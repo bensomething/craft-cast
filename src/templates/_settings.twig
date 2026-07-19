@@ -1,0 +1,144 @@
+{# @var plugin \bensomething\cast\Plugin #}
+{# @var settings \bensomething\cast\models\Settings #}
+{# @var themes \bensomething\cast\models\Theme[] #}
+{% requireAdmin false %}
+
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = plugin.name %}
+{% set docTitle = title ~ ' - ' ~ 'Plugins' | t('app') %}
+{% set fullPageForm = true %}
+
+{% set crumbs = [
+    { label: 'Settings' | t('app'), url: url('settings') },
+    { label: 'Plugins' | t('app'), url: url('settings/plugins') },
+] %}
+
+{% set formActions = [{
+    label: 'Save and continue editing' | t('app'),
+    redirect: "settings/plugins/#{plugin.handle}" | hash,
+    shortcut: true,
+    retainScroll: true,
+}] %}
+
+{% set selectedTab = 'cast-general' %}
+{% set tabs = {
+    'cast-general': { label: 'General' | t('cast'), url: '#cast-general' },
+    'cast-auto': { label: 'Auto' | t('cast'), url: '#cast-auto' },
+} %}
+
+{% set themeOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
+{% for theme in themes %}
+    {% set themeOptions = themeOptions | merge([{ label: theme.name, value: theme.handle }]) %}
+{% endfor %}
+
+{% set lightOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
+{% set darkOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
+{% for theme in themes %}
+    {% if theme.isDark %}
+        {% set darkOptions = darkOptions | merge([{ label: theme.name, value: theme.handle }]) %}
+    {% else %}
+        {% set lightOptions = lightOptions | merge([{ label: theme.name, value: theme.handle }]) %}
+    {% endif %}
+{% endfor %}
+
+{% block content %}
+    {{ actionInput('plugins/save-plugin-settings') }}
+    {{ hiddenInput('pluginHandle', plugin.handle) }}
+    {{ redirectInput('settings') }}
+
+    <style>
+        /* Full-bleed dividers, matching Craft's native `.content-pane > hr` (ours are nested a level deeper). */
+        #cast-general hr, #cast-auto hr { margin-inline: calc(var(--padding) * -1); }
+
+        /* A selectize fills its container, unlike the auto-sized native selects it sits
+           next to. 10rem is Craft's own width for a constrained selectize select, and
+           comfortably fits the longest colour name. */
+        #settings-buttonColor-field .selectize.select { width: 10rem; }
+    </style>
+
+    <div id="cast-general" role="tabpanel" aria-labelledby="tab-cast-general">
+        {% namespace 'settings' %}
+            {{ forms.colorSelectField({
+                label: 'Button colour' | t('cast'),
+                instructions: 'Fill for primary buttons. Each option is shaded separately for light and dark modes so button labels stay legible.' | t('cast'),
+                id: 'buttonColor',
+                name: 'buttonColor',
+                options: buttonColorOptions,
+                value: settings.buttonColor,
+                withBlankOption: false,
+                errors: settings.getErrors('buttonColor'),
+            }) }}
+
+            <hr>
+
+            {{ forms.selectField({
+                label: 'Default theme' | t('cast'),
+                instructions: 'Applied to everyone who hasn’t picked their own. Note that anyone set to **Auto** — including by this setting — gets the pair configured on the **Auto** tab, not the theme chosen here.' | t('cast'),
+                id: 'defaultTheme',
+                name: 'defaultTheme',
+                options: [{ label: 'Auto (match each user’s system)' | t('cast'), value: 'auto' }] | merge(themeOptions),
+                value: settings.defaultTheme,
+                errors: settings.getErrors('defaultTheme'),
+                data: { 'cast-preview': true },
+            }) }}
+
+            <hr>
+
+            {{ forms.lightswitchField({
+                label: 'Let users choose their own' | t('cast'),
+                instructions: 'Adds a theme picker to each user’s **Account → Preferences**. Turn this off to pin everyone to the default above.' | t('cast'),
+                id: 'allowUserOverride',
+                name: 'allowUserOverride',
+                on: settings.allowUserOverride,
+                errors: settings.getErrors('allowUserOverride'),
+            }) }}
+
+            {# With an "All" option, Craft's macro drops the empty-value hidden input,
+               so unticking everything posts no key at all and the old value silently
+               survives. This restores it: an empty selection posts '', which
+               Settings::beforeValidate() snaps back to "All". #}
+            {{ hiddenInput('enabledThemes', '') }}
+
+            {{ forms.checkboxSelectField({
+                label: 'Available themes' | t('cast'),
+                instructions: 'Which themes users can pick from. The default theme is always available.' | t('cast'),
+                id: 'enabledThemes',
+                name: 'enabledThemes',
+                options: themes | map(t => { label: t.name ~ (t.description ? ' — ' ~ t.description : ''), value: t.handle }) | values,
+                values: settings.enabledThemes,
+                showAllOption: true,
+                errors: settings.getErrors('enabledThemes'),
+            }) }}
+        {% endnamespace %}
+    </div>
+
+    <div id="cast-auto" class="hidden" role="tabpanel" aria-labelledby="tab-cast-auto">
+        {% namespace 'settings' %}
+            <div class="readable">
+                <p>{{ 'When a user is set to **Auto**, their browser’s `prefers-color-scheme` setting decides which of these two themes they get. Auto is a pair, so the **Default theme** on the General tab has no effect on anyone using it.' | t('cast') | md }}</p>
+            </div>
+
+            {{ forms.selectField({
+                label: 'Light theme' | t('cast'),
+                instructions: 'Used when the user’s system is set to light.' | t('cast'),
+                id: 'autoLightTheme',
+                name: 'autoLightTheme',
+                options: lightOptions,
+                value: settings.autoLightTheme,
+                errors: settings.getErrors('autoLightTheme'),
+            }) }}
+
+            {{ forms.selectField({
+                label: 'Dark theme' | t('cast'),
+                instructions: 'Used when the user’s system is set to dark.' | t('cast'),
+                id: 'autoDarkTheme',
+                name: 'autoDarkTheme',
+                options: darkOptions,
+                value: settings.autoDarkTheme,
+                errors: settings.getErrors('autoDarkTheme'),
+            }) }}
+        {% endnamespace %}
+    </div>
+{% endblock %}

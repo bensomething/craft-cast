@@ -1,0 +1,96 @@
+/**
+ * Cast — High contrast (dark)
+ *
+ * The dark base pushed to the other extreme from Dim: a near-black canvas, near-white
+ * copy, solid borders in place of alpha hairlines, and a focus ring that can't be
+ * missed. Status hues are lightened until each clears AA against the canvas.
+ */
+
+html[data-cast-theme="high-contrast-dark"] {
+    --gray-050-hsl: 210, 20%, 6%;
+    --gray-100-hsl: 210, 18%, 9%;
+    --gray-150-hsl: 210, 16%, 12%;
+    --gray-200-hsl: 210, 14%, 17%;
+    --gray-300-hsl: 210, 12%, 28%;
+    --gray-350-hsl: 210, 11%, 40%;
+    --gray-400-hsl: 210, 10%, 52%;
+    --gray-500-hsl: 210, 12%, 66%;
+    --gray-550-hsl: 210, 16%, 74%;
+    --gray-600-hsl: 210, 22%, 82%;
+    --gray-700-hsl: 210, 30%, 90%;
+    --gray-800-hsl: 210, 40%, 96%;
+    --gray-900-hsl: 210, 50%, 98%;
+    --gray-1000-hsl: 0, 0%, 100%;
+
+    --body-bg: #06090c;
+    --bg-color-hsl: 210, 20%, 4%;
+    --text-color: #f4f8fb;
+    --light-text-color: #c3ced9;
+    --fg-subtle: #c3ced9;
+
+    --pane-bg: #0d1319;
+    --secondary-pane-bg: #131a21;
+    --sidebar-bg: #0d1319;
+
+    /* Solid borders instead of alpha hairlines, and no shadow-only separation. */
+    --border-hairline: #7d8b99;
+    --border-hairline-medium: #96a3b1;
+    --border-hairline-dark: #b3bfca;
+    --pane-border: 1px solid #7d8b99;
+    --pane-shadow: none;
+    --secondary-pane-border: 1px solid #7d8b99;
+    --secondary-pane-shadow: none;
+    --modal-border: 1px solid #b3bfca;
+    --hr-border: 1px solid #7d8b99;
+    --header-border: 1px solid #96a3b1;
+
+    /* Popovers get a solid outline rather than the base's faint one. */
+    --cast-popover-outline: #b3bfca;
+
+    --input-bg: #0b1116;
+    --input-border-color: #96a3b1;
+    --input-border: 1px solid #96a3b1;
+    --fg-input: #b3bfca;
+    --button-border: 1px solid #96a3b1;
+
+    /* Status and links, lightened for the darker canvas. */
+    --link-color: #8cc4ff;
+    --fg-error: #ff9d9d;
+    --fg-warning: #ffd166;
+    --fg-success: #6fe3d0;
+    --fg-notice: #8fd3ff;
+    --error-color-rgb: 255 157 157;
+
+    --bg-error: #2b0d0d;
+    --bg-warning: #2b1f06;
+    --bg-success: #06231f;
+    --bg-notice: #07202e;
+
+    --border-error: #ff9d9d;
+    --border-warning: #ffd166;
+    --border-success: #6fe3d0;
+    --border-notice: #8fd3ff;
+
+    --focus-outline-medium: #ffd166;
+    --focus-outline-light: #ffd166;
+    --focus-outline-dark: #ffd166;
+    --focus-ring-alpha: 1;
+    --focus-ring: 0 0 0 2px #06090c, 0 0 0 5px #ffd166;
+}
+
+html[data-cast-theme="high-contrast-dark"] :focus-visible {
+    outline: 2px solid #ffd166;
+    outline-offset: 2px;
+}
+
+html[data-cast-theme="high-contrast-dark"] .status {
+    outline: 1px solid var(--text-color);
+    outline-offset: 1px;
+}
+
+html[data-cast-theme="high-contrast-dark"] pre,
+html[data-cast-theme="high-contrast-dark"] code,
+html[data-cast-theme="high-contrast-dark"] .code {
+    background-color: #000;
+    color: #f4f8fb;
+}

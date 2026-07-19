@@ -1,0 +1,6 @@
+/**
+ * Cast — Dark
+ *
+ * The reference dark mode: the shared base, unmodified. Kept as its own file so the
+ * base can be tuned for all dark themes without silently redefining what "Dark" means.
+ */

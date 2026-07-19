@@ -1,0 +1,80 @@
+/**
+ * Cast — High contrast (light)
+ *
+ * Craft's stock light CP leans on low-alpha hairlines, mid-grey secondary text, and
+ * shadow-only pane separation — all of which thin out badly for low-vision users and
+ * on poor displays. This pushes text to near-black, makes every border a solid
+ * 1px line, and widens the focus ring.
+ */
+
+html[data-cast-theme="high-contrast"] {
+    color-scheme: light;
+
+    /* Text: near-black body copy, and secondary text dropped to a shade that still
+       clears WCAG AA against the pane background rather than Craft's mid-grey. */
+    --text-color: #0b1016;
+    --light-text-color: #364150;
+    --fg-subtle: #364150;
+    --medium-text-color: #364150;
+    --medium-dark-text-color: #242c36;
+
+    --body-bg: #eef1f5;
+    --pane-bg: #fff;
+    --secondary-pane-bg: #f6f8fa;
+    --sidebar-bg: #e4e9ef;
+
+    /* Borders: solid and visible everywhere Craft uses an alpha hairline. */
+    --border-hairline: #6b7683;
+    --border-hairline-medium: #55606d;
+    --border-hairline-dark: #3b4650;
+    --pane-border: 1px solid #6b7683;
+    --pane-shadow: none;
+    --secondary-pane-border: 1px solid #6b7683;
+    --secondary-pane-shadow: none;
+    --modal-border: 1px solid #24303d;
+    --modal-shadow: 0 25px 100px rgb(0 0 0 / 45%);
+    --hr-border: 1px solid #6b7683;
+    --header-border: 1px solid #55606d;
+
+    /* Inputs and controls */
+    --input-border-color: #3b4650;
+    --input-border: 1px solid #3b4650;
+    --input-bg: #fff;
+    --fg-input: #3b4650;
+    --button-border: 1px solid #3b4650;
+    --ui-control-fg: #24303d;
+    --ui-control-fg-hover: #0b1016;
+    --ui-control-fg-active: #000;
+
+    /* Links and status text: darkened until each clears AA on white. */
+    --link-color: #0b4fc4;
+    --fg-error: #a11017;
+    --fg-warning: #7a4a00;
+    --fg-success: #005c52;
+    --fg-notice: #0b4a70;
+    --error-color-rgb: 161 16 23;
+
+    --border-error: #a11017;
+    --border-warning: #7a4a00;
+    --border-success: #005c52;
+    --border-notice: #0b4a70;
+
+    /* Focus: thicker, darker, and never suppressed. */
+    --focus-outline-medium: #0b4fc4;
+    --focus-outline-light: #0b4fc4;
+    --focus-outline-dark: #062f75;
+    --focus-ring-alpha: 1;
+    --focus-ring: 0 0 0 2px #fff, 0 0 0 5px #0b4fc4;
+}
+
+html[data-cast-theme="high-contrast"] :focus-visible {
+    outline: 2px solid #0b4fc4;
+    outline-offset: 2px;
+}
+
+/* Craft marks required fields and status with colour alone in a few places; add a
+   non-colour cue so the information survives greyscale and colour blindness. */
+html[data-cast-theme="high-contrast"] .status {
+    outline: 1px solid var(--text-color);
+    outline-offset: 1px;
+}

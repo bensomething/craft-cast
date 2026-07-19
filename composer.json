@@ -1,0 +1,54 @@
+{
+    "name": "bensomething/craft-cast",
+    "description": "Colour modes for the control panel.",
+    "type": "craft-plugin",
+    "license": "MIT",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "plugin",
+        "dark mode",
+        "theme",
+        "accessibility",
+        "contrast",
+        "control panel"
+    ],
+    "support": {
+        "issues": "https://github.com/bensomething/craft-cast/issues",
+        "source": "https://github.com/bensomething/craft-cast"
+    },
+    "require": {
+        "php": "^8.2",
+        "craftcms/cms": "^5.10"
+    },
+    "require-dev": {
+        "craftcms/ecs": "dev-main",
+        "craftcms/phpstan": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "bensomething\\cast\\": "src/"
+        }
+    },
+    "extra": {
+        "handle": "cast",
+        "name": "Cast",
+        "developer": "Ben Smith",
+        "developerUrl": "https://bensomething.com",
+        "documentationUrl": "https://github.com/bensomething/craft-cast",
+        "changelogUrl": "https://raw.githubusercontent.com/bensomething/craft-cast/develop/CHANGELOG.md",
+        "class": "bensomething\\cast\\Plugin"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    },
+    "scripts": {
+        "check-cs": "ecs check --ansi",
+        "fix-cs": "ecs check --ansi --fix",
+        "phpstan": "phpstan --memory-limit=1G"
+    }
+}

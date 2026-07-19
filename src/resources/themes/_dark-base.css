@@ -1,0 +1,661 @@
+/**
+ * Cast — shared dark base.
+ *
+ * Not a theme in its own right. Cast loads this once, ahead of every theme whose
+ * `colorScheme` is dark — including third-party ones — so a dark theme only has to
+ * declare its deltas.
+ *
+ * Scoped to `data-cast-scheme`, the companion attribute Cast stamps on <html>, so a
+ * theme's own `data-cast-theme` rules win: same specificity, but declared later.
+ * That ordering is why this file must never be `@import`ed by a theme — with two dark
+ * themes loaded (which the preview screens do), the second import would re-declare
+ * the base after the first theme's overrides and flatten it.
+ *
+ * Two layers:
+ *
+ * 1. **Palette.** Craft's CP is built almost entirely on the `--gray-*-hsl` ramp, so
+ *    the bulk of the work is inverting it — 050 (lightest) becomes the darkest, 1000
+ *    the lightest. Panes, hairlines, nav, and inputs all follow automatically.
+ *
+ * 2. **Patches.** Craft hard-codes a colour in maybe fifty places that no variable
+ *    reaches: near-white menu and dropdown surfaces, `#3f4d5a` control text, white
+ *    separator rings, light glows. Those are enumerated at the bottom. Anything
+ *    listed there is a Craft literal, not a Cast preference — if Craft ever moves one
+ *    behind a variable, its patch can go.
+ *
+ * `--white` and `--black` are deliberately left alone. Craft uses `--white` far more
+ * often as "ink on a coloured fill" (button labels, badge text, the lightswitch
+ * handle, the transparency checkerboard) than as a surface, so swapping them breaks
+ * more than it fixes. Surfaces are patched individually instead.
+ */
+
+html[data-cast-scheme="dark"] {
+    color-scheme: dark;
+
+    /* Inverted neutral ramp. Hue held at Craft's cool blue-grey. */
+    --gray-050-hsl: 210, 24%, 10%;
+    --gray-100-hsl: 210, 22%, 13%;
+    --gray-150-hsl: 210, 20%, 16%;
+    --gray-200-hsl: 209, 18%, 21%;
+    --gray-300-hsl: 209, 15%, 30%;
+    --gray-350-hsl: 210, 13%, 38%;
+    --gray-400-hsl: 210, 11%, 47%;
+    --gray-500-hsl: 211, 12%, 57%;
+    --gray-550-hsl: 211, 14%, 64%;
+    --gray-600-hsl: 211, 18%, 71%;
+    --gray-700-hsl: 212, 24%, 80%;
+    --gray-800-hsl: 212, 32%, 87%;
+    --gray-900-hsl: 212, 44%, 93%;
+    --gray-1000-hsl: 212, 60%, 97%;
+
+    /* Cast's own surface tokens, so the patch layer below has something to aim at
+       and themes can retune every popover in one line. */
+    --cast-surface: hsl(var(--gray-150-hsl));
+    --cast-surface-hover: hsl(var(--gray-200-hsl));
+    --cast-chip: hsl(var(--gray-200-hsl));
+    --cast-chip-active: hsl(var(--gray-300-hsl));
+    --cast-popover-outline: rgb(255 255 255 / 14%);
+    --cast-popover-shadow: 0 0 0 1px var(--cast-popover-outline), 0 5px 20px rgb(0 0 0 / 45%);
+
+    /* General */
+    --body-bg: hsl(var(--gray-050-hsl));
+    --bg-color-hsl: var(--gray-050-hsl);
+    --text-color: var(--gray-800);
+    --light-text-color: var(--gray-550);
+    --link-color: #7fb2ff;
+    --focus-ring-color: #4ea3e0;
+
+    /* Panes and surfaces. Craft leans on shadows for separation, which read as mud on
+       a dark canvas — swap them for hairline rings. */
+    --pane-bg: hsl(var(--gray-100-hsl));
+    --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 2px 12px rgb(0 0 0 / 35%);
+    --secondary-pane-bg: hsl(var(--gray-150-hsl));
+    --secondary-pane-shadow: var(--pane-shadow);
+    --slideout-footer-bg: hsl(var(--gray-150-hsl));
+    --sidebar-bg: hsl(var(--gray-100-hsl));
+
+    --modal-bg: hsl(var(--gray-150-hsl));
+    --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px rgb(0 0 0 / 65%);
+    --login-modal-bg: hsl(var(--gray-150-hsl));
+    --shade-bg: rgb(0 0 0 / 65%);
+
+    /* Inputs */
+    --input-bg: hsl(210, 22%, 15%);
+    --input-border-color: hsl(212deg 15% 60% / 35%);
+    --fg-input: #8ba7c7;
+
+    /* Status and message colours: Craft's light tints are far too bright as fills, so
+       these become deep washes with the brighter hue reserved for text and borders. */
+    --bg-error: hsl(0, 45%, 18%);
+    --bg-warning: hsl(35, 45%, 18%);
+    --bg-success: hsl(174, 40%, 15%);
+    --bg-notice: hsl(202, 45%, 18%);
+
+    --fg-error: var(--red-400);
+    --fg-warning: var(--amber-300);
+    --fg-success: var(--teal-300);
+    --fg-notice: var(--sky-300);
+    --fg-subtle: var(--gray-550);
+
+    --border-error: var(--red-800);
+    --border-warning: var(--amber-800);
+    --border-warning-emphasis: var(--amber-500);
+    --border-success: var(--teal-800);
+    --border-notice: var(--sky-800);
+    --error-color-rgb: 248 113 113;
+
+    /* Hairlines. Craft's are dark-on-light alpha blends; invert to light-on-dark. */
+    --border-hairline: rgb(255 255 255 / 12%);
+    --border-hairline-medium: hsl(var(--gray-200-hsl));
+    --border-hairline-dark: rgb(255 255 255 / 28%);
+
+    /* Selection and focus */
+    --bg-selection-light: hsl(var(--gray-200-hsl));
+    --bg-selection-dark: hsl(var(--gray-300-hsl));
+    --focus-outline-light: var(--blue-400);
+    --focus-outline-medium: #4ea3e0;
+    --focus-outline-dark: var(--blue-300);
+}
+
+
+/* ==========================================================================
+   Patch layer — Craft's hard-coded colours
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Popover surfaces. Craft paints menus, dropdowns, autosuggest results, and
+   tooltips with a literal `#fff` or `var(--white)`, so none of them follow the
+   palette. Their text is an equally literal `#3f4d5a`.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .menu,
+html[data-cast-scheme="dark"] .ui-datepicker,
+html[data-cast-scheme="dark"] .ui-timepicker-wrapper,
+html[data-cast-scheme="dark"] .autosuggest__results-container,
+html[data-cast-scheme="dark"] .craft-tooltip > .inner,
+html[data-cast-scheme="dark"] .craft-tooltip .arrow,
+html[data-cast-scheme="dark"] .tooltip,
+html[data-cast-scheme="dark"] .selectize-dropdown,
+html[data-cast-scheme="dark"] body .selectize-dropdown-content,
+html[data-cast-scheme="dark"] .selectize-dropdown .optgroup-header,
+html[data-cast-scheme="dark"] #notifications .copied-elements-notification .notification-inner {
+    background: var(--cast-surface);
+}
+
+/* Craft separates popovers from the page with a 1px `rgba(31,41,51,.1)` ring, which
+   is invisible against a dark canvas — a menu ends up as a flat slab with no edge.
+   Swap the ring for a faint light one and keep the drop shadow, deepened to carry on
+   a dark backdrop. Not applied to `.craft-tooltip .arrow`, which is a rotated square
+   that would ring its own diagonal. */
+html[data-cast-scheme="dark"] .menu,
+html[data-cast-scheme="dark"] .ui-datepicker,
+html[data-cast-scheme="dark"] .ui-timepicker-wrapper,
+html[data-cast-scheme="dark"] .autosuggest__results-container,
+html[data-cast-scheme="dark"] .craft-tooltip > .inner,
+html[data-cast-scheme="dark"] .tooltip,
+html[data-cast-scheme="dark"] .selectize-dropdown,
+html[data-cast-scheme="dark"] #notifications .copied-elements-notification .notification-inner {
+    box-shadow: var(--cast-popover-shadow);
+}
+
+html[data-cast-scheme="dark"] .menu ul li .menu-item,
+html[data-cast-scheme="dark"] .menu ul li .menu-option,
+html[data-cast-scheme="dark"] .menu:not(.menu--disclosure) ul li a,
+html[data-cast-scheme="dark"] .autosuggest__results-container .autosuggest__results-item,
+html[data-cast-scheme="dark"] body .selectize-dropdown .optgroup-header,
+html[data-cast-scheme="dark"] body .selectize-dropdown .option,
+html[data-cast-scheme="dark"] body .selectize-dropdown [data-selectable],
+html[data-cast-scheme="dark"] .selectize-dropdown,
+html[data-cast-scheme="dark"] .selectize-dropdown .active,
+html[data-cast-scheme="dark"] .selectize-dropdown .selected {
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .autosuggest__results-container .autosuggest__results-before {
+    color: var(--fg-subtle);
+}
+
+html[data-cast-scheme="dark"] .menu--disclosure ul li > .menu-item:hover,
+html[data-cast-scheme="dark"] .menu--disclosure ul li > .menu-option:hover,
+html[data-cast-scheme="dark"] .menu--disclosure ul li > a:not(.crumb-link):hover,
+html[data-cast-scheme="dark"] .selectize-dropdown .active,
+html[data-cast-scheme="dark"] .selectize-dropdown .selected,
+html[data-cast-scheme="dark"] .selectize-dropdown .active:not(.selected) {
+    background-color: var(--cast-surface-hover);
+    color: var(--text-color);
+}
+
+/* --------------------------------------------------------------------------
+   Form controls. `<select>` text and the selectize input that stands in for it
+   are hard-coded to `#3f4d5a` — invisible on a dark control. The checkbox and
+   radio boxes are painted `#fbfcfe` while their tick is `--gray-900`, so on the
+   inverted ramp it's a near-white tick on a near-white box.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .select:not(.selectize) select,
+html[data-cast-scheme="dark"] .selectize.select .selectize-input,
+html[data-cast-scheme="dark"] .selectize-input,
+html[data-cast-scheme="dark"] .selectize-input input,
+html[data-cast-scheme="dark"] .multiselect > select {
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .selectize-input,
+html[data-cast-scheme="dark"] .selectize-control.single .selectize-input.input-active,
+html[data-cast-scheme="dark"] .selectize-input.full,
+html[data-cast-scheme="dark"] .selectize-control .selectize-input.disabled {
+    background: var(--input-bg);
+    border-color: var(--input-border-color);
+}
+
+/* A selectize styled as a select is chrome, not a text input — Craft gives it
+   `--button-bg` to match a native `<select>`. The rule above aims at the input-shaped
+   selectize controls, so put the select-shaped ones back. */
+html[data-cast-scheme="dark"] .selectize.select .selectize-input {
+    background: var(--button-bg);
+}
+
+html[data-cast-scheme="dark"] .selectize.select .selectize-input.dropdown-active,
+html[data-cast-scheme="dark"] .selectize.select .selectize-input:hover {
+    background: var(--button-bg--hover);
+}
+
+html[data-cast-scheme="dark"] div.checkbox:before,
+html[data-cast-scheme="dark"] input.checkbox + label:before,
+html[data-cast-scheme="dark"] div.radio:before,
+html[data-cast-scheme="dark"] input.radio + label:before {
+    background-color: var(--input-bg);
+}
+
+html[data-cast-scheme="dark"] .ui-datepicker-title select.ui-datepicker-year {
+    background-color: var(--cast-chip);
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] input.range::-webkit-slider-runnable-track {
+    background: hsl(var(--gray-300-hsl));
+}
+
+html[data-cast-scheme="dark"] input.range::-moz-range-track {
+    background: hsl(var(--gray-300-hsl));
+}
+
+/* --------------------------------------------------------------------------
+   Chips and tokens — `#e4edf6` fills with `#3f4d5a` text.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .token,
+html[data-cast-scheme="dark"] .selectize.multiselect .selectize-input > .item,
+html[data-cast-scheme="dark"] .selectize-control.multi .selectize-input > div {
+    background-color: var(--cast-chip);
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .token:focus,
+html[data-cast-scheme="dark"] .selectize.multiselect .selectize-input > .item.active,
+html[data-cast-scheme="dark"] .selectize-control.multi .selectize-input > div.active {
+    background-color: var(--cast-chip-active);
+    color: var(--text-color);
+}
+
+/* --------------------------------------------------------------------------
+   White separator rings. These exist to lift an element off a light page; on a
+   dark one they read as bright halos. Re-point them at the surface behind.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .activity-container ul li .activity-btn .elementthumb {
+    border-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .draft-notice .draft-icon,
+html[data-cast-scheme="dark"] .content-notice .content-notice-icon {
+    box-shadow: 0 1px 1px 1px var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .element-index .source-path .btn.settings {
+    box-shadow: 0 0 0 2px var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] #footer {
+    border-block-start-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] ul.icons li a {
+    border-color: var(--border-hairline);
+}
+
+/* --------------------------------------------------------------------------
+   Light glows. Craft's ambient shadows are tinted `hsla(212,30%,85%,.5)`, which
+   on a dark canvas glows instead of receding.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] #trial-info {
+    box-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 2px 12px rgb(0 0 0 / 35%);
+}
+
+html[data-cast-scheme="dark"] .details .meta.warning {
+    box-shadow: 0 0 0 1px var(--border-warning-emphasis), 0 2px 12px rgb(0 0 0 / 35%);
+}
+
+html[data-cast-scheme="dark"] .fld-container .fld-workspace {
+    box-shadow: inset 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):before,
+html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):last-child:before {
+    background-color: var(--border-hairline);
+}
+
+/* --------------------------------------------------------------------------
+   Panels and page chrome that paint their own background.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] body.fixed-header #header {
+    background-color: hsl(var(--gray-050-hsl) / 75%);
+}
+
+/* The selected tab is drawn with three shadows: a top indicator bar, a 1px ring, and
+   an ambient spread. On dark, the ring (`rgba(51,64,77,.1)`) vanishes while the spread
+   (`--gray-200`, off the inverted ramp) glows — so the tab reads as a halo with no
+   edge. Dark spread, faint light ring, and a calmer indicator. */
+html[data-cast-scheme="dark"] .pane-tabs [role="tablist"] [role="tab"].sel {
+    --highlight-color: var(--gray-400);
+
+    background-color: var(--pane-bg) !important;
+    box-shadow:
+        inset 0 2px 0 var(--custom-text-color, var(--highlight-color)),
+        0 0 0 1px var(--cast-popover-outline),
+        0 2px 12px rgb(0 0 0 / 35%);
+}
+
+html[data-cast-scheme="dark"] .element-index .source-path .chevron-btns {
+    background: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .element-index .source-path .chevron-btns:before {
+    border-block-start-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .element-index .source-path .chevron-btns:after {
+    border-block-end-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .element-deletion-modal .body .edm-blockers .edm-details .element-index {
+    background-color: var(--pane-bg) !important;
+}
+
+html[data-cast-scheme="dark"] .datatablesorthelper,
+html[data-cast-scheme="dark"] .editabletablesorthelper {
+    background-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .meta > .flex-fields blockquote.note,
+html[data-cast-scheme="dark"] .meta > .flex-fields h2 {
+    background-color: var(--secondary-pane-bg);
+}
+
+html[data-cast-scheme="dark"] .lp-editor-container {
+    background-color: var(--pane-bg);
+}
+
+/* Loading and progress shades assume a light page underneath. */
+html[data-cast-scheme="dark"] .icon-picker-modal .body .icon-picker-modal--list.loading:after,
+html[data-cast-scheme="dark"] .cp-image-controls .progress-shade {
+    background-color: rgb(0 0 0 / 60%);
+}
+
+/* Field layout designer — every surface in it is `var(--white)`. */
+html[data-cast-scheme="dark"] .fld-tab .fld-tabcontent,
+html[data-cast-scheme="dark"] .fld-tab .tabs .tab,
+html[data-cast-scheme="dark"] .layoutdesigner .fld-library,
+html[data-cast-scheme="dark"] .fld-element,
+html[data-cast-scheme="dark"] .entry-type-group {
+    background-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .fld-new-tab-btn {
+    background: var(--secondary-pane-bg) !important;
+}
+
+/* Address cards */
+html[data-cast-scheme="dark"] .address-card {
+    border-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] .address-card:hover {
+    background-color: var(--cast-surface);
+    border-color: var(--border-hairline-dark);
+}
+
+html[data-cast-scheme="dark"] .address-card .address-card-label {
+    background: var(--bg-notice);
+    color: var(--fg-notice);
+}
+
+/* Vue admin tables, used by most of the Settings index screens. */
+html[data-cast-scheme="dark"] .vue-admin-table-footer,
+html[data-cast-scheme="dark"] .vuetable-pagination {
+    background: var(--pane-bg) !important;
+    border-top-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] table thead th.sortable:hover {
+    background-color: var(--cast-surface-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Typography in `.readable` regions (help text, plugin readmes, notes), which
+   sets its own literal ink colours.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .readable .h1,
+html[data-cast-scheme="dark"] .readable h1 {
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .h6,
+html[data-cast-scheme="dark"] h6,
+html[data-cast-scheme="dark"] .readable .h6,
+html[data-cast-scheme="dark"] .readable h6,
+html[data-cast-scheme="dark"] .readable blockquote:not(.note) {
+    color: var(--fg-subtle);
+}
+
+html[data-cast-scheme="dark"] .readable blockquote.note:not(.tip):not(.warning) {
+    border-color: var(--border-error);
+    color: var(--fg-error);
+}
+
+html[data-cast-scheme="dark"] .readable blockquote.note.tip {
+    border-color: var(--border-notice);
+    color: var(--fg-notice);
+}
+
+html[data-cast-scheme="dark"] .readable blockquote.note.warning:before {
+    color: var(--fg-warning);
+}
+
+html[data-cast-scheme="dark"] .btn.caution.hover,
+html[data-cast-scheme="dark"] .btn.caution:focus,
+html[data-cast-scheme="dark"] .btn.caution:hover {
+    background-color: var(--bg-error) !important;
+    color: var(--fg-error);
+}
+
+/* --------------------------------------------------------------------------
+   Prism, which Craft bundles for syntax highlighting (email previews, the
+   project config viewer) with its stock light theme.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] code[class*="language-"],
+html[data-cast-scheme="dark"] pre[class*="language-"] {
+    color: var(--gray-800);
+    text-shadow: none;
+}
+
+html[data-cast-scheme="dark"] :not(pre) > code[class*="language-"],
+html[data-cast-scheme="dark"] pre[class*="language-"] {
+    background: hsl(210, 24%, 8%);
+}
+
+html[data-cast-scheme="dark"] .token.comment,
+html[data-cast-scheme="dark"] .token.prolog,
+html[data-cast-scheme="dark"] .token.doctype,
+html[data-cast-scheme="dark"] .token.cdata {
+    background: none;
+    color: var(--gray-500);
+}
+
+html[data-cast-scheme="dark"] .token.punctuation {
+    background: none;
+    color: var(--gray-600);
+}
+
+html[data-cast-scheme="dark"] .token.boolean,
+html[data-cast-scheme="dark"] .token.constant,
+html[data-cast-scheme="dark"] .token.deleted,
+html[data-cast-scheme="dark"] .token.number,
+html[data-cast-scheme="dark"] .token.property,
+html[data-cast-scheme="dark"] .token.symbol,
+html[data-cast-scheme="dark"] .token.tag {
+    background: none;
+    color: #f0a1c8;
+}
+
+html[data-cast-scheme="dark"] .token.attr-name,
+html[data-cast-scheme="dark"] .token.builtin,
+html[data-cast-scheme="dark"] .token.char,
+html[data-cast-scheme="dark"] .token.inserted,
+html[data-cast-scheme="dark"] .token.selector,
+html[data-cast-scheme="dark"] .token.string {
+    background: none;
+    color: #b5d97a;
+}
+
+html[data-cast-scheme="dark"] .language-css .token.string,
+html[data-cast-scheme="dark"] .style .token.string,
+html[data-cast-scheme="dark"] .token.entity,
+html[data-cast-scheme="dark"] .token.operator,
+html[data-cast-scheme="dark"] .token.url {
+    background: none;
+    color: #e0b57a;
+}
+
+html[data-cast-scheme="dark"] .token.atrule,
+html[data-cast-scheme="dark"] .token.attr-value,
+html[data-cast-scheme="dark"] .token.keyword {
+    background: none;
+    color: #7fc4e8;
+}
+
+/* --------------------------------------------------------------------------
+   Status labels. Craft tints the pill to 15% of the status colour and sets its
+   text to that hue's 900 — a near-black meant to sit on a light page. Over a
+   dark canvas that's dark-on-dark, so each one takes the 300 shade instead, and
+   the tint comes up slightly to keep the pill readable.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .status-label {
+    background-color: rgb(from var(--status-label-bg-color) r g b / 22%);
+}
+
+html[data-cast-scheme="dark"] .status-label.red {
+    --status-label-text-color: var(--red-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.amber {
+    --status-label-text-color: var(--amber-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.orange {
+    --status-label-text-color: var(--orange-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.yellow {
+    --status-label-text-color: var(--yellow-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.lime {
+    --status-label-text-color: var(--lime-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.green {
+    --status-label-text-color: var(--green-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.emerald {
+    --status-label-text-color: var(--emerald-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.turquoise {
+    --status-label-text-color: var(--teal-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.cyan {
+    --status-label-text-color: var(--cyan-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.sky {
+    --status-label-text-color: var(--sky-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.blue {
+    --status-label-text-color: var(--blue-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.indigo {
+    --status-label-text-color: var(--indigo-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.violet {
+    --status-label-text-color: var(--violet-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.purple {
+    --status-label-text-color: var(--purple-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.fuchsia {
+    --status-label-text-color: var(--fuchsia-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.pink {
+    --status-label-text-color: var(--pink-300);
+}
+
+html[data-cast-scheme="dark"] .status-label.rose {
+    --status-label-text-color: var(--rose-300);
+}
+
+/* `black` sets its text to a literal `--black`, which Cast leaves as true black. */
+html[data-cast-scheme="dark"] .status-label.black {
+    --status-label-text-color: var(--gray-800);
+}
+
+/* --------------------------------------------------------------------------
+   Per-screen strays: light rules and insets in the CSS Craft ships alongside
+   individual utilities and settings screens.
+   -------------------------------------------------------------------------- */
+
+/* System messages (Settings → Email) */
+html[data-cast-scheme="dark"] .message .subject {
+    border-block-end-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] .message .body {
+    color: var(--gray-600);
+}
+
+/* Editable tables */
+html[data-cast-scheme="dark"] table.editable tbody tr th ~ td:not(:first-child) {
+    border-inline-start-color: var(--border-hairline);
+}
+
+/* User permissions */
+html[data-cast-scheme="dark"] .user-permissions h3:has(+ .select-all) {
+    border-inline-end-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] .user-permissions ul ul li:before {
+    border-block-start-color: var(--border-hairline);
+}
+
+/* Route settings */
+html[data-cast-scheme="dark"] .route-settings .uri-tokens {
+    box-shadow: inset 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+/* User photo upload */
+html[data-cast-scheme="dark"] div.user-photo-controls .progress-shade {
+    background-color: rgb(0 0 0 / 60%);
+}
+
+/* Selectize's own stylesheet, which predates Craft's variables entirely. */
+html[data-cast-scheme="dark"] .selectize-input,
+html[data-cast-scheme="dark"] .selectize-dropdown,
+html[data-cast-scheme="dark"] .selectize-input.dropdown-active:before,
+html[data-cast-scheme="dark"] .selectize-dropdown.plugin-dropdown_header .selectize-dropdown-header,
+html[data-cast-scheme="dark"] .selectize-control.plugin-remove_button .item .remove {
+    border-color: var(--input-border-color);
+}
+
+/* --------------------------------------------------------------------------
+   Craft embeds a few light-mode raster assets (the sidebar logo lockup, some
+   empty states) with no CSS hook. Taking the edge off is cheaper and more
+   robust than shipping dark duplicates.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] #global-sidebar .system-name img,
+html[data-cast-scheme="dark"] .zilch img {
+    filter: brightness(0.85) contrast(1.05);
+}
+
+/* Code and preformatted regions want a touch more separation than a pane gives.
+   Craft also puts `.code` on form controls — handle fields, template pickers — where
+   it means "monospace", not "code block"; those keep the normal input background so
+   they match the text fields they sit beside. */
+html[data-cast-scheme="dark"] pre,
+html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text) {
+    background-color: hsl(210, 24%, 8%);
+    color: var(--gray-800);
+}

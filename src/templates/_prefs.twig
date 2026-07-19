@@ -1,0 +1,40 @@
+{# Appended to Account → Preferences via the `cp.users.edit.prefs` template hook. #}
+{# @var user \craft\elements\User #}
+{# @var themes \bensomething\cast\models\Theme[] #}
+{# @var settings \bensomething\cast\models\Settings #}
+
+{% import '_includes/forms.twig' as forms %}
+
+{# Never having chosen and choosing "Site default" resolve identically, but only the
+   latter is storable — so a user who picked a theme can hand control back. #}
+{% set current = user.getPreference('castTheme') ?? 'inherit' %}
+
+{# Name the theme the default actually resolves to, so "Site default" isn't a guess. #}
+{% set default = settings.defaultTheme %}
+{% set defaultLabel =
+    default == 'auto' ? 'Auto' | t('cast') :
+    default == '' ? 'Craft default' | t('cast') :
+    (themes[default].name ?? default)
+%}
+
+{% set options = [
+    { label: 'Site default ({theme})' | t('cast', { theme: defaultLabel }), value: 'inherit' },
+    { label: 'Auto (match my system)' | t('cast'), value: 'auto' },
+    { label: 'Craft default' | t('cast'), value: '' },
+] %}
+{% for theme in themes %}
+    {% set options = options | merge([{ label: theme.name, value: theme.handle }]) %}
+{% endfor %}
+<hr>
+<div>
+    <h2>{{ 'Colour mode' | t('cast') }}</h2>
+
+    {{ forms.selectField({
+        id: 'castTheme',
+        name: 'castTheme',
+        label: 'Control panel theme' | t('cast'),
+        instructions: 'Applies to the control panel, for your account only.' | t('cast'),
+        options: options,
+        value: current,
+    }) }}
+</div>
