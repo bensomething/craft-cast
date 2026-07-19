@@ -1,28 +1,26 @@
 /**
- * Cast — High contrast (light)
+ * Cast: High contrast (light)
  *
  * Craft's stock light CP leans on low-alpha hairlines, mid-grey secondary text, and
- * shadow-only pane separation — all of which thin out badly for low-vision users and
- * on poor displays. This pushes text to near-black, makes every border a solid
- * 1px line, and widens the focus ring.
+ * shadow-only pane separation, all of which thin out badly for low-vision users and on
+ * poor displays. Text goes near-black, every border becomes a solid 1px line, and the
+ * focus ring widens.
  */
 
 html[data-cast-theme="high-contrast"] {
     color-scheme: light;
 
-    /* Text: near-black body copy, and secondary text dropped to a shade that still
-       clears WCAG AA against the pane background rather than Craft's mid-grey. */
+    /* Secondary text drops to a shade that clears WCAG AA against the pane
+       background, unlike Craft's mid-grey. */
     --text-color: #0b1016;
     --light-text-color: #364150;
     --fg-subtle: #364150;
     --medium-text-color: #364150;
     --medium-dark-text-color: #242c36;
 
-    /* Surfaces are deliberately left to Craft. High contrast is about contrast, not a
-       different palette — restating near-identical greys only made the CP look subtly
-       "off" next to the stock theme without adding any separation that the solid
-       borders below don't already provide. The near-black text keeps clearing AA
-       against Craft's own backgrounds regardless. */
+    /* Surfaces are left to Craft. Restating near-identical greys only made the CP
+       look off next to the stock theme, without adding separation the solid borders
+       below don't already give. Near-black text clears AA on Craft's backgrounds. */
 
     /* Borders: solid and visible everywhere Craft uses an alpha hairline. */
     --border-hairline: #6b7683;
@@ -37,7 +35,6 @@ html[data-cast-theme="high-contrast"] {
     --hr-border: 1px solid #6b7683;
     --header-border: 1px solid #55606d;
 
-    /* Inputs and controls */
     --input-border-color: #3b4650;
     --input-border: 1px solid #3b4650;
     --input-bg: #fff;
@@ -73,8 +70,8 @@ html[data-cast-theme="high-contrast"] :focus-visible {
     outline-offset: 2px;
 }
 
-/* Craft marks required fields and status with colour alone in a few places; add a
-   non-colour cue so the information survives greyscale and colour blindness. */
+/* Craft marks status with colour alone in a few places. This adds a non-colour cue so
+   the information survives greyscale and colour blindness. */
 html[data-cast-theme="high-contrast"] .status {
     outline: 1px solid var(--text-color);
     outline-offset: 1px;

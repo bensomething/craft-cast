@@ -1,18 +1,14 @@
-{# The theme control injected into Craft's account menu. Craft's own account menu is
-   hardcoded in `_layouts/cp.twig` with no hook, so this is placed by JS — see
-   Plugin::accountMenuJs().
+{# The theme control injected into Craft's account menu. That menu is hardcoded in
+   `_layouts/cp.twig` with no hook, so this is placed by JS. See Plugin::accountMenuJs().
 
-   A select rather than a row of menu items: it keeps the menu to one line however many
-   themes are registered, and shows the current choice without spending a row on a check
-   mark. Craft's disclosure menus have no submenu support, so the alternative would have
-   been hand-rolled nested markup. #}
+   A select rather than menu items, so the menu stays one line however many themes are
+   registered. Craft's disclosure menus have no submenu support. #}
 {# @var options array #}
 {# @var current string #}
 
 <hr>
-{# No horizontal padding of its own: `.menu` already insets its content by 14px, and
-   its items bleed back out (`margin-inline:-14px; padding-inline:14px`) so their text
-   lands on that same line. Adding more here double-indents the group. #}
+{# No horizontal padding of its own. `.menu` already insets content by 14px and its items
+   bleed back out to land on that line, so adding more here double-indents the group. #}
 <div class="cast-theme-field" style="padding-block: 0 10px;">
     <div class="smalltext light" style="margin-top: 10px;margin-bottom: 4px;">
         {{ 'Colour mode' | t('cast') }}

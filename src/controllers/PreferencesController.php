@@ -10,10 +10,8 @@ use craft\web\Controller;
 use yii\web\Response;
 
 /**
- * Saves a user's own theme choice.
- *
- * Craft's `users/save-preferences` posts the entire preferences form, so it can't be
- * reused for a one-field change from the account menu.
+ * Saves a user's own theme choice. Craft's `users/save-preferences` posts the entire
+ * preferences form, so it can't be reused for a one-field change from the account menu.
  */
 class PreferencesController extends Controller
 {
@@ -42,8 +40,7 @@ class PreferencesController extends Controller
             return $this->asFailure(Craft::t('cast', 'That theme isn’t available.'));
         }
 
-        // Merges into whatever else is stored, so the rest of the user's preferences
-        // are left alone.
+        // Merges into what's already stored, so the rest of the preferences are intact.
         Craft::$app->getUsers()->saveUserPreferences($user, [Themes::PREF_KEY => $handle]);
 
         return $this->asSuccess();

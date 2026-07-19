@@ -6,10 +6,10 @@
 {% import '_includes/forms.twig' as forms %}
 
 {# Never having chosen and choosing "Site default" resolve identically, but only the
-   latter is storable — so a user who picked a theme can hand control back. #}
+   latter is storable, so a user who picked a theme can hand control back. #}
 {% set current = user.getPreference('castTheme') ?? 'inherit' %}
 
-{# Name the theme the default actually resolves to, so "Site default" isn't a guess. #}
+{# Name the theme the default resolves to, so "Site default" isn't a guess. #}
 {% set default = settings.defaultTheme %}
 {% set defaultLabel =
     default == 'auto' ? 'Auto' | t('cast') :

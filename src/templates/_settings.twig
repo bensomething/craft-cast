@@ -49,12 +49,11 @@
     {{ redirectInput('settings') }}
 
     <style>
-        /* Full-bleed dividers, matching Craft's native `.content-pane > hr` (ours are nested a level deeper). */
+        /* Full-bleed dividers, matching Craft's `.content-pane > hr`. Ours nest a level deeper. */
         #cast-general hr, #cast-auto hr { margin-inline: calc(var(--padding) * -1); }
 
-        /* A selectize fills its container, unlike the auto-sized native selects it sits
-           next to. 10rem is Craft's own width for a constrained selectize select, and
-           comfortably fits the longest colour name. */
+        /* A selectize fills its container, unlike the auto-sized native selects beside it.
+           10rem is Craft's own constrained selectize width and fits the longest colour name. */
         #settings-buttonColor-field .selectize.select { width: 10rem; }
     </style>
 
@@ -95,10 +94,9 @@
                 errors: settings.getErrors('allowUserOverride'),
             }) }}
 
-            {# With an "All" option, Craft's macro drops the empty-value hidden input,
-               so unticking everything posts no key at all and the old value silently
-               survives. This restores it: an empty selection posts '', which
-               Settings::beforeValidate() snaps back to "All". #}
+            {# With an "All" option, Craft's macro drops the empty-value hidden input, so
+               unticking everything posts no key and the old value survives. This restores
+               it, and Settings::beforeValidate() snaps the empty value back to "All". #}
             {{ hiddenInput('enabledThemes', '') }}
 
             {{ forms.checkboxSelectField({

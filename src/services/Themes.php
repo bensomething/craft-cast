@@ -11,8 +11,8 @@ use craft\elements\User;
 use yii\base\Component;
 
 /**
- * The registry of available control-panel colour modes, and the rules for deciding
- * which one a given user gets.
+ * Registry of available control-panel colour modes, and the rules for deciding which
+ * one a given user gets.
  */
 class Themes extends Component
 {
@@ -32,7 +32,7 @@ class Themes extends Component
      */
     public const EVENT_REGISTER_THEMES = 'registerThemes';
 
-    /** The user-preference key holding a user's chosen theme handle. */
+    /** The user-preference key holding the chosen theme handle. */
     public const PREF_KEY = 'castTheme';
 
     /** @var Theme[]|null */
@@ -41,8 +41,8 @@ class Themes extends Component
     private ?string $baseUrl = null;
 
     /**
-     * Every registered theme, keyed by handle — the bundled ones plus anything added
-     * by third parties via {@see self::EVENT_REGISTER_THEMES}.
+     * Every registered theme, keyed by handle. Bundled ones plus anything added via
+     * {@see self::EVENT_REGISTER_THEMES}.
      *
      * @return Theme[]
      */
@@ -55,8 +55,8 @@ class Themes extends Component
         $event = new RegisterThemesEvent(['themes' => $this->bundledThemes()]);
         $this->trigger(self::EVENT_REGISTER_THEMES, $event);
 
-        // Bundled themes get their stylesheet URL resolved lazily, here, so the
-        // resources directory is only published on requests that actually theme.
+        // Resolved lazily so the resources directory is only published on requests that
+        // actually theme.
         foreach ($event->themes as $theme) {
             $theme->url ??= $this->getBaseUrl() . "/themes/{$theme->handle}.css";
         }
@@ -70,7 +70,7 @@ class Themes extends Component
     }
 
     /**
-     * The themes a user may choose between, honouring the **Available themes** setting.
+     * The themes a user may choose between, honouring the Available themes setting.
      *
      * @return Theme[]
      */
@@ -84,8 +84,8 @@ class Themes extends Component
 
         $enabled = (array)$enabled;
 
-        // The configured default stays selectable even if it's been left off the list,
-        // otherwise the picker would misrepresent what a user is actually seeing.
+        // The configured default stays selectable even if left off the list, otherwise
+        // the picker would misrepresent what a user is actually seeing.
         $enabled[] = $this->settings()->defaultTheme;
 
         return array_filter(
@@ -95,9 +95,9 @@ class Themes extends Component
     }
 
     /**
-     * The theme handle in effect for a user: their own choice when they're allowed one,
-     * otherwise the site-wide default. May be `auto`, a theme handle, or an empty string
-     * (Craft's stock appearance).
+     * The theme handle in effect for a user: their own choice when allowed one, otherwise
+     * the site-wide default. May be `auto`, a theme handle, or an empty string for Craft's
+     * stock appearance.
      */
     public function getThemeHandleForUser(?User $user = null): string
     {
@@ -110,8 +110,8 @@ class Themes extends Component
 
         $handle = $user->getPreference(self::PREF_KEY);
 
-        // Null means "never chose" and `inherit` means "chose to follow the admin";
-        // both defer. An empty string is a deliberate "no theme".
+        // Null means "never chose", `inherit` means "chose to follow the admin". Both
+        // defer. An empty string is a deliberate "no theme".
         if ($handle === null || $handle === Settings::THEME_INHERIT) {
             return $settings->defaultTheme;
         }
@@ -125,8 +125,8 @@ class Themes extends Component
     }
 
     /**
-     * The stylesheets to load for a handle: one entry for a concrete theme, or the
-     * light/dark pair for `auto`.
+     * The stylesheets to load for a handle: one for a concrete theme, or the light/dark
+     * pair for `auto`.
      *
      * @return Theme[]
      */
@@ -144,9 +144,6 @@ class Themes extends Component
         ]);
     }
 
-    /**
-     * URL the plugin's `resources/` directory is published to.
-     */
     public function getBaseUrl(): string
     {
         return $this->baseUrl ??= Craft::$app->getAssetManager()

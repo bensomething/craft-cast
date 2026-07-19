@@ -1,32 +1,19 @@
 /**
- * Cast — shared dark base.
+ * Cast: shared dark base.
  *
- * Not a theme in its own right. Cast loads this once, ahead of every theme whose
- * `colorScheme` is dark — including third-party ones — so a dark theme only has to
- * declare its deltas.
+ * Loaded once ahead of every dark theme, so a theme only declares its deltas. Scoped
+ * to `data-cast-scheme` so a theme's `data-cast-theme` rules win on declaration order.
+ * Never `@import` this from a theme: with two dark themes loaded (as the preview
+ * screens do), the second import re-declares the base after the first theme's
+ * overrides and flattens it.
  *
- * Scoped to `data-cast-scheme`, the companion attribute Cast stamps on <html>, so a
- * theme's own `data-cast-theme` rules win: same specificity, but declared later.
- * That ordering is why this file must never be `@import`ed by a theme — with two dark
- * themes loaded (which the preview screens do), the second import would re-declare
- * the base after the first theme's overrides and flatten it.
+ * Two layers: the inverted `--gray-*-hsl` ramp, which most of the CP follows
+ * automatically, then a patch layer for the colours Craft hard-codes beyond reach of
+ * any variable.
  *
- * Two layers:
- *
- * 1. **Palette.** Craft's CP is built almost entirely on the `--gray-*-hsl` ramp, so
- *    the bulk of the work is inverting it — 050 (lightest) becomes the darkest, 1000
- *    the lightest. Panes, hairlines, nav, and inputs all follow automatically.
- *
- * 2. **Patches.** Craft hard-codes a colour in maybe fifty places that no variable
- *    reaches: near-white menu and dropdown surfaces, `#3f4d5a` control text, white
- *    separator rings, light glows. Those are enumerated at the bottom. Anything
- *    listed there is a Craft literal, not a Cast preference — if Craft ever moves one
- *    behind a variable, its patch can go.
- *
- * `--white` and `--black` are deliberately left alone. Craft uses `--white` far more
- * often as "ink on a coloured fill" (button labels, badge text, the lightswitch
- * handle, the transparency checkerboard) than as a surface, so swapping them breaks
- * more than it fixes. Surfaces are patched individually instead.
+ * `--white` and `--black` are left alone. Craft uses `--white` more often as ink on a
+ * coloured fill (button labels, badge text, the lightswitch handle) than as a surface,
+ * so swapping them breaks more than it fixes. Surfaces are patched individually.
  */
 
 html[data-cast-scheme="dark"] {
@@ -48,8 +35,8 @@ html[data-cast-scheme="dark"] {
     --gray-900-hsl: 212, 44%, 93%;
     --gray-1000-hsl: 212, 60%, 97%;
 
-    /* Cast's own surface tokens, so the patch layer below has something to aim at
-       and themes can retune every popover in one line. */
+    /* Cast's own surface tokens, so the patch layer has something to aim at and
+       themes can retune every popover in one line. */
     --cast-surface: hsl(var(--gray-150-hsl));
     --cast-surface-hover: hsl(var(--gray-200-hsl));
     --cast-chip: hsl(var(--gray-200-hsl));
@@ -65,8 +52,8 @@ html[data-cast-scheme="dark"] {
     --link-color: #7fb2ff;
     --focus-ring-color: #4ea3e0;
 
-    /* Panes and surfaces. Craft leans on shadows for separation, which read as mud on
-       a dark canvas — swap them for hairline rings. */
+    /* Craft leans on shadows for pane separation, which read as mud on dark. Hairline
+       rings instead. */
     --pane-bg: hsl(var(--gray-100-hsl));
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 2px 12px rgb(0 0 0 / 35%);
     --secondary-pane-bg: hsl(var(--gray-150-hsl));
@@ -84,8 +71,8 @@ html[data-cast-scheme="dark"] {
     --input-border-color: hsl(212deg 15% 60% / 35%);
     --fg-input: #8ba7c7;
 
-    /* Status and message colours: Craft's light tints are far too bright as fills, so
-       these become deep washes with the brighter hue reserved for text and borders. */
+    /* Craft's light status tints are far too bright as fills, so these are deep
+       washes with the brighter hue kept for text and borders. */
     --bg-error: hsl(0, 45%, 18%);
     --bg-warning: hsl(35, 45%, 18%);
     --bg-success: hsl(174, 40%, 15%);
@@ -104,7 +91,7 @@ html[data-cast-scheme="dark"] {
     --border-notice: var(--sky-800);
     --error-color-rgb: 248 113 113;
 
-    /* Hairlines. Craft's are dark-on-light alpha blends; invert to light-on-dark. */
+    /* Craft's hairlines are dark-on-light alpha blends, inverted here. */
     --border-hairline: rgb(255 255 255 / 12%);
     --border-hairline-medium: hsl(var(--gray-200-hsl));
     --border-hairline-dark: rgb(255 255 255 / 28%);
@@ -119,13 +106,12 @@ html[data-cast-scheme="dark"] {
 
 
 /* ==========================================================================
-   Patch layer — Craft's hard-coded colours
+   Patch layer: Craft's hard-coded colours
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    Popover surfaces. Craft paints menus, dropdowns, autosuggest results, and
-   tooltips with a literal `#fff` or `var(--white)`, so none of them follow the
-   palette. Their text is an equally literal `#3f4d5a`.
+   tooltips with a literal `#fff`, and their text with `#3f4d5a`.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .menu,
@@ -142,11 +128,9 @@ html[data-cast-scheme="dark"] #notifications .copied-elements-notification .noti
     background: var(--cast-surface);
 }
 
-/* Craft separates popovers from the page with a 1px `rgba(31,41,51,.1)` ring, which
-   is invisible against a dark canvas — a menu ends up as a flat slab with no edge.
-   Swap the ring for a faint light one and keep the drop shadow, deepened to carry on
-   a dark backdrop. Not applied to `.craft-tooltip .arrow`, which is a rotated square
-   that would ring its own diagonal. */
+/* Craft's 1px popover ring is invisible on dark, leaving menus as flat slabs. Faint
+   light ring instead, with a deeper shadow. Skips `.craft-tooltip .arrow`, a rotated
+   square that would ring its own diagonal. */
 html[data-cast-scheme="dark"] .menu,
 html[data-cast-scheme="dark"] .ui-datepicker,
 html[data-cast-scheme="dark"] .ui-timepicker-wrapper,
@@ -186,10 +170,9 @@ html[data-cast-scheme="dark"] .selectize-dropdown .active:not(.selected) {
 }
 
 /* --------------------------------------------------------------------------
-   Form controls. `<select>` text and the selectize input that stands in for it
-   are hard-coded to `#3f4d5a` — invisible on a dark control. The checkbox and
-   radio boxes are painted `#fbfcfe` while their tick is `--gray-900`, so on the
-   inverted ramp it's a near-white tick on a near-white box.
+   Form controls. `<select>` and selectize text is hard-coded to `#3f4d5a`.
+   Checkbox and radio boxes are painted `#fbfcfe` while their tick is
+   `--gray-900`, so the inverted ramp gives a near-white tick on a near-white box.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .select:not(.selectize) select,
@@ -208,9 +191,8 @@ html[data-cast-scheme="dark"] .selectize-control .selectize-input.disabled {
     border-color: var(--input-border-color);
 }
 
-/* A selectize styled as a select is chrome, not a text input — Craft gives it
-   `--button-bg` to match a native `<select>`. The rule above aims at the input-shaped
-   selectize controls, so put the select-shaped ones back. */
+/* Craft gives a select-shaped selectize `--button-bg` to match a native `<select>`.
+   The rule above catches those too, so put them back. */
 html[data-cast-scheme="dark"] .selectize.select .selectize-input {
     background: var(--button-bg);
 }
@@ -241,7 +223,7 @@ html[data-cast-scheme="dark"] input.range::-moz-range-track {
 }
 
 /* --------------------------------------------------------------------------
-   Chips and tokens — `#e4edf6` fills with `#3f4d5a` text.
+   Chips and tokens. Craft fills these `#e4edf6` with `#3f4d5a` text.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .token,
@@ -259,8 +241,8 @@ html[data-cast-scheme="dark"] .selectize-control.multi .selectize-input > div.ac
 }
 
 /* --------------------------------------------------------------------------
-   White separator rings. These exist to lift an element off a light page; on a
-   dark one they read as bright halos. Re-point them at the surface behind.
+   White separator rings. They lift an element off a light page, but read as
+   bright halos on a dark one, so they point at the surface behind instead.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .activity-container ul li .activity-btn .elementthumb {
@@ -286,7 +268,7 @@ html[data-cast-scheme="dark"] ul.icons li a {
 
 /* --------------------------------------------------------------------------
    Light glows. Craft's ambient shadows are tinted `hsla(212,30%,85%,.5)`, which
-   on a dark canvas glows instead of receding.
+   glows on a dark canvas instead of receding.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] #trial-info {
@@ -314,10 +296,9 @@ html[data-cast-scheme="dark"] body.fixed-header #header {
     background-color: hsl(var(--gray-050-hsl) / 75%);
 }
 
-/* The selected tab is drawn with three shadows: a top indicator bar, a 1px ring, and
-   an ambient spread. On dark, the ring (`rgba(51,64,77,.1)`) vanishes while the spread
-   (`--gray-200`, off the inverted ramp) glows — so the tab reads as a halo with no
-   edge. Dark spread, faint light ring, and a calmer indicator. */
+/* The selected tab's ring (`rgba(51,64,77,.1)`) vanishes on dark while its `--gray-200`
+   spread glows, so the tab reads as a halo with no edge. Dark spread, faint light
+   ring, calmer indicator. */
 html[data-cast-scheme="dark"] .pane-tabs [role="tablist"] [role="tab"].sel {
     --highlight-color: var(--gray-400);
 
@@ -364,7 +345,7 @@ html[data-cast-scheme="dark"] .cp-image-controls .progress-shade {
     background-color: rgb(0 0 0 / 60%);
 }
 
-/* Field layout designer — every surface in it is `var(--white)`. */
+/* Field layout designer: every surface in it is `var(--white)`. */
 html[data-cast-scheme="dark"] .fld-tab .fld-tabcontent,
 html[data-cast-scheme="dark"] .fld-tab .tabs .tab,
 html[data-cast-scheme="dark"] .layoutdesigner .fld-library,
@@ -377,7 +358,6 @@ html[data-cast-scheme="dark"] .fld-new-tab-btn {
     background: var(--secondary-pane-bg) !important;
 }
 
-/* Address cards */
 html[data-cast-scheme="dark"] .address-card {
     border-color: var(--border-hairline);
 }
@@ -392,7 +372,7 @@ html[data-cast-scheme="dark"] .address-card .address-card-label {
     color: var(--fg-notice);
 }
 
-/* Vue admin tables, used by most of the Settings index screens. */
+/* Vue admin tables, used by most Settings index screens. */
 html[data-cast-scheme="dark"] .vue-admin-table-footer,
 html[data-cast-scheme="dark"] .vuetable-pagination {
     background: var(--pane-bg) !important;
@@ -404,8 +384,8 @@ html[data-cast-scheme="dark"] table thead th.sortable:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Typography in `.readable` regions (help text, plugin readmes, notes), which
-   sets its own literal ink colours.
+   `.readable` regions (help text, plugin readmes, notes) set their own literal
+   ink colours.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .readable .h1,
@@ -443,8 +423,8 @@ html[data-cast-scheme="dark"] .btn.caution:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Prism, which Craft bundles for syntax highlighting (email previews, the
-   project config viewer) with its stock light theme.
+   Prism, which Craft bundles with its stock light theme for syntax highlighting
+   (email previews, the project config viewer).
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] code[class*="language-"],
@@ -510,9 +490,8 @@ html[data-cast-scheme="dark"] .token.keyword {
 
 /* --------------------------------------------------------------------------
    Status labels. Craft tints the pill to 15% of the status colour and sets its
-   text to that hue's 900 — a near-black meant to sit on a light page. Over a
-   dark canvas that's dark-on-dark, so each one takes the 300 shade instead, and
-   the tint comes up slightly to keep the pill readable.
+   text to that hue's 900, a near-black meant for a light page. Each takes the
+   300 shade instead, with the tint raised slightly to keep the pill readable.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .status-label {
@@ -593,7 +572,7 @@ html[data-cast-scheme="dark"] .status-label.black {
 }
 
 /* --------------------------------------------------------------------------
-   Per-screen strays: light rules and insets in the CSS Craft ships alongside
+   Per-screen strays: light rules and insets in the CSS Craft ships with
    individual utilities and settings screens.
    -------------------------------------------------------------------------- */
 
@@ -606,12 +585,10 @@ html[data-cast-scheme="dark"] .message .body {
     color: var(--gray-600);
 }
 
-/* Editable tables */
 html[data-cast-scheme="dark"] table.editable tbody tr th ~ td:not(:first-child) {
     border-inline-start-color: var(--border-hairline);
 }
 
-/* User permissions */
 html[data-cast-scheme="dark"] .user-permissions h3:has(+ .select-all) {
     border-inline-end-color: var(--border-hairline);
 }
@@ -620,17 +597,15 @@ html[data-cast-scheme="dark"] .user-permissions ul ul li:before {
     border-block-start-color: var(--border-hairline);
 }
 
-/* Route settings */
 html[data-cast-scheme="dark"] .route-settings .uri-tokens {
     box-shadow: inset 0 1px 3px -1px rgb(0 0 0 / 60%);
 }
 
-/* User photo upload */
 html[data-cast-scheme="dark"] div.user-photo-controls .progress-shade {
     background-color: rgb(0 0 0 / 60%);
 }
 
-/* Selectize's own stylesheet, which predates Craft's variables entirely. */
+/* Selectize's own stylesheet predates Craft's variables entirely. */
 html[data-cast-scheme="dark"] .selectize-input,
 html[data-cast-scheme="dark"] .selectize-dropdown,
 html[data-cast-scheme="dark"] .selectize-input.dropdown-active:before,
@@ -641,8 +616,8 @@ html[data-cast-scheme="dark"] .selectize-control.plugin-remove_button .item .rem
 
 /* --------------------------------------------------------------------------
    Craft embeds a few light-mode raster assets (the sidebar logo lockup, some
-   empty states) with no CSS hook. Taking the edge off is cheaper and more
-   robust than shipping dark duplicates.
+   empty states) with no CSS hook. Taking the edge off beats shipping dark
+   duplicates.
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] #global-sidebar .system-name img,
@@ -650,10 +625,9 @@ html[data-cast-scheme="dark"] .zilch img {
     filter: brightness(0.85) contrast(1.05);
 }
 
-/* Code and preformatted regions want a touch more separation than a pane gives.
-   Craft also puts `.code` on form controls — handle fields, template pickers — where
-   it means "monospace", not "code block"; those keep the normal input background so
-   they match the text fields they sit beside. */
+/* Craft also puts `.code` on form controls (handle fields, template pickers) where it
+   means monospace, not code block. Those are excluded so they keep the input
+   background and match the text fields beside them. */
 html[data-cast-scheme="dark"] pre,
 html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text) {
     background-color: hsl(210, 24%, 8%);

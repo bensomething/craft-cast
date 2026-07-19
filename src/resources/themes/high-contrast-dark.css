@@ -1,9 +1,9 @@
 /**
- * Cast — High contrast (dark)
+ * Cast: High contrast (dark)
  *
- * The dark base pushed to the other extreme from Dim: a near-black canvas, near-white
- * copy, solid borders in place of alpha hairlines, and a focus ring that can't be
- * missed. Status hues are lightened until each clears AA against the canvas.
+ * The dark base at the opposite extreme from Dim: near-black canvas, near-white copy,
+ * solid borders in place of alpha hairlines, and an unmissable focus ring. Status hues
+ * are lightened until each clears AA against the canvas.
  */
 
 html[data-cast-theme="high-contrast-dark"] {

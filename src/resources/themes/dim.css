@@ -1,13 +1,13 @@
 /**
- * Cast — Dim
+ * Cast: Dim
  *
- * A softer dark mode for long editing sessions: nothing reaches true black, the
- * neutrals carry a little more blue, and text stops short of full brightness so the
- * contrast between chrome and copy is gentler. Still clears WCAG AA for body text.
+ * A softer dark mode for long editing sessions. Nothing reaches true black and text
+ * stops short of full brightness, so chrome and copy sit closer together. Still clears
+ * WCAG AA for body text.
  */
 
 html[data-cast-theme="dim"] {
-    /* Lifted floor, compressed ceiling — the whole ramp sits in the mid-darks. */
+    /* Lifted floor, compressed ceiling. The whole ramp sits in the mid-darks. */
     --gray-050-hsl: 213, 20%, 16%;
     --gray-100-hsl: 213, 19%, 19%;
     --gray-150-hsl: 213, 18%, 22%;
@@ -27,7 +27,7 @@ html[data-cast-theme="dim"] {
     --bg-color-hsl: var(--gray-050-hsl);
     --input-bg: hsl(213, 19%, 21%);
 
-    /* Shadows do less work at this contrast; let the hairline rings carry separation. */
+    /* Shadows do less work at this contrast, so hairline rings carry separation. */
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 6px rgb(0 0 0 / 20%);
     --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px rgb(0 0 0 / 45%);
     --shade-bg: rgb(from hsl(var(--gray-050-hsl)) r g b / 70%);
