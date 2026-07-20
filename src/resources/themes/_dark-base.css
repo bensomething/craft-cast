@@ -308,9 +308,13 @@ html[data-cast-scheme="dark"] .fld-container .fld-workspace {
     box-shadow: inset 0 1px 3px -1px rgb(0 0 0 / 60%);
 }
 
+/* Every field draws a leading divider, so whichever one starts a row lands on top of the
+   container's own edge. Both are `--border-hairline`, but as a translucent white the two
+   stack into a brighter line — hence the opaque equivalent here, which looks the same
+   alone and doesn't accumulate where it doubles up. */
 html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):before,
 html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):last-child:before {
-    background-color: var(--border-hairline);
+    background-color: var(--border-hairline-medium);
 }
 
 /* --------------------------------------------------------------------------
@@ -701,6 +705,23 @@ html[data-cast-scheme="dark"] .lp-preview-container .lp-device-type__label:befor
     filter: invert(1);
 }
 
+/* --------------------------------------------------------------------------
+   CKEditor. The plugin already maps most of CKEditor's `--ck-*` variables onto
+   Craft's tokens, so the editor follows a theme on its own — except the toolbar
+   and floating panels, which it pins to `--white`. Its declarations are
+   `!important` on `:root`, so these are too, and win on specificity.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] {
+    --ck-color-toolbar-background: var(--cast-surface) !important;
+    --ck-color-panel-background: var(--cast-surface) !important;
+    --ck-color-dropdown-panel-background: var(--cast-surface) !important;
+
+    /* Dialogs reach for `--ck-custom-background`, which nothing defines. */
+    --ck-color-dialog-background: var(--cast-surface) !important;
+    --ck-color-dialog-form-header-border: var(--border-hairline) !important;
+}
+
 /* Buttons floating over an asset preview. `--ui-control-bg` is a light wash once the
    ramp inverts, so they bleach out against the image instead of sitting on it. */
 html[data-cast-scheme="dark"] .image-actions .btn,
@@ -787,6 +808,14 @@ html[data-cast-scheme="dark"] .route-settings .uri-tokens {
 
 html[data-cast-scheme="dark"] div.user-photo-controls .progress-shade {
     background-color: rgb(0 0 0 / 60%);
+}
+
+/* The icon preview is painted `--gray-050` and edged with `--input-border`, a variable
+   Craft never defines, so it lands on the ramp's darkest step with whatever border the
+   browser falls back to — lighter than the buttons alongside it. */
+html[data-cast-scheme="dark"] .icon-picker--icon {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border-color);
 }
 
 /* Selectize's own stylesheet predates Craft's variables entirely. */
