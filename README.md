@@ -1,5 +1,8 @@
 # Cast
 
+> [!NOTE]
+> Cast is currently in beta. It's ready to use, but settings and theme APIs may still change before 1.0.0. Feedback and bug reports are very welcome.
+
 Colour modes for the Craft CMS control panel. Cast adds **Dark**, **Dim**, and **High Contrast** modes, an **Auto** mode that follows the operating system, and lets each user pick their own.
 
 ## Why Cast
