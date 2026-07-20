@@ -13,6 +13,7 @@ use craft\events\TemplateEvent;
 use craft\helpers\FileHelper;
 use craft\helpers\Json;
 use craft\web\assets\cp\CpAsset;
+use craft\web\assets\pluginstore\PluginStoreAsset;
 use craft\web\assets\theme\ThemeAsset;
 use craft\web\Controller;
 use craft\web\Request;
@@ -85,6 +86,7 @@ class Plugin extends \craft\base\Plugin
                 $this->registerThemes($this->themes->getThemesToLoad($handle), $handle);
                 $this->registerButtonColor();
                 $this->registerAccountMenu($handle);
+                $this->ignorePluginStore($event);
             }
         );
     }
@@ -157,6 +159,41 @@ class Plugin extends \craft\base\Plugin
             View::POS_HEAD,
             'cast-apply',
         );
+    }
+
+    /**
+     * Exempt Craft's Plugin Store from the active theme.
+     *
+     * The Plugin Store is a Vue app carrying its own compiled Tailwind stylesheet, whose
+     * greys are baked in as literal values rather than read from Craft's custom
+     * properties. The inverted ramp never reaches them, so on a dark theme it renders
+     * dark text on a dark canvas. `_dark-base.css` resets the region to Craft's stock
+     * values; this marks it.
+     *
+     * Marked with a body class rather than `data-cast-ignore` on the wrapper itself,
+     * which is Craft's markup with no template hook inside it. Setting the attribute
+     * from JS would land only after Vue had mounted and painted.
+     *
+     * Keyed off the asset bundle instead of the template name: the bundle is registered
+     * immediately before the template renders, and it's the thing that actually causes
+     * the problem.
+     */
+    private function ignorePluginStore(TemplateEvent $event): void
+    {
+        if (!isset(Craft::$app->getView()->assetBundles[PluginStoreAsset::class])) {
+            return;
+        }
+
+        // `bodyClass` is normalised by `_layouts/base.twig`, which accepts a string or an
+        // array and merges its own classes in, so appending is safe either way.
+        $classes = $event->variables['bodyClass'] ?? [];
+
+        if (is_string($classes)) {
+            $classes = explode(' ', $classes);
+        }
+
+        $classes[] = 'cast-ignore-plugin-store';
+        $event->variables['bodyClass'] = $classes;
     }
 
     /**

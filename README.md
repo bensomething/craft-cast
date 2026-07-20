@@ -111,6 +111,26 @@ Event::on(Themes::class, Themes::EVENT_REGISTER_THEMES, function(RegisterThemesE
 
 Replacing a bundled theme is a matter of using its handle as the key.
 
+## Opting a screen out
+
+Most plugin UIs get Cast for free, because they build on Craft's own components and read its custom properties. A screen that ships its own compiled stylesheet with colours baked in as literal values doesn't, and lands as dark text on a dark canvas.
+
+Mark that region and Cast renders it as stock Craft, leaving the CP around it themed:
+
+```twig
+<div data-cast-ignore>
+    {# your app #}
+</div>
+```
+
+Everything inside gets Craft's palette back — the grey ramp, panes, inputs, status colours — plus `color-scheme: light`, so native controls and scrollbars follow. It's the whole subtree, so put it on the outermost element the region owns.
+
+Craft's own Plugin Store is exempted this way out of the box.
+
+Reach for it only when a region genuinely can't follow the palette. Fixing the stylesheet to read Craft's properties is better where that's an option, since it earns dark mode rather than opting out of it.
+
+> **A caveat:** the region's own colours are restored through Cast's variables, so anything that reads them corrects itself. A handful of Cast's patches carry literal colours — Prism syntax highlighting is the main one — and those still need overriding by hand inside an ignored region.
+
 ## Config
 
 Settings can be overridden per environment in `config/cast.php`:
