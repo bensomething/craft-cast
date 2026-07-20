@@ -233,8 +233,7 @@ class Themes extends Component
 
     public function getBaseUrl(): string
     {
-        return $this->baseUrl ??= Craft::$app->getAssetManager()
-            ->getPublishedUrl(dirname(__DIR__) . '/resources', true);
+        return $this->baseUrl ??= $this->publish(dirname(__DIR__) . '/resources');
     }
 
     /**
@@ -246,8 +245,22 @@ class Themes extends Component
      */
     private function getThemesUrl(): string
     {
-        return $this->themesUrl ??= Craft::$app->getAssetManager()
-            ->getPublishedUrl((string)$this->getThemesPath(), true);
+        return $this->themesUrl ??= $this->publish((string)$this->getThemesPath());
+    }
+
+    /**
+     * Publishes a directory to `cpresources` and returns its URL.
+     *
+     * Craft returns false if the directory can't be published, which would otherwise
+     * become the string "false" in a `<link href>`. An empty base is no better as a URL,
+     * but it fails as a missing stylesheet rather than as a request for a file named
+     * after a boolean.
+     */
+    private function publish(string $path): string
+    {
+        $url = Craft::$app->getAssetManager()->getPublishedUrl($path, true);
+
+        return is_string($url) ? $url : '';
     }
 
     /**
@@ -377,6 +390,11 @@ class Themes extends Component
 
     private function settings(): Settings
     {
-        return Plugin::getInstance()->getSettings();
+        // This service is one of the plugin's own components, so it can't be reached
+        // before the plugin exists.
+        /** @var Plugin $plugin */
+        $plugin = Plugin::getInstance();
+
+        return $plugin->getSettings();
     }
 }

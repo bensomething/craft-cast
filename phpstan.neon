@@ -2,6 +2,13 @@ includes:
     - vendor/craftcms/phpstan/phpstan.neon
 
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
+    ignoreErrors:
+        # Settings::BUTTON_COLORS is a union of two shapes, one carrying `shades` and the
+        # other `values`. The guard above the access picks the right member at runtime,
+        # but PHPStan 1.x doesn't narrow a union of array shapes through isset().
+        -
+            message: '#Offset .values. does not exist on array\{#'
+            path: src/Plugin.php

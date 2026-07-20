@@ -15,6 +15,7 @@ use craft\helpers\Json;
 use craft\web\assets\cp\CpAsset;
 use craft\web\assets\theme\ThemeAsset;
 use craft\web\Controller;
+use craft\web\Request;
 use craft\web\View;
 use yii\base\ActionEvent;
 use yii\base\Event;
@@ -35,6 +36,9 @@ class Plugin extends \craft\base\Plugin
     public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function config(): array
     {
         return [
@@ -113,7 +117,13 @@ class Plugin extends \craft\base\Plugin
         }
 
         foreach ($themes as $theme) {
-            $view->registerCssFile($theme->url, $depends);
+            // Themes reach here through Themes::getAllThemes(), which fills in any URL a
+            // registering plugin left unset. One without a stylesheet still contributes
+            // its scheme, so Auto and the head script can resolve it.
+            if ($theme->url !== null) {
+                $view->registerCssFile($theme->url, $depends);
+            }
+
             $schemes[$theme->handle] = $theme->colorScheme;
         }
 
@@ -337,7 +347,9 @@ JS, Json::encode($html));
     {
         $spec = Settings::BUTTON_COLORS[$handle];
 
-        if (isset($spec['values'])) {
+        // Black/White carries its own values, including a label colour, since it swaps
+        // ends with the mode rather than sitting on a ramp.
+        if (!isset($spec['shades'])) {
             return $spec['values'][$mode];
         }
 
@@ -616,7 +628,15 @@ JS;
                     return;
                 }
 
-                $handle = Craft::$app->getRequest()->getBodyParam(Themes::PREF_KEY);
+                $request = Craft::$app->getRequest();
+
+                // A console request can't reach UsersController, so this is narrowing the
+                // union Craft returns rather than a case that happens.
+                if (!$request instanceof Request) {
+                    return;
+                }
+
+                $handle = $request->getBodyParam(Themes::PREF_KEY);
                 $user = Craft::$app->getUser()->getIdentity();
 
                 if ($handle === null || !$user) {

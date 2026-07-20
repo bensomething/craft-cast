@@ -15,12 +15,15 @@ use yii\web\Response;
  */
 class PreferencesController extends Controller
 {
-    public function actionSaveTheme(): Response
+    public function actionSaveTheme(): ?Response
     {
         $this->requireCpRequest();
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
+        // The route this action serves is registered by the plugin, so it can't be
+        // reached before the plugin exists.
+        /** @var Plugin $plugin */
         $plugin = Plugin::getInstance();
         $user = Craft::$app->getUser()->getIdentity();
 
