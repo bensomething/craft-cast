@@ -25,16 +25,16 @@
 {% set selectedTab = 'cast-general' %}
 {% set tabs = {
     'cast-general': { label: 'General' | t('cast'), url: '#cast-general' },
-    'cast-auto': { label: 'Auto' | t('cast'), url: '#cast-auto' },
+    'cast-themes': { label: 'Themes' | t('cast'), url: '#cast-themes' },
 } %}
 
-{% set themeOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
+{% set themeOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
 {% for theme in themes %}
     {% set themeOptions = themeOptions | merge([{ label: theme.name, value: theme.handle }]) %}
 {% endfor %}
 
-{% set lightOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
-{% set darkOptions = [{ label: 'Craft default' | t('cast'), value: '' }] %}
+{% set lightOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
+{% set darkOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
 {% for theme in themes %}
     {% if theme.isDark %}
         {% set darkOptions = darkOptions | merge([{ label: theme.name, value: theme.handle }]) %}
@@ -49,12 +49,62 @@
     {{ redirectInput('settings') }}
 
     <style>
+        /* `.readable` is 16px, sized for long-form docs. Here it sits beside 14px field
+           instructions, so it takes the CP's body size and keeps the class for markdown. */
+        #cast-general .readable, #cast-themes .readable, #cast-variables-modal .readable {
+            font-size: var(--font-size);
+            line-height: var(--lh);
+        }
+
         /* Full-bleed dividers, matching Craft's `.content-pane > hr`. Ours nest a level deeper. */
-        #cast-general hr, #cast-auto hr { margin-inline: calc(var(--padding) * -1); }
+        #cast-general hr, #cast-themes hr { margin-inline: calc(var(--padding) * -1); }
+
+        /* A field's own margin collapses through a plain wrapper, but Craft's toggle sets
+           inline styles on the wrapper as it shows it, and the collapse stops — so the gap
+           above the field grows on toggle. Spacing the wrapper instead holds it steady. */
+        .cast-toggle-target { margin-block: var(--xl); }
+        .cast-toggle-target > .field { margin-block: 0; }
 
         /* A selectize fills its container, unlike the auto-sized native selects beside it.
            10rem is Craft's own constrained selectize width and fits the longest colour name. */
         #settings-buttonColor-field .selectize.select { width: 10rem; }
+
+        /* The `<pre>` gives up its own background and padding so the pane provides both,
+           and leaves room at the end of the first line for the copy button. */
+        #cast-example { margin-block: 1rem; position: relative; }
+        #cast-example pre { background: none; margin: 0; overflow-x: auto; padding-inline-end: 2.5rem; }
+        #cast-example-btn { inset-block-start: var(--s); inset-inline-end: var(--s); position: absolute; }
+
+        /* The variable list is reference material, so it lives in a modal rather than
+           stretching the tab. The body scrolls; the footer stays put. */
+        #cast-variables-modal { max-height: 80vh; max-width: 92vw; width: 44rem; }
+        #cast-variables-modal .body { max-height: calc(80vh - 4rem); overflow: auto; padding: var(--padding); }
+        #cast-variables-modal h3 { margin-block-start: var(--xl); }
+
+        /* Group dividers run edge to edge, past the body's padding. */
+        #cast-variables-modal .body hr { margin-inline: calc(var(--padding) * -1); }
+
+        /* A row can list several variables, so they wrap rather than stretching the column.
+           Most land on their own line, hence the looser row gap. */
+        .cast-variable-names { display: flex; flex-wrap: wrap; gap: var(--xs) var(--2xs); }
+
+        /* A narrow column breaks a name across two lines inside its chip, overlapping the
+           one below. Truncate instead — the copy and the `title` keep the whole value. */
+        .cast-variable-names craft-copy-attribute {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Each table sizes itself to its own content otherwise, so the split shifts from one
+           group to the next. Fixed halves keep the columns aligned all the way down. */
+        #cast-variables-modal table.data { table-layout: fixed; }
+        #cast-variables-modal table.data th { width: 50%; }
+
+        /* Craft's data tables carry no top margin, so a table introduced by a paragraph
+           sits flush against it. */
+        #cast-themes table.data, #cast-variables-modal table.data { margin-block-start: var(--m); }
     </style>
 
     <div id="cast-general" role="tabpanel" aria-labelledby="tab-cast-general">
@@ -74,7 +124,7 @@
 
             {{ forms.selectField({
                 label: 'Default theme' | t('cast'),
-                instructions: 'Applied to everyone who hasn’t picked their own. Note that anyone set to **Auto** — including by this setting — gets the pair configured on the **Auto** tab, not the theme chosen here.' | t('cast'),
+                instructions: 'Applied to everyone who hasn’t picked their own. Note that anyone set to **Auto**, including by this setting, gets the pair configured under **Auto** below, not the theme chosen here.' | t('cast'),
                 id: 'defaultTheme',
                 name: 'defaultTheme',
                 options: [{ label: 'Auto (match each user’s system)' | t('cast'), value: 'auto' }] | merge(themeOptions),
@@ -83,8 +133,6 @@
                 data: { 'cast-preview': true },
             }) }}
 
-            <hr>
-
             {{ forms.lightswitchField({
                 label: 'Let users choose their own' | t('cast'),
                 instructions: 'Adds a theme picker to each user’s **Account → Preferences**. Turn this off to pin everyone to the default above.' | t('cast'),
@@ -92,8 +140,16 @@
                 name: 'allowUserOverride',
                 on: settings.allowUserOverride,
                 errors: settings.getErrors('allowUserOverride'),
+                toggle: '#enabledThemes-container',
             }) }}
 
+            {# Which themes are on offer only means anything if users can pick one, so the
+               field rides with the switch above. It still posts while hidden, so turning
+               the switch off and on again doesn't lose the selection. #}
+            {% tag 'div' with {
+                id: 'enabledThemes-container',
+                class: ['cast-toggle-target', not settings.allowUserOverride ? 'hidden' : null] | filter,
+            } %}
             {# With an "All" option, Craft's macro drops the empty-value hidden input, so
                unticking everything posts no key and the old value survives. This restores
                it, and Settings::beforeValidate() snaps the empty value back to "All". #}
@@ -104,18 +160,19 @@
                 instructions: 'Which themes users can pick from. The default theme is always available.' | t('cast'),
                 id: 'enabledThemes',
                 name: 'enabledThemes',
-                options: themes | map(t => { label: t.name ~ (t.description ? ' — ' ~ t.description : ''), value: t.handle }) | values,
+                options: themes | map(t => { label: t.name ~ (t.description ? ': ' ~ t.description : ''), value: t.handle }) | values,
                 values: settings.enabledThemes,
                 showAllOption: true,
                 errors: settings.getErrors('enabledThemes'),
             }) }}
-        {% endnamespace %}
-    </div>
+            {% endtag %}
 
-    <div id="cast-auto" class="hidden" role="tabpanel" aria-labelledby="tab-cast-auto">
-        {% namespace 'settings' %}
+            <hr>
+
+            <h2>{{ 'Auto' | t('cast') }}</h2>
+
             <div class="readable">
-                <p>{{ 'When a user is set to **Auto**, their browser’s `prefers-color-scheme` setting decides which of these two themes they get. Auto is a pair, so the **Default theme** on the General tab has no effect on anyone using it.' | t('cast') | md }}</p>
+                <p>{{ 'When a user is set to **Auto**, their browser’s `prefers-color-scheme` setting decides which of these two themes they get. Auto is a pair, so the **Default theme** above has no effect on anyone using it.' | t('cast') | md }}</p>
             </div>
 
             {{ forms.selectField({
@@ -139,4 +196,275 @@
             }) }}
         {% endnamespace %}
     </div>
+
+    {# Read-only by design. A theme is a file, so the folder is the source of truth for
+       what exists; anything editable here would be a second copy of that, free to drift
+       from what's actually deployed. This tab reports, it doesn't configure. #}
+    <div id="cast-themes" class="hidden" role="tabpanel" aria-labelledby="tab-cast-themes">
+        <h2>{{ 'Registering a new theme' | t('cast') }}</h2>
+
+        <div class="readable">
+            <p>{{ 'Drop a `.css` file into the themes folder and Cast registers it. The filename becomes the handle, and a header comment supplies the rest.' | t('cast') | md }}</p>
+
+            {% if themesPath %}
+                <p><strong>{{ 'Themes folder' | t('cast') }}:</strong> <code>{{ themesPath }}</code>{% if not themesPathExists %} <span class="light">({{ 'doesn’t exist yet' | t('cast') }})</span>{% endif %}</p>
+                <p class="light">{{ 'Change the path using the `themesPath` setting in `config/cast.php`.' | t('cast') | md(inlineOnly = true) }}</p>
+            {% else %}
+                <p class="error">{{ 'The configured themes folder doesn’t resolve to a path.' | t('cast') }}</p>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <h2>{{ 'Theme CSS example' | t('cast') }}</h2>
+
+        {% set exampleCss %}/**
+ * Theme Name: Midnight
+ * Color Scheme: dark
+ * Description: Near-black, for late sessions.
+ */
+
+html[data-cast-theme="midnight"] {
+    --body-bg: #05070d;
+    --text-color: #e6ecff;
+}{% endset %}
+
+        <div id="cast-example" class="pane">
+            {{ tag('button', {
+                type: 'button',
+                id: 'cast-example-btn',
+                class: 'btn',
+                title: 'Copy to clipboard' | t('app'),
+                aria: { label: 'Copy to clipboard' | t('app') },
+                data: { icon: 'clipboard' },
+            }) }}
+            <pre class="code">{{ exampleCss }}</pre>
+
+            {# `execCommand` copies from a form control, so the snippet is repeated in one
+               that's hidden from view and from the tab order. Craft's own `copytext` field
+               works the same way, and unlike the clipboard API it survives plain HTTP. #}
+            <textarea id="cast-example-source" class="visually-hidden" readonly tabindex="-1" aria-hidden="true">{{ exampleCss }}</textarea>
+        </div>
+
+        <div class="readable">
+            <p class="light">{{ 'Only **Color Scheme** really matters — it decides whether the shared dark base loads first, and which side of **Auto** the theme sits on. Everything else falls back: the name to the filename, the scheme to light. Files starting with an underscore are treated as partials and skipped.' | t('cast') | md }}</p>
+        </div>
+
+        <button type="button" id="cast-variables-btn" class="btn">{{ 'View common variables' | t('cast') }}</button>
+
+        {% js %}
+            $('#cast-example-btn').on('click', function() {
+                var source = document.getElementById('cast-example-source');
+                source.select();
+                document.execCommand('copy');
+                source.setSelectionRange(0, 0);
+                Craft.cp.displayNotice("{{ 'Copied to clipboard.' | t('app') | e('js') }}");
+                $(this).focus();
+            });
+
+            var castVariablesModal = new Garnish.Modal($('#cast-variables-modal'), { autoShow: false });
+
+            $('#cast-variables-btn').on('click', function() {
+                castVariablesModal.show();
+            });
+
+            $('#cast-variables-close').on('click', function() {
+                castVariablesModal.hide();
+            });
+        {% endjs %}
+
+        <hr>
+
+        <h2>{{ 'Registered themes' | t('cast') }}</h2>
+
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Name' | t('app') }}</th>
+                    <th scope="col">{{ 'Handle' | t('app') }}</th>
+                    <th scope="col">{{ 'Scheme' | t('cast') }}</th>
+                    <th scope="col">{{ 'Source' | t('cast') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for theme in themes %}
+                    <tr>
+                        <td>
+                            {{ theme.name }}
+                            {% if theme.description %}<div class="light smalltext">{{ theme.description }}</div>{% endif %}
+                        </td>
+                        <td><code>{{ theme.handle }}</code></td>
+                        <td>{{ theme.isDark ? 'Dark' | t('cast') : 'Light' | t('cast') }}</td>
+                        <td class="light">{{ themeSources[theme.handle] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if ignoredFiles %}
+            <hr>
+
+            <h2>{{ 'Ignored files' | t('cast') }}</h2>
+
+            <div class="readable">
+                <p class="light">{{ 'Stylesheets in the themes folder that Cast couldn’t register.' | t('cast') }}</p>
+            </div>
+
+            <table class="data fullwidth">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ 'File' | t('app') }}</th>
+                        <th scope="col">{{ 'Reason' | t('cast') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ignored in ignoredFiles %}
+                        <tr>
+                            <td><code>{{ ignored.file }}</code></td>
+                            <td class="error">{{ ignored.reason }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {# Curated rather than generated: the full set runs to several hundred properties,
+           most of them derived from the handful below. Each row lists its names separately
+           so every one of them is copyable on its own. #}
+        {% set variableGroups = [
+            {
+                heading: 'Neutral ramp' | t('cast'),
+                note: 'Bare HSL triplets. Craft derives `--gray-050` … `--gray-1000` from these, so retinting the ramp moves most of the CP at once. A dark theme inverts the values, not the names.' | t('cast'),
+                variables: [
+                    { names: ['--gray-050-hsl', '--gray-100-hsl', '--gray-150-hsl', '--gray-200-hsl'], purpose: 'The lightest steps on Craft’s scale: page and pane backgrounds.' | t('cast') },
+                    { names: ['--gray-300-hsl', '--gray-350-hsl', '--gray-400-hsl', '--gray-500-hsl', '--gray-550-hsl'], purpose: 'The middle of the ramp: borders, controls, and secondary copy.' | t('cast') },
+                    { names: ['--gray-600-hsl', '--gray-700-hsl', '--gray-800-hsl', '--gray-900-hsl', '--gray-1000-hsl'], purpose: 'The darkest steps: body copy, and anything meant to read as near-black.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Surfaces' | t('cast'),
+                variables: [
+                    { names: ['--body-bg'], purpose: 'The page behind everything else.' | t('cast') },
+                    { names: ['--bg-color-hsl'], purpose: 'The same colour as an HSL triplet, for rules that blend against the page.' | t('cast') },
+                    { names: ['--pane-bg'], purpose: 'Content panes.' | t('cast') },
+                    { names: ['--secondary-pane-bg'], purpose: 'Panes nested inside a pane.' | t('cast') },
+                    { names: ['--sidebar-bg'], purpose: 'The global sidebar.' | t('cast') },
+                    { names: ['--modal-bg'], purpose: 'Modals and slideouts.' | t('cast') },
+                    { names: ['--shade-bg'], purpose: 'The shade drawn behind a modal.' | t('cast') },
+                    { names: ['--slideout-footer-bg', '--login-modal-bg'], purpose: 'Two surfaces that sit apart from the ones above and are easy to miss.' | t('cast') },
+                    { names: ['--pane-shadow', '--modal-shadow'], purpose: 'Separation. Set to `none` and use a border if shadows look muddy.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Text and links' | t('cast'),
+                variables: [
+                    { names: ['--text-color'], purpose: 'Body copy.' | t('cast') },
+                    { names: ['--light-text-color', '--fg-subtle'], purpose: 'Instructions, meta, and other secondary copy.' | t('cast') },
+                    { names: ['--link-color'], purpose: 'Links.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Inputs and borders' | t('cast'),
+                variables: [
+                    { names: ['--input-bg', '--input-border-color'], purpose: 'Text fields, textareas, and selects.' | t('cast') },
+                    { names: ['--fg-input'], purpose: 'Input text, and the tint Craft mixes UI control backgrounds from.' | t('cast') },
+                    { names: ['--button-border'], purpose: 'Secondary buttons.' | t('cast') },
+                    { names: ['--border-hairline', '--border-hairline-medium', '--border-hairline-dark'], purpose: 'The three weights of divider. Craft’s are alpha blends meant for a light page.' | t('cast') },
+                    { names: ['--hr-border', '--header-border'], purpose: 'Rules and the header underline.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'UI controls' | t('cast'),
+                note: 'Buttons, menu toggles, and chips all derive from these, so they carry further than their names suggest.' | t('cast'),
+                variables: [
+                    { names: ['--ui-control-bg', '--ui-control-bg-hover', '--ui-control-bg-active'], purpose: 'Control fills, at rest and under the pointer.' | t('cast') },
+                    { names: ['--ui-control-fg', '--ui-control-fg-hover', '--ui-control-fg-active'], purpose: 'Their labels and icons.' | t('cast') },
+                    { names: ['--primary-color', '--secondary-color'], purpose: 'Primary and secondary accents. Cast’s **Button colour** setting drives the primary one.' | t('cast') },
+                    { names: ['--nav-item-bg-active', '--nav-item-bg-hover', '--nav-item-fg-active'], purpose: 'Global sidebar items, selected and hovered.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Status' | t('cast'),
+                note: 'Each status has a fill, a text colour, and a border. Keeping the fill deep and the hue bright for text and borders reads better than tinting all three.' | t('cast'),
+                variables: [
+                    { names: ['--bg-error', '--bg-warning', '--bg-success', '--bg-notice'], purpose: 'Fills.' | t('cast') },
+                    { names: ['--fg-error', '--fg-warning', '--fg-success', '--fg-notice'], purpose: 'Text and icons.' | t('cast') },
+                    { names: ['--border-error', '--border-warning', '--border-success', '--border-notice'], purpose: 'Borders.' | t('cast') },
+                    { names: ['--bg-enabled', '--bg-pending', '--bg-disabled'], purpose: 'The status dots on elements. Separate from the fills above, and bright enough to read at that size.' | t('cast') },
+                    { names: ['--error-color-rgb'], purpose: 'The error hue as bare RGB, for rules that need it at an alpha.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Selection and focus' | t('cast'),
+                variables: [
+                    { names: ['--bg-selection-light', '--bg-selection-dark'], purpose: 'Selected rows, cards, and sources.' | t('cast') },
+                    { names: ['--focus-outline-light', '--focus-outline-medium', '--focus-outline-dark'], purpose: 'The focus ring, over three background weights.' | t('cast') },
+                    { names: ['--focus-ring', '--focus-ring-alpha'], purpose: 'The ring itself. High-contrast themes widen it and drop the alpha.' | t('cast') },
+                ],
+            },
+            {
+                heading: 'Cast’s own' | t('cast'),
+                note: 'Cast adds these so a dark theme can retune every popover, menu, and tooltip in one line instead of chasing each component.' | t('cast'),
+                variables: [
+                    { names: ['--cast-surface', '--cast-surface-hover'], purpose: 'Menus, popovers, and tooltips.' | t('cast') },
+                    { names: ['--cast-chip', '--cast-chip-active'], purpose: 'Tokens, tags, and other chips.' | t('cast') },
+                    { names: ['--cast-popover-outline', '--cast-popover-shadow'], purpose: 'The edge and lift on floating panels.' | t('cast') },
+                ],
+            },
+        ] %}
+
+        {# Garnish moves a modal to the end of `<body>` when it initialises, so this can sit
+           inside the form: it holds no inputs to be posted. #}
+        <div id="cast-variables-modal" class="modal fitted" style="display: none;">
+            <div class="body">
+                <h1>{{ 'Common CSS variables' | t('cast') }}</h1>
+
+                <div class="readable">
+                    <p class="light">{{ 'Almost all of these are Craft’s own custom properties rather than Cast’s, so anything in Craft’s `_variables.css` can be overridden the same way. A dark theme only needs to state what it changes, the shared dark base has already set the rest.' | t('cast') | md(inlineOnly = true) }}</p>
+                </div>
+                <hr>
+                {% for group in variableGroups %}
+                    <h2>{{ group.heading }}</h2>
+
+                    {% if group.note is defined %}
+                        <div class="readable">
+                            <p class="light">{{ group.note | md(inlineOnly = true) }}</p>
+                        </div>
+                    {% endif %}
+
+                    <table class="data fullwidth">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ 'Variable' | t('cast') }}</th>
+                                <th scope="col">{{ 'Purpose' | t('cast') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variable in group.variables %}
+                                <tr>
+                                    <td>
+                                        <div class="cast-variable-names">
+                                            {% for name in variable.names %}
+                                                <craft-copy-attribute class="copytextbtn" value="{{ name }}" title="{{ name }}">{{ name }}</craft-copy-attribute>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="light">{{ variable.purpose | md(inlineOnly = true) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if not loop.last %}<hr>{% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="footer">
+                <div class="buttons right">
+                    <button type="button" id="cast-variables-close" class="btn">{{ 'Close' | t('app') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

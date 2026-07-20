@@ -1,14 +1,14 @@
 # Cast
 
-Colour modes for the Craft CMS control panel. Craft 5 ships a light-only CP; Cast adds **Dark**, **Dim**, and **High contrast** modes, an **Auto** mode that follows the operating system, and lets each user pick their own.
+Colour modes for the Craft CMS control panel. Cast adds **Dark**, **Dim**, and **High Contrast** modes, an **Auto** mode that follows the operating system, and lets each user pick their own.
 
 ## Why Cast
 
 - **No forks, no overrides:** themes are stylesheets that override the CSS custom properties Craft already declares in `ThemeAsset`. Nothing is patched, and a Craft upgrade can't break a layout.
 - **Per user:** everyone chooses their own from **Account → Preferences**, or you pin the whole team to one.
 - **No flash:** the active theme is stamped onto `<html>` by an inline head script, before first paint.
-- **Live preview:** picking a theme repaints the page immediately, no save needed.
-- **Extensible:** register your own theme from any plugin or module.
+- **Live update:** picking a theme repaints the page immediately, no save needed.
+- **Your own themes:** drop a `.css` file in `cast-themes/` and it's automatically registered. Plugins and modules can register in code.
 
 ## Requirements
 
@@ -34,8 +34,8 @@ Note that **Auto is a pair, not a theme**: anyone set to Auto gets the two theme
 | --- | --- | --- |
 | Dark | Dark | Neutral dark CP. The reference implementation. |
 | Dim | Dark | Softer and lower contrast, for long sessions. |
-| High contrast | Light | Near-black text, solid borders, widened focus ring. |
-| High contrast (dark) | Dark | The same treatment on a near-black canvas. |
+| High Contrast | Light | Near-black text, solid borders, widened focus ring. |
+| High Contrast (Dark) | Dark | The same treatment on a near-black canvas. |
 
 **Auto** follows the browser's `prefers-color-scheme` and switches live when the OS does. Which two themes it picks between is configurable on the **Auto** tab.
 
@@ -52,7 +52,7 @@ html[data-cast-theme="midnight"] {
 
 Cast also sets `data-cast-scheme` to `light` or `dark`, so several themes can share a base stylesheet. Every theme with `colorScheme: dark` gets `_dark-base.css` loaded ahead of it — the inverted grey ramp plus patches for the colours Craft hardcodes — so a dark theme only needs to declare its deltas.
 
-> Never `@import` the base from a theme. The preview screens load every theme at once, and a second import would re-declare the base *after* the first theme's overrides; with equal specificity, the base would win and flatten it.
+> Never `@import` the base from a theme. The preview screens load every theme at once, and a second import would re-declare the base *after* the first theme's overrides. With equal specificity, the base would win and flatten it.
 
 ## Button colour
 
@@ -62,7 +62,34 @@ Most options are shades of a Craft ramp, chosen per mode so the white label clea
 
 Status colours stay red, since a disabled indicator shouldn't follow your button colour.
 
-## Registering your own theme
+## Adding your own theme
+
+Drop a `.css` file in `cast-themes/`, alongside `config/` and `templates/`, and Cast registers it. The filename is the handle, the header comment supplies the rest.
+
+```css
+/**
+ * Theme Name: Midnight
+ * Color Scheme: dark
+ * Description: Near-black, for late sessions.
+ */
+
+html[data-cast-theme="midnight"] {
+    --body-bg: #05070d;
+    --text-color: #e6ecff;
+}
+```
+
+Of those, only **Color Scheme** really matters: it decides whether `_dark-base.css` loads ahead of your theme, and which side of **Auto** it sits on. The name falls back to the filename and the scheme to light, so a stylesheet with no header at all is still a theme. Files starting with an underscore are treated as partials and skipped, as `_dark-base.css` is.
+
+There's nothing to configure and nothing to install, the file *is* the registration, so a theme can't exist in one environment and not another, and the control panel can't hold a reference to a stylesheet that isn't there. **Settings → Plugins → Cast → Themes** lists what was found, where each theme came from, and any file that couldn't be read as one, with the reason.
+
+The folder is published to `cpresources`, so it needn't sit in the web root, and every theme's URL is hashed on the folder's modification time. Edit a theme and the control panel picks it up without a cache clear. Point Cast somewhere else with `themesPath` in `config/cast.php`.
+
+Bundled handles win, so naming a file `dark.css` won't quietly redefine **Dark** for everyone already set to it. To genuinely replace a bundled theme, register it in code.
+
+## Registering a theme in code
+
+For a plugin or module shipping its own theme, rather than a project adding one:
 
 ```php
 use bensomething\cast\events\RegisterThemesEvent;
@@ -90,15 +117,17 @@ Settings can be overridden per environment in `config/cast.php`:
 
 ```php
 return [
+    'buttonColor' => 'red',
     'defaultTheme' => 'auto',
     'allowUserOverride' => true,
     'enabledThemes' => ['dark', 'high-contrast'],
     'autoLightTheme' => '',
     'autoDarkTheme' => 'dark',
+    'themesPath' => '@root/cast-themes',
 ];
 ```
 
-An empty theme handle means Craft's stock appearance.
+An empty theme handle means Craft's stock appearance. Copy [`src/config.php`](src/config.php) to `config/cast.php` for a commented starting point.
 
 ## Licence
 

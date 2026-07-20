@@ -82,6 +82,19 @@ class Settings extends Model
      */
     public array|string $enabledThemes = '*';
 
+    /**
+     * @var string Folder scanned for theme stylesheets, as a path or alias. Every `.css`
+     * file in it is a theme, described by a header comment in the file itself.
+     *
+     * Defaults outside the web root: Cast publishes the folder to `cpresources`, so it
+     * can live anywhere, and inside the web root a theme would be reachable at two URLs,
+     * only one of them carrying the hash that busts caches when a theme is edited.
+     *
+     * Set it in `config/cast.php`. There's deliberately no UI: a themes folder that
+     * differed per environment would mean themes that exist in one and not another.
+     */
+    public string $themesPath = '@root/cast-themes';
+
     /** @var string Theme used when "Auto" resolves to dark. */
     public string $autoDarkTheme = 'dark';
 
@@ -91,7 +104,7 @@ class Settings extends Model
     public function rules(): array
     {
         return [
-            [['defaultTheme', 'autoDarkTheme', 'autoLightTheme'], 'string'],
+            [['defaultTheme', 'autoDarkTheme', 'autoLightTheme', 'themesPath'], 'string'],
             [['buttonColor'], 'in', 'range' => array_keys(self::BUTTON_COLORS)],
             [['allowUserOverride'], 'boolean'],
         ];

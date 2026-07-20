@@ -13,14 +13,14 @@
 {% set default = settings.defaultTheme %}
 {% set defaultLabel =
     default == 'auto' ? 'Auto' | t('cast') :
-    default == '' ? 'Craft default' | t('cast') :
+    default == '' ? 'Craft Default' | t('cast') :
     (themes[default].name ?? default)
 %}
 
 {% set options = [
     { label: 'Site default ({theme})' | t('cast', { theme: defaultLabel }), value: 'inherit' },
     { label: 'Auto (match my system)' | t('cast'), value: 'auto' },
-    { label: 'Craft default' | t('cast'), value: '' },
+    { label: 'Craft Default' | t('cast'), value: '' },
 ] %}
 {% for theme in themes %}
     {% set options = options | merge([{ label: theme.name, value: theme.handle }]) %}

@@ -4,14 +4,17 @@
 
 ### Added
 - Initial scaffold: control-panel colour modes driven by Craft's own CSS custom properties, with a flash-free inline head script that stamps the active theme onto `<html>`.
-- Bundled themes: **Dark**, **Dim**, **High contrast**, and **High contrast (dark)**, the dark ones sharing a `_dark-base.css`.
+- Bundled themes: **Dark**, **Dim**, **High Contrast**, and **High Contrast (Dark)**, the dark ones sharing a `_dark-base.css`.
 - **Auto** mode, following `prefers-color-scheme` and switching live with the OS, with a configurable light/dark pair.
 - Per-user theme picker on **Account → Preferences**, with live preview, and a site-wide default plus an **Available themes** allowlist in the plugin settings.
 - `Themes::EVENT_REGISTER_THEMES` so other plugins and modules can add their own colour modes.
+- Project themes: drop a `.css` file in `cast-themes/` and Cast registers it, taking the handle from the filename and the rest from a header comment in the file. The file is the registration, so there's no second copy of a theme's metadata to drift from what's actually deployed, and no way to reference a stylesheet that isn't there. Underscore-prefixed files are partials and skipped, as `_dark-base.css` is; bundled handles win, so a stray `dark.css` can't redefine **Dark** under anyone already set to it. The folder is published to `cpresources` rather than served from the web root — a theme is control-panel source, not a public asset, and publishing hashes on the folder's modification time, so editing a theme busts its URL without a cache clear. Relocatable with `themesPath` in `config/cast.php`.
+- A read-only **Themes** tab in the settings, listing every registered theme with its scheme and origin — bundled, themes folder, or registered in code — plus any file in the folder that couldn't be read as a theme, with the reason. Read-only deliberately: the folder is the source of truth for what exists, and anything editable here would be a second copy of it. The failure mode it's there to remove is a stylesheet that looks fine and simply never appears.
 - **Button colour** setting — nine fills for primary buttons, using Craft's own colour names so the swatch picker comes from the CP. Named for what it does: beyond primary buttons, `--bg-primary` reaches only the Plugin Store cart badge and the installer's step dots. Most options are shades of a Craft ramp, picked per mode so the white label clears WCAG AA against the fill (≥4.5:1 light, ≥4:1 dark) while staying distinct from a dark pane. **Black/White** carries its own label colour so it can swap ends with the mode.
 - Button colour previews live, like the theme picker — the Save button is the nearest primary button, so it's what repaints. Previewing a theme that flips the colour scheme re-resolves it, since some colours resolve differently per mode.
 - Theme switcher in the account menu, top right. Craft's account menu has no template hook, so the group is injected by JS — additively, and it bails out silently if the menu isn't found. Theme stylesheets are appended on first open rather than loaded on every CP page, so switching is instant without making every page carry all of them.
 - **Site default** option in the user theme picker, so someone who has picked a theme can hand the choice back to the admin setting. Stored as `inherit`, and labelled with the theme it currently resolves to.
+- A commented `src/config.php` to copy to `config/cast.php`.
 - Dark popovers (menus, datepickers, autosuggest, tooltips) get a faint light outline via `--cast-popover-outline`, keeping the drop shadow. Craft's own 1px `rgba(31,41,51,.1)` ring is invisible on a dark canvas, which left menus reading as flat slabs.
 
 ### Fixed

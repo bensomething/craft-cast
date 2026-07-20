@@ -10,6 +10,7 @@ use craft\base\Model;
 use craft\controllers\UsersController;
 use craft\events\RegisterTemplateRootsEvent;
 use craft\events\TemplateEvent;
+use craft\helpers\FileHelper;
 use craft\helpers\Json;
 use craft\web\Controller;
 use craft\web\View;
@@ -175,7 +176,6 @@ class Plugin extends \craft\base\Plugin
 
         $options = [[
             'value' => Settings::THEME_INHERIT,
-            // "Site default" applies whatever it resolves to.
             'applies' => $settings->defaultTheme,
             'label' => Craft::t('cast', 'Site default'),
         ], [
@@ -185,7 +185,7 @@ class Plugin extends \craft\base\Plugin
         ], [
             'value' => Settings::THEME_NONE,
             'applies' => Settings::THEME_NONE,
-            'label' => Craft::t('cast', 'Craft default'),
+            'label' => Craft::t('cast', 'Craft Default'),
         ]];
 
         foreach ($themes as $theme) {
@@ -235,7 +235,6 @@ class Plugin extends \craft\base\Plugin
         menu.insertBefore(group.firstChild, anchor);
     }
 
-    // The stylesheets are only needed once someone goes looking for the menu.
     var trigger = document.getElementById('user-info');
 
     if (trigger) {
@@ -658,12 +657,66 @@ JS;
         $this->registerPreview('#settings-defaultTheme');
         $this->registerButtonColorPreview('#settings-buttonColor');
 
+        $themesPath = $this->themes->getThemesPath();
+
         return $controller->renderTemplate('cast/_settings.twig', [
             'plugin' => $this,
             'settings' => $this->getSettings(),
             'themes' => $this->themes->getAllThemes(),
+            'themeSources' => $this->themeSources(),
+            'themesPath' => $this->themesPathAlias($themesPath),
+            'themesPathExists' => $themesPath !== null && is_dir($themesPath),
+            'ignoredFiles' => $this->themes->getIgnoredFiles(),
             'buttonColorOptions' => $this->buttonColorOptions(),
         ]);
+    }
+
+    /**
+     * The themes folder written relative to the project root, for display.
+     *
+     * The absolute path is whatever Craft sees, which under Docker is a mount point that
+     * exists nowhere on the machine reading the screen. The alias is the one form that's
+     * both recognisable and what you'd paste into `config/cast.php`.
+     *
+     * Derived from `@root` rather than `Craft::alias()`, which walks every alias and will
+     * happily match a `@web` that's empty on a console request.
+     */
+    private function themesPathAlias(?string $path): ?string
+    {
+        if ($path === null) {
+            return null;
+        }
+
+        $path = FileHelper::normalizePath($path, '/');
+        $root = Craft::getAlias('@root', false);
+        $root = is_string($root) && $root !== '' ? FileHelper::normalizePath($root, '/') : null;
+
+        // Outside the project, so there's nothing to relate it to. Show it as it is.
+        if ($root === null || !str_starts_with($path . '/', $root . '/')) {
+            return $path;
+        }
+
+        return rtrim('@root/' . trim(substr($path, strlen($root)), '/'), '/');
+    }
+
+    /**
+     * A readable origin for each registered theme, keyed by handle, for the read-only
+     * Themes tab.
+     *
+     * @return array<string, string>
+     */
+    private function themeSources(): array
+    {
+        $labels = [
+            Themes::SOURCE_BUNDLED => Craft::t('cast', 'Bundled with Cast'),
+            Themes::SOURCE_FOLDER => Craft::t('cast', 'Themes folder'),
+            Themes::SOURCE_PLUGIN => Craft::t('cast', 'Registered in code'),
+        ];
+
+        return array_map(
+            fn(Theme $theme) => $labels[$this->themes->getThemeSource($theme->handle)],
+            $this->themes->getAllThemes(),
+        );
     }
 
     /**

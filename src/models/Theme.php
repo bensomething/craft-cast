@@ -41,13 +41,19 @@ class Theme extends Model
      */
     public ?string $url = null;
 
+    /**
+     * @var string|null Absolute path to the stylesheet, for themes discovered in the
+     * themes folder. Set instead of {@see self::$url}, which is then derived from it.
+     */
+    public ?string $path = null;
+
     public function rules(): array
     {
         return [
             [['handle', 'name', 'colorScheme'], 'required'],
             [['handle'], 'match', 'pattern' => '/^[a-z][a-z0-9\-]*$/'],
             [['colorScheme'], 'in', 'range' => [self::SCHEME_LIGHT, self::SCHEME_DARK]],
-            [['url', 'description'], 'string'],
+            [['url', 'description', 'path'], 'string'],
         ];
     }
 
