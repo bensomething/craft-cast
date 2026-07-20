@@ -125,6 +125,8 @@ Mark that region and Cast renders it as stock Craft, leaving the CP around it th
 
 Everything inside gets Craft's palette back — the grey ramp, panes, inputs, status colours — plus `color-scheme: light`, so native controls and scrollbars follow. It's the whole subtree, so put it on the outermost element the region owns.
 
+Menus opened from inside the region come with it. Garnish moves a menu to the end of `<body>` when it opens, which would otherwise hand it back to the theme and drop a dark menu over a light screen, so Cast marks those as they open.
+
 Craft's own Plugin Store is exempted this way out of the box.
 
 Reach for it only when a region genuinely can't follow the palette. Fixing the stylesheet to read Craft's properties is better where that's an option, since it earns dark mode rather than opting out of it.

@@ -87,6 +87,7 @@ class Plugin extends \craft\base\Plugin
                 $this->registerButtonColor();
                 $this->registerAccountMenu($handle);
                 $this->ignorePluginStore($event);
+                $this->registerIgnoredMenus();
             }
         );
     }
@@ -194,6 +195,56 @@ class Plugin extends \craft\base\Plugin
 
         $classes[] = 'cast-ignore-plugin-store';
         $event->variables['bodyClass'] = $classes;
+    }
+
+    /**
+     * Carry a region's exemption onto the menus opened from inside it.
+     *
+     * Garnish moves a menu to `<body>` when it opens, which takes it out of whatever
+     * region it belongs to and hands it back to the theme — a dark menu over an exempt
+     * screen. No selector can reach it once it's moved, but its anchor still points at
+     * the trigger, so the exemption is carried across when it opens.
+     *
+     * Wraps `show()` rather than watching the DOM because that's where the move happens,
+     * and menus only open on interaction, so there's nothing to paint before the
+     * attribute lands.
+     */
+    private function registerIgnoredMenus(): void
+    {
+        Craft::$app->getView()->registerJs(<<<'JS'
+(function() {
+    if (typeof Garnish === 'undefined') {
+        return;
+    }
+
+    // Either marked directly, or the Plugin Store, whose wrapper is aliased because
+    // Craft's markup can't carry the attribute itself.
+    var region = '[data-cast-ignore], .cast-ignore-plugin-store .ps-wrapper';
+
+    // `Garnish.Menu` and `Garnish.CustomSelect` are the same class, hence the dedupe.
+    var wrapped = [];
+
+    [Garnish.Menu, Garnish.CustomSelect, Garnish.DisclosureMenu].forEach(function(cls) {
+        if (!cls || !cls.prototype || wrapped.indexOf(cls) !== -1) {
+            return;
+        }
+
+        wrapped.push(cls);
+        var show = cls.prototype.show;
+
+        cls.prototype.show = function() {
+            // Menu buttons anchor the menu, disclosure menus trigger it.
+            var anchor = this.$anchor || this.$trigger;
+
+            if (this.$container && anchor && anchor.closest(region).length) {
+                this.$container.attr('data-cast-ignore', '');
+            }
+
+            return show.apply(this, arguments);
+        };
+    });
+})();
+JS, View::POS_READY, 'cast-ignore-menus');
     }
 
     /**

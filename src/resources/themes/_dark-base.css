@@ -984,8 +984,12 @@ html[data-cast-scheme="dark"] body.cast-ignore-plugin-store :is(#app, .ps-wrappe
 }
 
 /* An ignored region generally paints nothing of its own — the Plugin Store's wrapper is
-   a bare `<div>` — so without this the themed canvas shows through behind it. */
-html[data-cast-scheme="dark"] [data-cast-ignore] {
+   a bare `<div>` — so without this the themed canvas shows through behind it.
+
+   Menus are the exception: they're marked as they open (see `registerIgnoredMenus()`)
+   having already been moved to `<body>`, and Craft paints them white rather than in the
+   canvas colour. Left in, this would out-specify that and tint them. */
+html[data-cast-scheme="dark"] [data-cast-ignore]:not(.menu) {
     background-color: var(--body-bg);
     color: var(--text-color);
 }
