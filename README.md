@@ -25,7 +25,7 @@ Cast is in beta, so ask for the beta explicitly:
 composer require bensomething/craft-cast:^1.0.0-beta
 ```
 
-If Composer refuses to resolve it, your project's `minimum-stability` is `stable`. Either set it to `beta` in `composer.json` (with `"prefer-stable": true`, so this is the only prerelease you pull in), or pin the exact version — `bensomething/craft-cast:1.0.0-beta.1`.
+If Composer refuses to resolve it, your project's `minimum-stability` is `stable`. Either set it to `beta` in `composer.json` (with `"prefer-stable": true`, so this is the only prerelease you pull in), or pin the exact version — `bensomething/craft-cast:1.0.0-beta.2`.
 
 ## Usage
 

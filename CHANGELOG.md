@@ -1,5 +1,13 @@
 # Release Notes for Cast
 
+## 1.0.0-beta.2 - 2026-07-20
+
+### Fixed
+- Colour-coded Matrix blocks, cards, and relation chips kept their light tint in dark modes. The hue is kept and the surfaces rebuilt around it, including a distinct selected state.
+- The CKEditor toolbar and its floating panels stayed white, being pinned past Craft's own tokens.
+- Fields in a `.flex-fields` row drew a brighter divider wherever one landed on the container's edge.
+- The icon preview took a browser-default border, having asked for a variable Craft never defines.
+
 ## 1.0.0-beta.1 - 2026-07-20
 
 ### Added
