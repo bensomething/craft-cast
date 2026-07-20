@@ -706,6 +706,39 @@ html[data-cast-scheme="dark"] .lp-preview-container .lp-device-type__label:befor
 }
 
 /* --------------------------------------------------------------------------
+   Colour-coded elements. An entry type, category group, or component with a
+   colour gets it inline, as four fixed shades of that hue: a `050` wash for the
+   background, `100` for a titlebar, `200` for the border, and `900` — near-black
+   — for text. Only the border shade survives inversion, so the rest are rebuilt
+   from it, which keeps the hue while the surfaces follow the theme.
+   -------------------------------------------------------------------------- */
+
+/* Inline styles, so these have to be important to land. `--custom-border-color` is
+   deliberately left alone: it's the accent the others are mixed from, and redefining it
+   here would leave those mixes resolving against their own result. */
+html[data-cast-scheme="dark"] [style*="--custom-"] {
+    --custom-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 12%, var(--pane-bg)) !important;
+    --custom-titlebar-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 20%, var(--pane-bg)) !important;
+    --custom-sel-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 35%, var(--pane-bg)) !important;
+    --custom-sel-titlebar-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 45%, var(--pane-bg)) !important;
+    --custom-text-color: var(--custom-border-color, var(--text-color)) !important;
+}
+
+/* Selected sits a step above the resting tint rather than jumping to a solid fill, which
+   on a Matrix block would swamp the fields inside it. */
+html[data-cast-scheme="dark"] [style*="--custom-"].sel {
+    --custom-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 22%, var(--pane-bg)) !important;
+    --custom-titlebar-bg-color: color-mix(in srgb, var(--custom-border-color, transparent) 30%, var(--pane-bg)) !important;
+}
+
+/* The outline is an inset ring on a pseudo-element, not a border, and at full strength
+   it's the loudest thing on the block. The variable itself keeps the full shade, so the
+   mixes above still have an accent to work from. */
+html[data-cast-scheme="dark"] [style*="--custom-"]:not(.chromeless):before {
+    box-shadow: inset 0 0 0 1px rgb(from var(--custom-border-color, transparent) r g b / 40%);
+}
+
+/* --------------------------------------------------------------------------
    CKEditor. The plugin already maps most of CKEditor's `--ck-*` variables onto
    Craft's tokens, so the editor follows a theme on its own — except the toolbar
    and floating panels, which it pins to `--white`. Its declarations are

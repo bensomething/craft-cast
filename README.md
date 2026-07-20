@@ -1,13 +1,13 @@
 # Cast
 
-> [!NOTE]
-> Cast is currently in beta. It's ready to use, but settings and theme APIs may still change before 1.0.0. Feedback and bug reports are very welcome.
-
 Colour modes for the Craft CMS control panel. Cast adds **Dark**, **Dim**, and **High Contrast** modes, an **Auto** mode that follows the operating system, and lets each user pick their own.
+
+> [!NOTE]
+> Cast is currently in beta. The theme APIs are settled — `Themes::EVENT_REGISTER_THEMES` and the `cast-themes/` file format won't change before 1.0.0, so it's safe to build a theme against them now. The plugin's own settings may still move. Feedback and bug reports are very welcome.
 
 ## Why Cast
 
-- **No forks, no overrides:** themes are stylesheets that override the CSS custom properties Craft already declares in `ThemeAsset`. Nothing is patched, and a Craft upgrade can't break a layout.
+- **Works with Craft, not against it:** a theme is a stylesheet that redeclares the CSS custom properties Craft already ships in `ThemeAsset`. No forked templates, no rewritten layouts — so a Craft upgrade brings its own changes through untouched.
 - **Per user:** everyone chooses their own from **Account → Preferences**, or you pin the whole team to one.
 - **No flash:** the active theme is stamped onto `<html>` by an inline head script, before first paint.
 - **Live update:** picking a theme repaints the page immediately, no save needed.
@@ -19,9 +19,13 @@ Craft CMS 5.10+ and PHP 8.2+.
 
 ## Installation
 
+Cast is in beta, so ask for the beta explicitly:
+
 ```bash
-composer require bensomething/craft-cast
+composer require bensomething/craft-cast:^1.0.0-beta
 ```
+
+If Composer refuses to resolve it, your project's `minimum-stability` is `stable`. Either set it to `beta` in `composer.json` (with `"prefer-stable": true`, so this is the only prerelease you pull in), or pin the exact version — `bensomething/craft-cast:1.0.0-beta.1`.
 
 ## Usage
 
