@@ -1,5 +1,5 @@
 /**
- * Cast: High contrast (light)
+ * Cast: High Contrast (Light)
  *
  * Craft's stock light CP leans on low-alpha hairlines, mid-grey secondary text, and
  * shadow-only pane separation, all of which thin out badly for low-vision users and on
@@ -68,6 +68,12 @@ html[data-cast-theme="high-contrast"] {
 html[data-cast-theme="high-contrast"] :focus-visible {
     outline: 2px solid #0b4fc4;
     outline-offset: 2px;
+}
+
+/* Craft hard-codes a lighter blue for footer links. Inheriting hands back the theme's
+   own link colour, which clears AA. */
+html[data-cast-theme="high-contrast"] #global-footer {
+    --link-color: inherit;
 }
 
 /* Craft marks status with colour alone in a few places. This adds a non-colour cue so

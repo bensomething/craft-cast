@@ -262,8 +262,21 @@ html[data-cast-scheme="dark"] #footer {
     border-block-start-color: var(--border-hairline);
 }
 
+/* Craft hard-codes a light-mode blue for footer links, which sinks into the canvas.
+   Inheriting hands the theme's own link colour back. */
+html[data-cast-scheme="dark"] #global-footer {
+    --link-color: inherit;
+}
+
+/* Craft draws these in the page colour, so they only appear on hover. Keep them
+   invisible at rest, and hover to a lighter surface rather than the ramp's darkest step. */
 html[data-cast-scheme="dark"] ul.icons li a {
-    border-color: var(--border-hairline);
+    border-color: transparent;
+}
+
+html[data-cast-scheme="dark"] ul.icons li a:hover {
+    background-color: var(--cast-surface);
+    border-color: var(--cast-surface-hover);
 }
 
 /* --------------------------------------------------------------------------
@@ -273,6 +286,12 @@ html[data-cast-scheme="dark"] ul.icons li a {
 
 html[data-cast-scheme="dark"] #trial-info {
     box-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 2px 12px rgb(0 0 0 / 35%);
+}
+
+/* Sidebar meta blocks ask for `--gray-050`, which inverts to the page colour and leaves
+   them flat. A step up separates each block from the canvas, as on light. */
+html[data-cast-scheme="dark"] .details .meta:not(.read-only) {
+    background-color: hsl(var(--gray-100-hsl)) !important;
 }
 
 html[data-cast-scheme="dark"] .details .meta.warning {
@@ -286,6 +305,34 @@ html[data-cast-scheme="dark"] .fld-container .fld-workspace {
 html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):before,
 html[data-cast-scheme="dark"] .flex-fields > :not(h2, hr, .line-break):last-child:before {
     background-color: var(--border-hairline);
+}
+
+/* --------------------------------------------------------------------------
+   Draft notice. Every part of it is drawn in `--blue-800`, a dark navy meant to
+   sit on white.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .draft-notice {
+    color: var(--blue-300);
+}
+
+html[data-cast-scheme="dark"] .draft-notice .draft-icon {
+    border-color: rgb(from var(--blue-300) r g b / 35%);
+}
+
+html[data-cast-scheme="dark"] .draft-notice .draft-icon:before {
+    color: var(--blue-300) !important;
+}
+
+html[data-cast-scheme="dark"] .draft-notice .discard-changes-btn {
+    border-color: var(--blue-400) !important;
+    color: var(--blue-300) !important;
+}
+
+html[data-cast-scheme="dark"] .draft-notice .discard-changes-btn:focus,
+html[data-cast-scheme="dark"] .draft-notice .discard-changes-btn:hover,
+html[data-cast-scheme="dark"] .draft-notice .discard-changes-btn:active {
+    border-color: var(--blue-300);
 }
 
 /* --------------------------------------------------------------------------
@@ -307,6 +354,52 @@ html[data-cast-scheme="dark"] .pane-tabs [role="tablist"] [role="tab"].sel {
         inset 0 2px 0 var(--custom-text-color, var(--highlight-color)),
         0 0 0 1px var(--cast-popover-outline),
         0 2px 12px rgb(0 0 0 / 35%);
+}
+
+/* A slideout stacks three surfaces from three different tokens — the slideout itself
+   (`--modal-bg`), its body and sidebar (a literal `--gray-100`), and the selected tab
+   above them — so on dark the tab never quite lines up with the fields beneath it.
+   Pinning all of them to `--pane-bg` makes the panel read as one surface. */
+html[data-cast-scheme="dark"] .slideout {
+    background-color: var(--pane-bg);
+}
+
+/* The details sidebar is the canvas its meta blocks sit on. Craft asks for `--gray-100`
+   there, a step *down* from the blocks' `--gray-050`; inverted, that ordering flips and
+   the two flatten into each other, so the canvas takes the darker step instead. */
+html[data-cast-scheme="dark"] .slideout > .so-body.so-full-details,
+html[data-cast-scheme="dark"] .slideout > .so-body > .so-sidebar {
+    background-color: hsl(var(--gray-050-hsl)) !important;
+}
+
+/* Notes and other meta textareas: Craft flattens meta text inputs into the block they
+   sit in, but a textarea keeps `--input-bg` and reads as a hole punched in it. */
+html[data-cast-scheme="dark"] .details .meta textarea {
+    background-color: transparent;
+}
+
+/* The notes field is a bare `.field` rather than a `.meta` block, so nothing lifts it off
+   the canvas. Give it the same surface the blocks above it sit on. */
+html[data-cast-scheme="dark"] .details .notes,
+html[data-cast-scheme="dark"] .details .notes textarea {
+    background-color: hsl(var(--gray-100-hsl));
+}
+
+/* Selected sources and pressed segmented buttons are painted `--gray-500`, a light step
+   on the inverted ramp that glares against the chrome around it. A mid step still reads
+   as selected under the white label without taking over the panel. */
+html[data-cast-scheme="dark"] .sidebar nav li:not(.has-subnav) [data-source-item].sel,
+html[data-cast-scheme="dark"] .sidebar nav li:not(.has-subnav) [data-source-item].active-drop-target,
+html[data-cast-scheme="dark"] .sidebar nav li:not(.has-subnav) > a.sel,
+html[data-cast-scheme="dark"] .sidebar nav li:not(.has-subnav) > a.active-drop-target,
+html[data-cast-scheme="dark"] .btngroup--exclusive .btn[aria-pressed="true"]:not(.disabled, .loading, .dashed, [aria-disabled]) {
+    background-color: hsl(var(--gray-350-hsl));
+}
+
+/* The asset preview backdrop asks for `--gray-900`, meaning "near-black" on Craft's ramp.
+   Inverted, that turns into a white band behind the image. */
+html[data-cast-scheme="dark"] .preview-thumb-container {
+    background-color: hsl(var(--gray-050-hsl));
 }
 
 html[data-cast-scheme="dark"] .element-index .source-path .chevron-btns {
@@ -343,6 +436,12 @@ html[data-cast-scheme="dark"] .lp-editor-container {
 html[data-cast-scheme="dark"] .icon-picker-modal .body .icon-picker-modal--list.loading:after,
 html[data-cast-scheme="dark"] .cp-image-controls .progress-shade {
     background-color: rgb(0 0 0 / 60%);
+}
+
+/* The element index veils itself in white while refreshing, which flashes a bright
+   block over the pane. Fade toward the pane colour instead. */
+html[data-cast-scheme="dark"] .elements.busy:after {
+    background: hsl(var(--gray-100-hsl) / 75%);
 }
 
 /* Field layout designer: every surface in it is `var(--white)`. */
@@ -526,6 +625,8 @@ html[data-cast-scheme="dark"] .status-label.emerald {
     --status-label-text-color: var(--emerald-300);
 }
 
+/* Craft treats `teal` and `turquoise` as the same status — enabled elements use `teal`. */
+html[data-cast-scheme="dark"] .status-label.teal,
 html[data-cast-scheme="dark"] .status-label.turquoise {
     --status-label-text-color: var(--teal-300);
 }
@@ -569,6 +670,83 @@ html[data-cast-scheme="dark"] .status-label.rose {
 /* `black` sets its text to a literal `--black`, which Cast leaves as true black. */
 html[data-cast-scheme="dark"] .status-label.black {
     --status-label-text-color: var(--gray-800);
+}
+
+/* --------------------------------------------------------------------------
+   Live Preview. Its two panels are painted `--white`, and their headers a fixed
+   frosted light blue, so the whole frame stays light over a dark CP.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .lp-editor-container,
+html[data-cast-scheme="dark"] .lp-preview-container {
+    background-color: var(--pane-bg);
+}
+
+html[data-cast-scheme="dark"] .lp-editor-container > header,
+html[data-cast-scheme="dark"] .lp-preview-container > header,
+html[data-cast-scheme="dark"] .lp-preview-container .lp-preview-header {
+    background-color: hsl(var(--gray-100-hsl) / 75%);
+    box-shadow: 0 1px 0 var(--border-hairline);
+}
+
+/* The device-type icons are dark line art, drawn for a light toolbar. */
+html[data-cast-scheme="dark"] .lp-preview-container .lp-preview-header .lp-device-type .btn:before,
+html[data-cast-scheme="dark"] .lp-preview-container .lp-device-type__label:before {
+    filter: invert(1);
+}
+
+/* Buttons floating over an asset preview. `--ui-control-bg` is a light wash once the
+   ramp inverts, so they bleach out against the image instead of sitting on it. */
+html[data-cast-scheme="dark"] .image-actions .btn,
+html[data-cast-scheme="dark"] .cp-image-controls .btn {
+    --ui-control-bg-color: rgb(0 0 0 / 55%);
+    --ui-control-hover-bg-color: rgb(0 0 0 / 70%);
+    --ui-control-active-bg-color: rgb(0 0 0 / 80%);
+    --ui-control-color: #fff;
+
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   Image editor. Craft's one already-dark screen, but it gets there by reaching
+   for the dark end of the ramp — `--gray-900` for the canvas, `--gray-1000` for
+   its rules, `--gray-600` for buttons. Inverted, the whole modal turns white, so
+   it's pinned to fixed values rather than tracking a theme.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .modal.imageeditor {
+    background-color: hsl(210, 24%, 8%);
+    color: #fff;
+}
+
+html[data-cast-scheme="dark"] .modal.imageeditor .body .tabs,
+html[data-cast-scheme="dark"] .modal.imageeditor .body .tabs ul li {
+    border-color: hsl(210, 22%, 4%);
+}
+
+/* The straightening rule fades its ends out to `--gray-900`, so the fade has to be
+   restated against the canvas colour above. */
+html[data-cast-scheme="dark"] .slide-rule .overlay {
+    background-image: linear-gradient(
+        to right,
+        hsl(210, 24%, 8%) 0,
+        rgb(0 0 0 / 0%) 15%,
+        rgb(0 0 0 / 0%) 85%,
+        hsl(210, 24%, 8%) 100%
+    );
+}
+
+html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder) {
+    background-color: hsl(210, 14%, 26%);
+    color: #fff;
+}
+
+html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder):hover {
+    background-color: hsl(210, 14%, 32%);
+}
+
+html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder).active {
+    background-color: hsl(210, 14%, 38%);
 }
 
 /* --------------------------------------------------------------------------
@@ -632,4 +810,21 @@ html[data-cast-scheme="dark"] pre,
 html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text) {
     background-color: hsl(210, 24%, 8%);
     color: var(--gray-800);
+}
+
+/* Monospace form controls stay on the input background, so a handle or template field
+   matches the text fields beside it. */
+html[data-cast-scheme="dark"] input.code,
+html[data-cast-scheme="dark"] textarea.code,
+html[data-cast-scheme="dark"] select.code,
+html[data-cast-scheme="dark"] .code > input.text,
+html[data-cast-scheme="dark"] .code > textarea {
+    background-color: var(--input-bg);
+}
+
+/* Craft drops the background on a `<pre>` that fills a pane (the project config viewer)
+   so the pane's own padding surrounds it. Repainting it leaves a mismatched gutter. */
+html[data-cast-scheme="dark"] .pane pre,
+html[data-cast-scheme="dark"] .pane pre code {
+    background-color: transparent;
 }

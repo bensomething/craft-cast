@@ -33,8 +33,13 @@ html[data-cast-theme="dim"] {
     --shade-bg: rgb(from hsl(var(--gray-050-hsl)) r g b / 70%);
 }
 
+/* Code blocks only. Inline `<code>` is left alone, as Craft leaves it, and form controls
+   marked `.code` keep the input background. */
 html[data-cast-theme="dim"] pre,
-html[data-cast-theme="dim"] code,
-html[data-cast-theme="dim"] .code {
+html[data-cast-theme="dim"] .code:not(input, textarea, select, .text) {
     background-color: hsl(213, 20%, 13%);
+}
+
+html[data-cast-theme="dim"] .pane pre {
+    background-color: transparent;
 }

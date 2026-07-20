@@ -1,5 +1,5 @@
 /**
- * Cast: High contrast (dark)
+ * Cast: High Contrast (Dark)
  *
  * The dark base at the opposite extreme from Dim: near-black canvas, near-white copy,
  * solid borders in place of alpha hairlines, and an unmissable focus ring. Status hues
@@ -88,9 +88,15 @@ html[data-cast-theme="high-contrast-dark"] .status {
     outline-offset: 1px;
 }
 
+/* Form controls keep the input background — `.code` means monospace there, not code block. */
 html[data-cast-theme="high-contrast-dark"] pre,
-html[data-cast-theme="high-contrast-dark"] code,
-html[data-cast-theme="high-contrast-dark"] .code {
+html[data-cast-theme="high-contrast-dark"] .code:not(input, textarea, select, .text) {
     background-color: #000;
     color: #f4f8fb;
+}
+
+/* A `<pre>` filling a pane keeps the pane's background, or its padding reads as a gutter. */
+html[data-cast-theme="high-contrast-dark"] .pane pre,
+html[data-cast-theme="high-contrast-dark"] .pane pre code {
+    background-color: transparent;
 }
