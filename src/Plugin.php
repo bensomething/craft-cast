@@ -473,6 +473,58 @@ window.Cast = {
         this.pair = { light: light, dark: dark };
     },
 
+    // Monaco (nystudio107/craft-code-editor) defaults to its light `vs` theme. Plugins
+    // that embed it for settings — CKEditor's config editors, say — pass no theme at
+    // all, so those follow the CP. A caller that names one is honoured as-is, which
+    // leaves the Code Field plugin's own theme setting in charge of its fields.
+    //
+    // The property is defined ahead of the editor's own bundle, which assigns to it.
+    watchMonaco: function() {
+        var self = this;
+        var real = null;
+
+        var wrapped = function(elementId, fieldType, monacoOptions) {
+            var args = Array.prototype.slice.call(arguments);
+            args[2] = self.monacoTheme(monacoOptions);
+
+            return real.apply(this, args);
+        };
+
+        Object.defineProperty(window, 'makeMonacoEditor', {
+            configurable: true,
+            get: function() {
+                return real ? wrapped : undefined;
+            },
+            set: function(fn) {
+                real = fn;
+            },
+        });
+    },
+
+    // Options arrive as a JSON string, so a malformed one is passed straight through
+    // rather than risking an editor that never renders.
+    monacoTheme: function(monacoOptions) {
+        if (document.documentElement.getAttribute('data-cast-scheme') !== 'dark') {
+            return monacoOptions;
+        }
+
+        var options;
+
+        try {
+            options = JSON.parse(monacoOptions || '{}');
+        } catch (e) {
+            return monacoOptions;
+        }
+
+        if (options.theme) {
+            return monacoOptions;
+        }
+
+        options.theme = 'vs-dark';
+
+        return JSON.stringify(options);
+    },
+
     resolve: function(handle) {
         if (handle !== 'auto') {
             return handle;
@@ -510,6 +562,8 @@ window.Cast = {
         }
     },
 };
+
+window.Cast.watchMonaco();
 JS;
     }
 
