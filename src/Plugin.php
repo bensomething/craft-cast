@@ -12,10 +12,10 @@ use craft\events\RegisterTemplateRootsEvent;
 use craft\events\TemplateEvent;
 use craft\helpers\FileHelper;
 use craft\helpers\Json;
-use craft\web\Controller;
-use craft\web\View;
 use craft\web\assets\cp\CpAsset;
 use craft\web\assets\theme\ThemeAsset;
+use craft\web\Controller;
+use craft\web\View;
 use yii\base\ActionEvent;
 use yii\base\Event;
 
