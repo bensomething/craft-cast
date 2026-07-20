@@ -4,13 +4,24 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  # The themes are pinned to Craft's internal markup, so a Craft release can break them
+  # without anything here changing. The selector check runs weekly against the newest
+  # Craft the constraint allows, so drift surfaces on a schedule rather than in an issue.
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A branch only needs its latest push checked.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ci:
-    name: ${{ matrix.script }} (PHP ${{ matrix.php }})
+  static:
+    name: ${{ matrix.script }} (PHP ${{ matrix.php }}, ${{ matrix.dependencies }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -18,6 +29,11 @@ jobs:
       matrix:
         php: ['8.2', '8.4']
         script: [check-cs, phpstan]
+        dependencies: [highest, lowest]
+        exclude:
+          # Code style is ours alone — the Craft version can't affect it.
+          - script: check-cs
+            dependencies: lowest
 
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +44,59 @@ jobs:
           coverage: none
 
       - uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
 
       - run: composer ${{ matrix.script }}
+
+  selectors:
+    name: check-selectors (Craft ${{ matrix.dependencies }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both ends of the `^5.10` constraint. A selector present in only one of them is
+        # a selector some supported install doesn't get.
+        dependencies: [highest, lowest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+
+      # Which Craft actually got installed is the first thing you want to know from a
+      # failure here, and `highest` moves without the repo changing.
+      - name: Report the Craft version under test
+        run: composer show craftcms/cms | head -3
+
+      - run: composer check-selectors
+
+  package:
+    name: package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      # No `composer install` above: validation reads the manifest, not the tree.
+      # `--no-plugins` keeps `craftcms/plugin-installer` out of it, which errors on a
+      # relative vendor path when it does get loaded.
+      - run: composer validate --strict --no-plugins
+
+      # `export-ignore` is easy to get wrong, and only ever wrong in the published
+      # package, where it's least visible. This prints what an install would receive.
+      - name: List what ships in the dist archive
+        run: git archive --format=tar HEAD | tar --list | sort

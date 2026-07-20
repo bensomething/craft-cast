@@ -5,6 +5,7 @@ parameters:
     level: 8
     paths:
         - src
+        - bin
     ignoreErrors:
         # Settings::BUTTON_COLORS is a union of two shapes, one carrying `shades` and the
         # other `values`. The guard above the access picks the right member at runtime,
