@@ -5,6 +5,9 @@
 ### Added
 - **Stone** and **Stone Dark** themes, based on Tailwind's stone ramp, a warm neutral.
 
+### Fixed
+- `data-cast-ignore` did nothing under a light theme. The reset lived in `_dark-base.css` and was scoped to dark, so a light theme that moved the ramp accepted the attribute and left the region themed anyway. It's now `_stock.css`, loaded for any active theme. Same for the Plugin Store, which is exempted through the same rules.
+
 ## 1.0.0-beta.2 - 2026-07-20
 
 ### Fixed
