@@ -5,6 +5,8 @@
 /bin                export-ignore
 /ecs.php            export-ignore
 /phpstan.neon       export-ignore
+/phpunit.xml        export-ignore
+/tests              export-ignore
 
 # CHANGELOG, README and LICENCE stay in the package. Craft reads the changelog from
 # its URL, but it's 8K and the first place anyone looks inside vendor.

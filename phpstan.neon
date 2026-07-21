@@ -6,10 +6,15 @@ parameters:
     paths:
         - src
         - bin
+        - tests
     ignoreErrors:
         # Settings::BUTTON_COLORS is a union of two shapes, one carrying `shades` and the
         # other `values`. The guard above the access picks the right member at runtime,
         # but PHPStan 1.x doesn't narrow a union of array shapes through isset().
         -
             message: '#Offset .values. does not exist on array\{#'
-            path: src/Plugin.php
+            paths:
+                - src/Plugin.php
+                # The test asserting each entry is one of those two shapes reads them the
+                # same way, and can't narrow any better than the code it's checking.
+                - tests/unit/SettingsTest.php

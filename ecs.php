@@ -8,6 +8,7 @@ return static function(ECSConfig $ecsConfig): void {
     $ecsConfig->paths([
         __DIR__ . '/src',
         __DIR__ . '/bin',
+        __DIR__ . '/tests',
         __DIR__ . '/ecs.php',
     ]);
     $ecsConfig->sets([SetList::CRAFT_CMS_4]);

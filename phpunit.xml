@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         failOnWarning="true"
+         failOnNotice="true"
+         failOnDeprecation="true"
+         beStrictAboutOutputDuringTests="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true">
+    <testsuites>
+        <testsuite name="cast">
+            <directory>tests/unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <!--
+        Warnings, notices and deprecations fail the build, but only Cast's own. PHP 8.4
+        deprecations from inside `vendor` are the dependency's business, and one arrives
+        with every release the `^5.10` constraint allows.
+    -->
+    <source restrictDeprecations="true"
+            restrictNotices="true"
+            restrictWarnings="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+</phpunit>
