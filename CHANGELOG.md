@@ -1,5 +1,16 @@
 # Release Notes for Cast
 
+## Unreleased
+
+### Changed
+- The high contrast themes are rebuilt on pure white and pure black surfaces and a desaturated ramp. Craft's neutrals carry a blue cast, and its containers are separated by a few percent of tint; here every container is bounded by a solid border instead, and no hue is spent on chrome.
+
+### Fixed
+- JSON fields stayed white on every dark theme. CodeMirror's own stylesheet paints the editor `#fff` from the same selector Craft points at `--input-bg`, and loads after it. The editor, its gutters, and its syntax colours now follow the theme.
+- Matrix blocks and cards sank below the pane they're inset into on every dark theme, Craft filling them with a token that's a step above white on light and the ramp's floor once inverted. They're now lifted off the pane's own colour, and take a lighter border.
+- The field layout designer lost most of its edges on dark themes: its tabs, library, new tab button and drag helper are separated by a near-black ring, and its field cards by a fill that inverts to the tab's own colour. Field handles also picked up the code block fill, `.code` there meaning monospace rather than a code block.
+- Under high contrast, containers Craft separates with a shadow alone had no outline at all, cards, chips, Matrix blocks and grouped fields kept a soft shadow or low-alpha hairline, and selects, menus, field cards and the Settings tiles' hover state had no border to speak of.
+
 ## 1.0.0-beta.3 - 2026-07-21
 
 ### Added

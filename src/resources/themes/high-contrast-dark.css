@@ -1,57 +1,72 @@
 /**
  * Cast: High Contrast (Dark)
  *
- * The dark base at the opposite extreme from Dim: near-black canvas, near-white copy,
+ * The dark base at the opposite extreme from Dim: a black canvas, near-white copy,
  * solid borders in place of alpha hairlines, and an unmissable focus ring. Status hues
  * are lightened until each clears AA against the canvas.
  */
 
 html[data-cast-theme="high-contrast-dark"] {
-    --gray-050-hsl: 210, 20%, 6%;
-    --gray-100-hsl: 210, 18%, 9%;
-    --gray-150-hsl: 210, 16%, 12%;
-    --gray-200-hsl: 210, 14%, 17%;
-    --gray-300-hsl: 210, 12%, 28%;
-    --gray-350-hsl: 210, 11%, 40%;
-    --gray-400-hsl: 210, 10%, 52%;
-    --gray-500-hsl: 210, 12%, 66%;
-    --gray-550-hsl: 210, 16%, 74%;
-    --gray-600-hsl: 210, 22%, 82%;
-    --gray-700-hsl: 210, 30%, 90%;
-    --gray-800-hsl: 210, 40%, 96%;
-    --gray-900-hsl: 210, 50%, 98%;
+    /* The ramp, desaturated. The base's neutrals carry a blue cast, which is a hue spent
+       on decoration — it tints every fill drawn off the ramp (nav hovers, field cards,
+       the designer's grid, chips) and shifts the ink away from white. */
+    --gray-050-hsl: 0, 0%, 0%;
+    --gray-100-hsl: 0, 0%, 9%;
+    --gray-150-hsl: 0, 0%, 12%;
+    --gray-200-hsl: 0, 0%, 17%;
+    --gray-300-hsl: 0, 0%, 28%;
+    --gray-350-hsl: 0, 0%, 40%;
+    --gray-400-hsl: 0, 0%, 52%;
+    --gray-500-hsl: 0, 0%, 66%;
+    --gray-550-hsl: 0, 0%, 74%;
+    --gray-600-hsl: 0, 0%, 82%;
+    --gray-700-hsl: 0, 0%, 90%;
+    --gray-800-hsl: 0, 0%, 96%;
+    --gray-900-hsl: 0, 0%, 98%;
     --gray-1000-hsl: 0, 0%, 100%;
 
-    --body-bg: #06090c;
-    --bg-color-hsl: 210, 20%, 4%;
-    --text-color: #f4f8fb;
-    --light-text-color: #c3ced9;
-    --fg-subtle: #c3ced9;
+    /* Every surface goes to pure black. The base separates panes from the canvas by a
+       few percent of lightness, which is separation a low-vision user can't rely on
+       seeing; the solid borders below carry it instead, and black maximises text
+       contrast. Only the hover greys are kept off black, so hovers still register. */
+    --body-bg: #000;
+    --bg-color-hsl: 0, 0%, 0%;
+    --text-color: #f7f7f7;
+    --light-text-color: #cfcfcf;
+    --fg-subtle: #cfcfcf;
 
-    --pane-bg: #0d1319;
-    --secondary-pane-bg: #131a21;
-    --sidebar-bg: #0d1319;
+    --pane-bg: #000;
+    --secondary-pane-bg: #000;
+    --sidebar-bg: #000;
+    --slideout-footer-bg: #000;
+    --modal-bg: #000;
+    --login-modal-bg: #000;
+    --cast-surface: #000;
 
-    /* Solid borders instead of alpha hairlines, and no shadow-only separation. */
-    --border-hairline: #7d8b99;
-    --border-hairline-medium: #96a3b1;
-    --border-hairline-dark: #b3bfca;
-    --pane-border: 1px solid #7d8b99;
-    --pane-shadow: none;
-    --secondary-pane-border: 1px solid #7d8b99;
-    --secondary-pane-shadow: none;
-    --modal-border: 1px solid #b3bfca;
-    --hr-border: 1px solid #7d8b99;
-    --header-border: 1px solid #96a3b1;
+    /* Solid borders instead of alpha hairlines. The pane shadow becomes a solid 1px
+       ring rather than being switched off — Craft separates the content pane, the
+       sidebar, notifications and the sidebar's meta groups with a shadow and no border
+       at all, so `none` left them floating unbounded on the canvas. With the ring doing
+       the work, the border itself would only double the line. */
+    --border-hairline: #8a8a8a;
+    --border-hairline-medium: #a3a3a3;
+    --border-hairline-dark: #c2c2c2;
+    --pane-border: none;
+    --pane-shadow: 0 0 0 1px var(--border-hairline);
+    --secondary-pane-border: none;
+    --secondary-pane-shadow: 0 0 0 1px var(--border-hairline);
+    --modal-border: 1px solid var(--border-hairline-dark);
+    --hr-border: 1px solid var(--border-hairline);
+    --header-border: 1px solid var(--border-hairline-medium);
 
     /* Popovers get a solid outline rather than the base's faint one. */
-    --cast-popover-outline: #b3bfca;
+    --cast-popover-outline: #c2c2c2;
 
-    --input-bg: #0b1116;
-    --input-border-color: #96a3b1;
-    --input-border: 1px solid #96a3b1;
-    --fg-input: #b3bfca;
-    --button-border: 1px solid #96a3b1;
+    --input-bg: #000;
+    --input-border-color: #a3a3a3;
+    --input-border: 1px solid #a3a3a3;
+    --fg-input: #c2c2c2;
+    --button-border: 1px solid #a3a3a3;
 
     /* Status and links, lightened for the darker canvas. */
     --link-color: #8cc4ff;
@@ -75,7 +90,7 @@ html[data-cast-theme="high-contrast-dark"] {
     --focus-outline-light: #ffd166;
     --focus-outline-dark: #ffd166;
     --focus-ring-alpha: 1;
-    --focus-ring: 0 0 0 2px #06090c, 0 0 0 5px #ffd166;
+    --focus-ring: 0 0 0 2px #000, 0 0 0 5px #ffd166;
 }
 
 html[data-cast-theme="high-contrast-dark"] :focus-visible {
@@ -88,15 +103,104 @@ html[data-cast-theme="high-contrast-dark"] .status {
     outline-offset: 1px;
 }
 
+/* The Settings tiles are drawn in the page colour and appear on hover alone, as a fill
+   and a border both a step or two off the canvas. That's the whole affordance, and at
+   this contrast it barely shows, so the border goes to full strength. */
+html[data-cast-theme="high-contrast-dark"] ul.icons li a:hover {
+    background-color: hsl(var(--gray-150-hsl));
+    border-color: var(--border-hairline-dark);
+}
+
+/* Field layout designer. A field card is told from a UI element card by its fill alone,
+   Craft stripping the ring the elements around it keep — a distinction drawn in a couple
+   of percent of grey, and none at all once every surface here is black. */
+html[data-cast-theme="high-contrast-dark"] .fld-element.fld-field:not(.draghelper) {
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+/* Selects are a fill and no border at all, so they vanish into any surface close to
+   their own. `select` is border-box by default, so the line costs no height. */
+html[data-cast-theme="high-contrast-dark"] .select:not(.selectize) select,
+html[data-cast-theme="high-contrast-dark"] .selectize.select .selectize-input {
+    border: var(--input-border);
+}
+
+/* The main nav is the one surface Craft paints from a literal grey rather than a token,
+   so it stays lighter than everything around it. Its own border already draws the edge. */
+html[data-cast-theme="high-contrast-dark"] .global-sidebar {
+    background-color: #000;
+}
+
+/* The account button takes the theme's button border, which draws a box around the
+   avatar and its chevron — chrome around what is really just the photo. The line belongs
+   on the photo, which is otherwise a 5% alpha ring nobody can see. */
+html[data-cast-theme="high-contrast-dark"] #user-info {
+    border: none;
+}
+
+html[data-cast-theme="high-contrast-dark"] #user-info .header-photo img,
+html[data-cast-theme="high-contrast-dark"] #user-info .header-photo svg {
+    box-shadow: 0 0 0 1px var(--border-hairline-dark);
+}
+
+/* Cards, chips and Matrix blocks hard-code a soft drop shadow instead of reading
+   `--pane-shadow`, and notifications declare the variable then immediately override it.
+   Each gets the same solid ring. `:not(:focus)` keeps Craft's focus ring, which these
+   selectors would otherwise out-specify. */
+html[data-cast-theme="high-contrast-dark"] .card:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast-dark"] .chip:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast-dark"] .matrixblock:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast-dark"] #notifications .notification:not(:focus) {
+    box-shadow: 0 0 0 1px var(--border-hairline);
+}
+
+/* Paned and grouped fields — a field layout's `fieldset` panes and anything marked
+   `.hairline` — are drawn with a 25% alpha blue-grey, stamped `!important`. */
+html[data-cast-theme="high-contrast-dark"] .pane.hairline,
+html[data-cast-theme="high-contrast-dark"] .pane:is(fieldset) {
+    border: 1px solid var(--border-hairline) !important;
+}
+
+/* The trial notice paints its fill from a literal grey, and the dark base gives it a
+   ring off the ramp. Both land short of black. */
+html[data-cast-theme="high-contrast-dark"] #trial-info {
+    background-color: #000;
+    box-shadow: 0 0 0 1px var(--border-hairline);
+}
+
+/* Sidebar meta blocks are stepped a shade off the canvas by the dark base, which is the
+   separation the ring now carries. */
+html[data-cast-theme="high-contrast-dark"] .details .meta:not(.read-only) {
+    background-color: #000 !important;
+}
+
+/* Block and card headers separate themselves from the body with a grey fill a couple of
+   percent off the block's own. A rule rather than a fill: the header is bounded by a
+   line, and the block reads as one surface. Collapsed blocks are all header, so the
+   line would land on the block's own bottom edge, and a selected card keeps its fill —
+   that one is state, not decoration. */
+html[data-cast-theme="high-contrast-dark"] .matrixblock:not(.collapsed) > .titlebar,
+html[data-cast-theme="high-contrast-dark"] .card:not(.sel) > .card-titlebar {
+    background-color: transparent;
+    border-block-end: 1px solid var(--border-hairline);
+}
+
 /* Form controls keep the input background — `.code` means monospace there, not code block. */
 html[data-cast-theme="high-contrast-dark"] pre,
 html[data-cast-theme="high-contrast-dark"] .code:not(input, textarea, select, .text) {
     background-color: #000;
-    color: #f4f8fb;
+    color: var(--text-color);
 }
 
 /* A `<pre>` filling a pane keeps the pane's background, or its padding reads as a gutter. */
 html[data-cast-theme="high-contrast-dark"] .pane pre,
 html[data-cast-theme="high-contrast-dark"] .pane pre code {
     background-color: transparent;
+    border: 0;
+}
+
+/* With the surfaces black, a code block's fill no longer sets it apart from what it sits
+   on, so it's bounded the same way every other container here is. */
+html[data-cast-theme="high-contrast-dark"] pre {
+    border: 1px solid var(--border-hairline);
 }

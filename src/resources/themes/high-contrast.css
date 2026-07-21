@@ -3,45 +3,76 @@
  *
  * Craft's stock light CP leans on low-alpha hairlines, mid-grey secondary text, and
  * shadow-only pane separation, all of which thin out badly for low-vision users and on
- * poor displays. Text goes near-black, every border becomes a solid 1px line, and the
- * focus ring widens.
+ * poor displays. Surfaces go to pure white, text near-black, every border becomes a
+ * solid 1px line, and the focus ring widens.
  */
 
 html[data-cast-theme="high-contrast"] {
     color-scheme: light;
 
+    /* The ramp, desaturated. Craft's neutrals carry a blue cast, which is a hue spent on
+       decoration — it tints every fill drawn off the ramp (nav hovers, field cards, the
+       designer's grid, chips) and shifts the ink away from black. Lightness is Craft's
+       throughout, bar the floor, which goes to white with the rest of the surfaces. */
+    --gray-050-hsl: 0, 0%, 100%;
+    --gray-100-hsl: 0, 0%, 93%;
+    --gray-150-hsl: 0, 0%, 89%;
+    --gray-200-hsl: 0, 0%, 85%;
+    --gray-300-hsl: 0, 0%, 65%;
+    --gray-350-hsl: 0, 0%, 59%;
+    --gray-400-hsl: 0, 0%, 53%;
+    --gray-500-hsl: 0, 0%, 43%;
+    --gray-550-hsl: 0, 0%, 40%;
+    --gray-600-hsl: 0, 0%, 37%;
+    --gray-700-hsl: 0, 0%, 30%;
+    --gray-800-hsl: 0, 0%, 25%;
+    --gray-900-hsl: 0, 0%, 16%;
+    --gray-1000-hsl: 0, 0%, 10%;
+
     /* Secondary text drops to a shade that clears WCAG AA against the pane
        background, unlike Craft's mid-grey. */
-    --text-color: #0b1016;
-    --light-text-color: #364150;
-    --fg-subtle: #364150;
-    --medium-text-color: #364150;
-    --medium-dark-text-color: #242c36;
+    --text-color: #111;
+    --light-text-color: #414141;
+    --fg-subtle: #414141;
+    --medium-text-color: #414141;
+    --medium-dark-text-color: #2b2b2b;
 
-    /* Surfaces are left to Craft. Restating near-identical greys only made the CP
-       look off next to the stock theme, without adding separation the solid borders
-       below don't already give. Near-black text clears AA on Craft's backgrounds. */
-
-    /* Borders: solid and visible everywhere Craft uses an alpha hairline. */
-    --border-hairline: #6b7683;
-    --border-hairline-medium: #55606d;
-    --border-hairline-dark: #3b4650;
-    --pane-border: 1px solid #6b7683;
-    --pane-shadow: none;
-    --secondary-pane-border: 1px solid #6b7683;
-    --secondary-pane-shadow: none;
-    --modal-border: 1px solid #24303d;
-    --modal-shadow: 0 25px 100px rgb(0 0 0 / 45%);
-    --hr-border: 1px solid #6b7683;
-    --header-border: 1px solid #55606d;
-
-    --input-border-color: #3b4650;
-    --input-border: 1px solid #3b4650;
+    /* Every surface goes to pure white. Craft tints its panes and canvas apart by a few
+       percent of grey, which is separation a low-vision user can't rely on seeing; the
+       solid borders below carry it instead, and white maximises text contrast. */
+    --body-bg: #fff;
+    --bg-color-hsl: 0, 0%, 100%;
+    --pane-bg: #fff;
+    --secondary-pane-bg: #fff;
+    --sidebar-bg: #fff;
+    --slideout-footer-bg: #fff;
+    --modal-bg: #fff;
+    --login-modal-bg: #fff;
     --input-bg: #fff;
-    --fg-input: #3b4650;
-    --button-border: 1px solid #3b4650;
-    --ui-control-fg: #24303d;
-    --ui-control-fg-hover: #0b1016;
+
+    /* Borders: solid and visible everywhere Craft uses an alpha hairline. The pane
+       shadow becomes a solid 1px ring rather than being switched off — Craft separates
+       the content pane, the sidebar, notifications and the sidebar's meta groups with a
+       shadow and no border at all, so `none` left them floating unbounded on the canvas.
+       With the ring doing the work, the border itself would only double the line. */
+    --border-hairline: #707070;
+    --border-hairline-medium: #5c5c5c;
+    --border-hairline-dark: #414141;
+    --pane-border: none;
+    --pane-shadow: 0 0 0 1px var(--border-hairline);
+    --secondary-pane-border: none;
+    --secondary-pane-shadow: 0 0 0 1px var(--border-hairline);
+    --modal-border: 1px solid #2b2b2b;
+    --modal-shadow: 0 25px 100px rgb(0 0 0 / 45%);
+    --hr-border: 1px solid var(--border-hairline);
+    --header-border: 1px solid var(--border-hairline-medium);
+
+    --input-border-color: #414141;
+    --input-border: 1px solid #414141;
+    --fg-input: #414141;
+    --button-border: 1px solid #414141;
+    --ui-control-fg: #2b2b2b;
+    --ui-control-fg-hover: #111;
     --ui-control-fg-active: #000;
 
     /* Links and status text: darkened until each clears AA on white. */
@@ -74,6 +105,113 @@ html[data-cast-theme="high-contrast"] :focus-visible {
    own link colour, which clears AA. */
 html[data-cast-theme="high-contrast"] #global-footer {
     --link-color: inherit;
+}
+
+/* A selected source is painted `--gray-500` under a white label, which clears AA on
+   Craft's ramp only because of the blue in it. Desaturated it comes out at 4.1:1, so it
+   goes darker rather than the label going grey. */
+html[data-cast-theme="high-contrast"] .sidebar nav li:not(.has-subnav) [data-source-item].sel,
+html[data-cast-theme="high-contrast"] .sidebar nav li:not(.has-subnav) [data-source-item].active-drop-target,
+html[data-cast-theme="high-contrast"] .sidebar nav li:not(.has-subnav) > a.sel,
+html[data-cast-theme="high-contrast"] .sidebar nav li:not(.has-subnav) > a.active-drop-target {
+    background-color: #404040;
+}
+
+/* Selects are a fill and no border at all, so they vanish into any surface close to
+   their own. `select` is border-box by default, so the line costs no height. */
+html[data-cast-theme="high-contrast"] .select:not(.selectize) select,
+html[data-cast-theme="high-contrast"] .selectize.select .selectize-input {
+    border: var(--input-border);
+}
+
+/* The main nav is the one surface Craft paints from a literal grey rather than a token,
+   so it stays tinted while everything around it goes white. Its own border already draws
+   the edge. */
+html[data-cast-theme="high-contrast"] .global-sidebar {
+    background-color: #fff;
+}
+
+/* The Settings tiles are drawn in the page colour and appear on hover alone, as a fill
+   and a border both a step or two off the canvas. That's the whole affordance, and at
+   this contrast it barely shows, so the border goes to full strength. */
+html[data-cast-theme="high-contrast"] ul.icons li a:hover {
+    background-color: hsl(var(--gray-100-hsl));
+    border-color: var(--border-hairline-dark);
+}
+
+/* Field layout designer. A field card is told from a UI element card by its fill alone,
+   Craft stripping the ring the elements around it keep — a distinction drawn in a couple
+   of percent of grey. Both get a ring here, and the tabs, library and new tab button
+   trade their 10% alpha one for a line at full strength. */
+html[data-cast-theme="high-contrast"] .fld-element.fld-field:not(.draghelper) {
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+html[data-cast-theme="high-contrast"] .fld-tab .fld-tabcontent,
+html[data-cast-theme="high-contrast"] .fld-tab .tabs .tab,
+html[data-cast-theme="high-contrast"] .layoutdesigner .fld-library,
+html[data-cast-theme="high-contrast"] .fld-new-tab-btn {
+    box-shadow: 0 0 0 1px var(--border-hairline);
+}
+
+/* Menus, date and time pickers, and the autosuggest list are separated by a shadow off a
+   literal, which the theme's stronger borders leave looking soft and detached. A solid
+   line does the same job, and the shadow underneath it only muddies the edge. */
+html[data-cast-theme="high-contrast"] .menu,
+html[data-cast-theme="high-contrast"] .ui-datepicker,
+html[data-cast-theme="high-contrast"] .ui-timepicker-wrapper,
+html[data-cast-theme="high-contrast"] .autosuggest__results-container,
+html[data-cast-theme="high-contrast"] .selectize-dropdown {
+    border: 1px solid var(--border-hairline-dark);
+    box-shadow: none;
+}
+
+/* The account button takes the theme's button border, which draws a box around the
+   avatar and its chevron — chrome around what is really just the photo. The line belongs
+   on the photo, which is otherwise a 5% alpha ring nobody can see. */
+html[data-cast-theme="high-contrast"] #user-info {
+    border: none;
+}
+
+html[data-cast-theme="high-contrast"] #user-info .header-photo img,
+html[data-cast-theme="high-contrast"] #user-info .header-photo svg {
+    box-shadow: 0 0 0 1px var(--border-hairline-dark);
+}
+
+/* Cards, chips and Matrix blocks hard-code a soft drop shadow instead of reading
+   `--pane-shadow`, and notifications declare the variable then immediately override it.
+   Each gets the same solid ring. `:not(:focus)` keeps Craft's focus ring, which these
+   selectors would otherwise out-specify. */
+html[data-cast-theme="high-contrast"] .card:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast"] .chip:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast"] .matrixblock:not(.chromeless, .hairline),
+html[data-cast-theme="high-contrast"] #notifications .notification:not(:focus) {
+    box-shadow: 0 0 0 1px var(--border-hairline);
+}
+
+/* Paned and grouped fields — a field layout's `fieldset` panes and anything marked
+   `.hairline` — are drawn with a 25% alpha blue-grey, stamped `!important`. */
+html[data-cast-theme="high-contrast"] .pane.hairline,
+html[data-cast-theme="high-contrast"] .pane:is(fieldset) {
+    border: 1px solid var(--border-hairline) !important;
+}
+
+/* The trial notice paints both its fill and its ring from literals, so it keeps a tinted
+   panel and a soft glow while the CP around it goes white. */
+html[data-cast-theme="high-contrast"] #trial-info {
+    background-color: #fff;
+    box-shadow: 0 0 0 1px var(--border-hairline);
+}
+
+/* Block and card headers separate themselves from the body with a grey fill a couple of
+   percent off the block's own. A rule rather than a fill: the header is bounded by a
+   line, and the block reads as one surface. Collapsed blocks are all header, so the
+   line would land on the block's own bottom edge, and a selected card keeps its fill —
+   that one is state, not decoration. */
+html[data-cast-theme="high-contrast"] .matrixblock:not(.collapsed) > .titlebar,
+html[data-cast-theme="high-contrast"] .card:not(.sel) > .card-titlebar {
+    background-color: transparent;
+    border-block-end: 1px solid var(--border-hairline);
 }
 
 /* Craft marks status with colour alone in a few places. This adds a non-colour cue so

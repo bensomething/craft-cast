@@ -289,6 +289,17 @@ html[data-cast-scheme="dark"] #global-footer {
     --link-color: inherit;
 }
 
+/* The view mode and transform mode pickers illustrate their options with flat SVG artwork
+   drawn for a white page, and there's no repainting a bitmap-shaped asset from CSS. Given
+   a white card to sit on, each one reads as a picture of the CP rather than a bright patch
+   torn out of it. `.mb-xs` is a margin utility, but every use of it in Craft is one of
+   these images. */
+html[data-cast-scheme="dark"] label > img.mb-xs {
+    background-color: #fff;
+    border-radius: var(--large-border-radius);
+    padding: var(--s);
+}
+
 /* Craft draws these in the page colour, so they only appear on hover. Keep them
    invisible at rest, and hover to a lighter surface rather than the ramp's darkest step. */
 html[data-cast-scheme="dark"] ul.icons li a {
@@ -480,6 +491,36 @@ html[data-cast-scheme="dark"] .entry-type-group {
 
 html[data-cast-scheme="dark"] .fld-new-tab-btn {
     background: var(--secondary-pane-bg) !important;
+}
+
+/* A field card is the one element in there Craft doesn't ring, marking it as a field
+   rather than a UI element by fill alone — `--gray-100` on the tab's white. Inverted,
+   that token *is* the tab's own colour, so the cards disappear into it while the UI
+   elements around them keep their ring. A step up puts the distinction back. */
+html[data-cast-scheme="dark"] .fld-element.fld-field {
+    background-color: var(--cast-surface);
+}
+
+/* The tabs, their content, the library and the new-tab button are separated by a ring
+   and a drop shadow struck in `rgba(31, 41, 51, …)` — a near-black that disappears into
+   a dark canvas, leaving each of them edgeless. */
+html[data-cast-scheme="dark"] .fld-tab .fld-tabcontent,
+html[data-cast-scheme="dark"] .fld-tab .tabs .tab,
+html[data-cast-scheme="dark"] .layoutdesigner .fld-library,
+html[data-cast-scheme="dark"] .fld-new-tab-btn {
+    box-shadow: 0 0 0 1px var(--border-hairline), 0 2px 5px -2px rgb(0 0 0 / 50%);
+}
+
+/* Same again for the card that follows the cursor while dragging. */
+html[data-cast-scheme="dark"] .fld-element.draghelper {
+    box-shadow: 0 1px 5px -1px rgb(0 0 0 / 50%);
+}
+
+/* A field's handle sits under its name as `.code`, meaning monospace rather than a code
+   block — but it's a `<div>`, so the code-block fill below catches it and each card in
+   the designer and its library ends up with a chip inside it. */
+html[data-cast-scheme="dark"] .fld-element .code {
+    background-color: transparent;
 }
 
 html[data-cast-scheme="dark"] .address-card {
@@ -720,6 +761,23 @@ html[data-cast-scheme="dark"] .lp-preview-container .lp-device-type__label:befor
     filter: invert(1);
 }
 
+/* Craft fills a Matrix block or a card with `--gray-050`. On light that's the step above
+   white, so it rises off the pane it's inset into; inverted, the same token is the ramp's
+   floor and it sinks below the pane instead, reading as a hole rather than a panel. A
+   lift off the pane's own colour restores the relationship whatever a theme puts at the
+   floor — and holds up where the pane is already black. Colour-coded ones keep their own
+   fill, which is mixed over the pane below and lands lighter anyway. */
+html[data-cast-scheme="dark"] :is(.matrixblock, .card):not(.chromeless, .hairline) {
+    background-color: var(--custom-bg-color, color-mix(in srgb, var(--pane-bg) 92%, #fff));
+}
+
+/* The ring around one is `--gray-200`, which inverts to a step that barely clears the
+   fill it now encloses. The next one up holds the edge without it shouting. Colour-coded
+   blocks are left to the accent ring set in the section below. */
+html[data-cast-scheme="dark"] :is(.matrixblock, .card):not(.chromeless, [style*="--custom-"]):before {
+    box-shadow: inset 0 0 0 1px hsl(var(--gray-300-hsl));
+}
+
 /* --------------------------------------------------------------------------
    Colour-coded elements. An entry type, category group, or component with a
    colour gets it inline, as four fixed shades of that hue: a `050` wash for the
@@ -751,6 +809,105 @@ html[data-cast-scheme="dark"] [style*="--custom-"].sel {
    mixes above still have an accent to work from. */
 html[data-cast-scheme="dark"] [style*="--custom-"]:not(.chromeless):before {
     box-shadow: inset 0 0 0 1px rgb(from var(--custom-border-color, transparent) r g b / 40%);
+}
+
+/* --------------------------------------------------------------------------
+   CodeMirror, which the JSON field and a few settings screens run on. Craft
+   points `.CodeMirror` at `--input-bg` in its own stylesheet, then loads
+   CodeMirror's after it, where the same selector paints the editor `#fff` — so
+   the field lands white on every dark theme. Its default syntax theme is a set
+   of dark inks chosen for that white ground, so the tokens are rebuilt too.
+   -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] .CodeMirror {
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-gutter-filler,
+html[data-cast-scheme="dark"] .CodeMirror-scrollbar-filler {
+    background-color: var(--input-bg);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-gutters {
+    background-color: hsl(var(--gray-100-hsl));
+    border-inline-end-color: var(--border-hairline);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-linenumber {
+    color: var(--light-text-color);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-cursor {
+    border-inline-start-color: var(--text-color);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-selected {
+    background: var(--bg-selection-light);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-focused .CodeMirror-selected {
+    background: var(--bg-selection-dark);
+}
+
+html[data-cast-scheme="dark"] .CodeMirror-activeline-background {
+    background: hsl(var(--gray-150-hsl));
+}
+
+html[data-cast-scheme="dark"] div.CodeMirror span.CodeMirror-matchingbracket {
+    color: var(--green-300);
+}
+
+/* The tokens, at the 300 step of the hue each one carries on light. */
+html[data-cast-scheme="dark"] .cm-s-default .cm-header,
+html[data-cast-scheme="dark"] .cm-s-default .cm-def,
+html[data-cast-scheme="dark"] .cm-s-default .cm-attribute,
+html[data-cast-scheme="dark"] .cm-s-default .cm-link {
+    color: var(--blue-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-keyword,
+html[data-cast-scheme="dark"] .cm-s-default .cm-builtin {
+    color: var(--purple-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-atom {
+    color: var(--indigo-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-quote,
+html[data-cast-scheme="dark"] .cm-s-default .cm-tag,
+html[data-cast-scheme="dark"] .cm-s-default .cm-number {
+    color: var(--green-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-variable-2 {
+    color: var(--sky-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-type,
+html[data-cast-scheme="dark"] .cm-s-default .cm-variable-3 {
+    color: var(--teal-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-comment,
+html[data-cast-scheme="dark"] .cm-s-default .cm-string-2 {
+    color: var(--orange-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-string {
+    color: var(--red-300);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-meta,
+html[data-cast-scheme="dark"] .cm-s-default .cm-qualifier,
+html[data-cast-scheme="dark"] .cm-s-default .cm-bracket,
+html[data-cast-scheme="dark"] .cm-s-default .cm-hr {
+    color: var(--light-text-color);
+}
+
+html[data-cast-scheme="dark"] .cm-s-default .cm-error {
+    color: var(--fg-error);
 }
 
 /* --------------------------------------------------------------------------
