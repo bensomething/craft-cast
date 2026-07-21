@@ -45,7 +45,7 @@ class RegisterThemesEventTest extends TestCase
 
         $this->themes->getAllThemes();
 
-        self::assertSame(['dark', 'dim', 'high-contrast', 'high-contrast-dark', 'midnight'], $seen);
+        self::assertSame(['dark', 'dim', 'stone', 'stone-dark', 'high-contrast', 'high-contrast-dark', 'midnight'], $seen);
     }
 
     public function testAListenerCanReplaceABundledTheme(): void

@@ -1,0 +1,98 @@
+/**
+ * Cast: Stone
+ *
+ * Tailwind's stone ramp, light mode. Stone is a warm neutral — the hue sits around 20-33°
+ * at 5-9% saturation, so it reads as grey with the chill taken off rather than as beige.
+ *
+ * Tailwind gives eleven steps and Craft wants fourteen, so 150, 350, 500 and 600 are
+ * interpolated between their neighbours. They're marked below; everything else is a
+ * stone value converted to the HSL triplet Craft's ramp is declared in.
+ *
+ * Stone palette from Tailwind CSS, MIT licensed. See https://tailwindcss.com
+ */
+
+html[data-cast-theme="stone"] {
+    color-scheme: light;
+
+    --gray-050-hsl: 60, 9%, 98%;    /* stone-50  #fafaf9 */
+    --gray-100-hsl: 60, 5%, 96%;    /* stone-100 #f5f5f4 */
+    --gray-150-hsl: 30, 6%, 93%;    /* interpolated */
+    --gray-200-hsl: 20, 6%, 90%;    /* stone-200 #e7e5e4 */
+    --gray-300-hsl: 24, 6%, 83%;    /* stone-300 #d6d3d1 */
+    --gray-350-hsl: 24, 6%, 74%;    /* interpolated */
+    --gray-400-hsl: 24, 5%, 64%;    /* stone-400 #a8a29e */
+    --gray-500-hsl: 24, 5%, 54%;    /* interpolated */
+    --gray-550-hsl: 25, 5%, 45%;    /* stone-500 #78716c */
+    --gray-600-hsl: 29, 5%, 38%;    /* interpolated */
+    --gray-700-hsl: 33, 5%, 32%;    /* stone-600 #57534e */
+    --gray-800-hsl: 30, 6%, 25%;    /* stone-700 #44403c */
+    --gray-900-hsl: 12, 6%, 15%;    /* stone-800 #292524 */
+    --gray-1000-hsl: 24, 10%, 10%;  /* stone-900 #1c1917 */
+
+    /* Page on stone-100, panes white. Keeping the panes white is what makes the warmth
+       read as deliberate: content sits on a clean ground and the tint shows in the chrome
+       around it, rather than everything drifting beige at once. */
+    --body-bg: hsl(var(--gray-100-hsl));
+    --bg-color-hsl: var(--gray-050-hsl);
+    --pane-bg: var(--white);
+
+    /* Craft's stock input background is a blue-white (hsl(212, 50%, 99%)), visible against
+       stone at this saturation. stone-50 keeps the same just-off-white relationship to the
+       pane that Craft intends, on the right side of neutral. */
+    --input-bg: hsl(var(--gray-050-hsl));
+
+    /* stone-800 on white is 15.2:1, and stone-500 as the secondary reaches 4.80:1 — both
+       clear AA. Anything lighter than stone-500 doesn't, which is why the ramp isn't
+       allowed to supply it. */
+    --text-color: hsl(var(--gray-900-hsl));
+    --light-text-color: hsl(var(--gray-550-hsl));
+    --medium-text-color: hsl(var(--gray-550-hsl));
+    --medium-dark-text-color: hsl(var(--gray-700-hsl));
+
+    /* Craft derives every control background from --fg-input at 25%, 30% and 50% alpha,
+       and pins it to a blue-grey (#607d9f). Left alone, the unselected segments of a
+       button group come out cool while the selected one — which does read the ramp —
+       comes out warm, and the two sit side by side in the same control. The dark base
+       patches this same property for the same reason. */
+    --fg-input: hsl(var(--gray-550-hsl));
+
+    /* Shadows are neutral black, which greys a warm ground. Hairlines off the ramp keep
+       the tint through the separation. */
+    --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 3px hsl(24, 10%, 10%, 6%);
+    --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px hsl(24, 10%, 10%, 20%);
+}
+
+/* Code blocks take stone-200, so they separate from the pane without introducing a grey.
+   Inline `<code>` is left alone, as Craft leaves it, and form controls marked `.code`
+   keep the input background. */
+html[data-cast-theme="stone"] pre,
+html[data-cast-theme="stone"] .code:not(input, textarea, select, .text) {
+    background-color: hsl(var(--gray-200-hsl));
+}
+
+html[data-cast-theme="stone"] .pane pre {
+    background-color: transparent;
+}
+
+/* What follows is the short list of places Craft writes a blue straight into a rule
+   instead of deriving it, so no amount of retinting the ramp reaches them. Each is the
+   same colour's job done off the ramp. */
+
+/* Source paths set their own hover and active fills, overriding the ones --fg-input
+   would otherwise have supplied above. */
+html[data-cast-theme="stone"] .element-index .source-path {
+    --ui-control-hover-bg-color: hsl(var(--gray-200-hsl));
+    --ui-control-active-bg-color: hsl(var(--gray-300-hsl));
+}
+
+/* A blue pinned inside a shadow, where a custom property can't reach it. */
+html[data-cast-theme="stone"] .fld-container .fld-workspace {
+    box-shadow: inset 0 1px 3px -1px hsl(var(--gray-300-hsl));
+}
+
+html[data-cast-theme="stone"] #trial-info {
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 50%),
+        0 0 0 1px hsl(var(--gray-200-hsl)),
+        0 2px 12px hsl(24, 10%, 85%, 50%);
+}

@@ -272,6 +272,7 @@ JS, View::POS_READY, 'cast-ignore-menus');
         $view = Craft::$app->getView();
         $themes = $this->themes->getEnabledThemes();
 
+        // Above the groups, both being a rule for picking a theme rather than a theme.
         $options = [[
             'value' => Settings::THEME_INHERIT,
             'applies' => $settings->defaultTheme,
@@ -280,18 +281,15 @@ JS, View::POS_READY, 'cast-ignore-menus');
             'value' => Settings::THEME_AUTO,
             'applies' => Settings::THEME_AUTO,
             'label' => Craft::t('cast', 'Auto'),
-        ], [
-            'value' => Settings::THEME_NONE,
-            'applies' => Settings::THEME_NONE,
-            'label' => Craft::t('cast', 'Craft Default'),
         ]];
 
-        foreach ($themes as $theme) {
-            $options[] = [
-                'value' => $theme->handle,
-                'applies' => $theme->handle,
-                'label' => $theme->name,
-            ];
+        // What a row applies is its own value everywhere past the two above, so the
+        // grouped options only need the key adding. Group markers carry no value and
+        // pass through untouched.
+        foreach ($this->themes->toGroupedOptions($themes) as $option) {
+            $options[] = isset($option['value'])
+                ? $option + ['applies' => $option['value']]
+                : $option;
         }
 
         $html = $view->renderTemplate('cast/_account-menu.twig', [
@@ -702,6 +700,7 @@ JS;
             $this->registerPreview('#castTheme');
 
             return Craft::$app->getView()->renderTemplate('cast/_prefs.twig', [
+                'plugin' => $this,
                 'user' => $user,
                 'themes' => $this->themes->getEnabledThemes(),
                 'settings' => $this->getSettings(),

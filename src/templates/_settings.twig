@@ -28,11 +28,10 @@
     'cast-themes': { label: 'Themes' | t('cast'), url: '#cast-themes' },
 } %}
 
-{% set themeOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
-{% for theme in themes %}
-    {% set themeOptions = themeOptions | merge([{ label: theme.name, value: theme.handle }]) %}
-{% endfor %}
+{% set themeOptions = plugin.themes.toGroupedOptions(themes) %}
 
+{# The Auto pair is already one scheme per field, so those two stay flat: a "Light themes"
+   heading over a list that can only hold light themes says nothing. #}
 {% set lightOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
 {% set darkOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
 {% for theme in themes %}

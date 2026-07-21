@@ -41,8 +41,10 @@ Note that **Auto is a pair, not a theme**: anyone set to Auto gets the two theme
 | --- | --- | --- |
 | Dark | Dark | Neutral dark CP. The reference implementation. |
 | Dim | Dark | Softer and lower contrast, for long sessions. |
+| Stone | Light | A warm neutral, based on Tailwind's stone ramp. |
+| Stone Dark | Dark | The same warm neutral, but.. dark. |
 | High Contrast | Light | Near-black text, solid borders, widened focus ring. |
-| High Contrast (Dark) | Dark | The same treatment on a near-black canvas. |
+| High Contrast Dark | Dark | The same treatment on a near-black canvas. |
 
 **Auto** follows the browser's `prefers-color-scheme` and switches live when the OS does. Which two themes it picks between is configurable on the **Auto** tab.
 

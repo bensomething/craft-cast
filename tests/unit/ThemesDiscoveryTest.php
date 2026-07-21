@@ -18,7 +18,7 @@ class ThemesDiscoveryTest extends TestCase
         $themes = $this->themes->getAllThemes();
 
         self::assertSame(
-            ['dark', 'dim', 'high-contrast', 'high-contrast-dark'],
+            ['dark', 'dim', 'stone', 'stone-dark', 'high-contrast', 'high-contrast-dark'],
             array_keys($themes),
         );
 
@@ -150,7 +150,7 @@ CSS);
     {
         $this->settings->themesPath = $this->themesPath . '/nowhere';
 
-        self::assertCount(4, $this->themes->getAllThemes());
+        self::assertCount(6, $this->themes->getAllThemes());
         self::assertSame([], $this->themes->getIgnoredFiles());
     }
 

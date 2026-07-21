@@ -15,13 +15,24 @@
     </div>
     <div class="select fullwidth">
         <select id="cast-theme-select" aria-label="{{ 'Colour mode' | t('cast') }}">
+            {# Groups are flat markers rather than nesting, matching Craft's own
+               `forms/select`: a marker closes the previous group and opens its own, and
+               the last one is closed after the loop. #}
+            {% set inGroup = false %}
             {% for option in options %}
-                <option
-                    value="{{ option.value }}"
-                    data-cast-applies="{{ option.applies }}"
-                    {{ option.value == current ? 'selected' }}
-                >{{ option.label }}</option>
+                {% if option.optgroup is defined %}
+                    {{ inGroup ? '</optgroup>' | raw }}
+                    {% set inGroup = true %}
+                    <optgroup label="{{ option.optgroup }}">
+                {% else %}
+                    <option
+                        value="{{ option.value }}"
+                        data-cast-applies="{{ option.applies }}"
+                        {{ option.value == current ? 'selected' }}
+                    >{{ option.label }}</option>
+                {% endif %}
             {% endfor %}
+            {{ inGroup ? '</optgroup>' | raw }}
         </select>
     </div>
 </div>

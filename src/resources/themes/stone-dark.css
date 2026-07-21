@@ -1,0 +1,64 @@
+/**
+ * Cast: Stone Dark
+ * Color Scheme: dark
+ *
+ * Tailwind's stone ramp, inverted onto the shared dark base. Stone is a warm neutral, so
+ * this is the same idea as Dark with the blue cast taken out and a little warmth put in.
+ *
+ * The base derives nearly everything from the ramp, so redeclaring it moves the whole CP.
+ * What follows the ramp is the short list the base pins to literal blues, which would
+ * otherwise sit cold against a warm neutral.
+ *
+ * Stone palette from Tailwind CSS, MIT licensed. See https://tailwindcss.com
+ */
+
+html[data-cast-theme="stone-dark"] {
+    /* Inverted: 050 is the floor, 1000 the lightest step. Tailwind's eleven stretched
+       over Craft's fourteen, so 150, 350, 500, 600 and 800 are interpolated. */
+    --gray-050-hsl: 20, 14%, 4%;   /* stone-950 #0c0a09 */
+    --gray-100-hsl: 24, 10%, 10%;  /* stone-900 #1c1917 */
+    --gray-150-hsl: 16, 8%, 12%;   /* interpolated */
+    --gray-200-hsl: 12, 6%, 15%;   /* stone-800 #292524 */
+    --gray-300-hsl: 30, 6%, 25%;   /* stone-700 #44403c */
+    --gray-350-hsl: 32, 5%, 28%;   /* interpolated */
+    --gray-400-hsl: 33, 5%, 32%;   /* stone-600 #57534e */
+    --gray-500-hsl: 28, 5%, 38%;   /* interpolated */
+    --gray-550-hsl: 25, 5%, 45%;   /* stone-500 #78716c */
+    --gray-600-hsl: 24, 5%, 54%;   /* interpolated */
+    --gray-700-hsl: 24, 5%, 64%;   /* stone-400 #a8a29e */
+    --gray-800-hsl: 24, 6%, 74%;   /* interpolated */
+    --gray-900-hsl: 24, 6%, 83%;   /* stone-300 #d6d3d1 */
+    --gray-1000-hsl: 20, 6%, 90%;  /* stone-200 #e7e5e4 */
+
+    /* The base pins this to hsl(210, 22%, 15%), a blue-tinted dark that reads as a cold
+       patch once everything around it is warm. Stone-800's hue at a slightly lifted
+       lightness, so inputs still sit above the pane. */
+    --input-bg: hsl(12, 6%, 17%);
+
+    /* Every control background is --fg-input at 25%, 30% and 50% alpha, and the base pins
+       it to its own blue-grey (#8ba7c7) — the dark counterpart of the #607d9f Craft uses
+       in light. Unpatched, a button group's unselected segments come out cool against a
+       selected one that follows the ramp. stone-400 matches the lightness it replaces. */
+    --fg-input: hsl(var(--gray-700-hsl));
+
+    /* Shadows do the separating on the stock dark base. Against a warm ground a neutral
+       black shadow greys the edge, so panes get a hairline off the ramp as well. */
+    --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 6px hsl(20, 14%, 4%, 40%);
+    --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px hsl(20, 14%, 4%, 60%);
+}
+
+/* The base's link blue is left alone deliberately. It's the one hue that shouldn't follow
+   the palette — a link that stops reading as a link costs more than the warmth gains —
+   and it already clears AA on a dark ground. */
+
+/* Code blocks drop below the pane rather than rising above it, the floor being stone-950.
+   Inline `<code>` is left alone, as Craft leaves it, and form controls marked `.code`
+   keep the input background. */
+html[data-cast-theme="stone-dark"] pre,
+html[data-cast-theme="stone-dark"] .code:not(input, textarea, select, .text) {
+    background-color: hsl(var(--gray-050-hsl));
+}
+
+html[data-cast-theme="stone-dark"] .pane pre {
+    background-color: transparent;
+}

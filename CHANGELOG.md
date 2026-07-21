@@ -1,5 +1,10 @@
 # Release Notes for Cast
 
+## Unreleased
+
+### Added
+- **Stone** and **Stone Dark** themes, based on Tailwind's stone ramp, a warm neutral.
+
 ## 1.0.0-beta.2 - 2026-07-20
 
 ### Fixed

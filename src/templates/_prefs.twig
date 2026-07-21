@@ -1,4 +1,5 @@
 {# Appended to Account → Preferences via the `cp.users.edit.prefs` template hook. #}
+{# @var plugin \bensomething\cast\Plugin #}
 {# @var user \craft\elements\User #}
 {# @var themes \bensomething\cast\models\Theme[] #}
 {# @var settings \bensomething\cast\models\Settings #}
@@ -17,14 +18,12 @@
     (themes[default].name ?? default)
 %}
 
+{# Site default and Auto sit above the groups: neither is a light or a dark theme, they're
+   both a rule for picking one. #}
 {% set options = [
     { label: 'Site default ({theme})' | t('cast', { theme: defaultLabel }), value: 'inherit' },
     { label: 'Auto (match my system)' | t('cast'), value: 'auto' },
-    { label: 'Craft Default' | t('cast'), value: '' },
-] %}
-{% for theme in themes %}
-    {% set options = options | merge([{ label: theme.name, value: theme.handle }]) %}
-{% endfor %}
+] | merge(plugin.themes.toGroupedOptions(themes)) %}
 <hr>
 <div>
     <h2>{{ 'Colour mode' | t('cast') }}</h2>

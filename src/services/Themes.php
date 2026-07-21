@@ -182,6 +182,53 @@ class Themes extends Component
     }
 
     /**
+     * Themes as select options, grouped by colour scheme.
+     *
+     * Craft's `forms/select` macro starts a group on any row carrying an `optgroup` key
+     * and closes the previous one itself, so the grouping is expressed as flat markers
+     * rather than nesting. The account menu's hand-rolled select mirrors that.
+     *
+     * A group with nothing in it is left out entirely, so a site whose themes are all
+     * dark doesn't show an empty "Light" heading.
+     *
+     * @param Theme[] $themes
+     * @param bool $craftDefault Whether to offer Craft's stock appearance as an option.
+     * @return array<int, array<string, string>>
+     */
+    public function toGroupedOptions(array $themes, bool $craftDefault = true): array
+    {
+        // Craft's stock CP is light, so it belongs inside that group rather than floating
+        // above both of them.
+        $light = $craftDefault
+            ? [['label' => Craft::t('cast', 'Craft Default'), 'value' => Settings::THEME_NONE]]
+            : [];
+
+        $dark = [];
+
+        foreach ($themes as $theme) {
+            $option = ['label' => $theme->name, 'value' => $theme->handle];
+
+            if ($theme->getIsDark()) {
+                $dark[] = $option;
+            } else {
+                $light[] = $option;
+            }
+        }
+
+        $options = [];
+
+        if ($light !== []) {
+            $options = [['optgroup' => Craft::t('cast', 'Light')], ...$light];
+        }
+
+        if ($dark !== []) {
+            $options = [...$options, ['optgroup' => Craft::t('cast', 'Dark')], ...$dark];
+        }
+
+        return $options;
+    }
+
+    /**
      * The theme handle in effect for a user: their own choice when allowed one, otherwise
      * the site-wide default. May be `auto`, a theme handle, or an empty string for Craft's
      * stock appearance.
@@ -372,6 +419,18 @@ class Themes extends Component
                 'colorScheme' => Theme::SCHEME_DARK,
             ]),
             new Theme([
+                'handle' => 'stone',
+                'name' => Craft::t('cast', 'Stone'),
+                'description' => Craft::t('cast', 'A warm neutral light mode.'),
+                'colorScheme' => Theme::SCHEME_LIGHT,
+            ]),
+            new Theme([
+                'handle' => 'stone-dark',
+                'name' => Craft::t('cast', 'Stone Dark'),
+                'description' => Craft::t('cast', 'The same warm neutral, but.. dark.'),
+                'colorScheme' => Theme::SCHEME_DARK,
+            ]),
+            new Theme([
                 'handle' => 'high-contrast',
                 'name' => Craft::t('cast', 'High Contrast'),
                 'description' => Craft::t('cast', 'Light, with stronger text and borders.'),
@@ -379,7 +438,7 @@ class Themes extends Component
             ]),
             new Theme([
                 'handle' => 'high-contrast-dark',
-                'name' => Craft::t('cast', 'High Contrast (Dark)'),
+                'name' => Craft::t('cast', 'High Contrast Dark'),
                 'description' => Craft::t('cast', 'Dark, with stronger text and borders.'),
                 'colorScheme' => Theme::SCHEME_DARK,
             ]),
