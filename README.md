@@ -63,6 +63,10 @@ Cast also sets `data-cast-scheme` to `light` or `dark`, so several themes can sh
 
 > Never `@import` the base from a theme. The preview screens load every theme at once, and a second import would re-declare the base *after* the first theme's overrides. With equal specificity, the base would win and flatten it.
 
+There's no equivalent base for light themes, because most don't need one: Craft's CP is light already, so a light theme that adjusts a few semantic properties gets there without a fight — **High Contrast** does it in 84 lines.
+
+Retinting the whole `--gray-*-hsl` ramp is the harder case. Craft writes a colour straight into a rule in a few dozen places rather than reading the custom property beside it, and those don't follow a retinted ramp — most visibly `--fg-input`, which every control background derives from at 25%, 30% and 50% alpha, and which Craft pins to a blue-grey. **Stone** is the worked example: its stylesheet carries the patches with a note on each explaining what Craft pinned and why.
+
 ## Button colour
 
 **Settings → Plugins → Cast → Button colour** repoints the fill of Craft's primary buttons at one of nine colours, previewed live as you pick. It's named for what it does: beyond primary buttons, `--bg-primary` reaches only the Plugin Store's cart badge and the installer's step dots.

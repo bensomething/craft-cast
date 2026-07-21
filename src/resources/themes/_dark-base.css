@@ -14,6 +14,18 @@
  * `--white` and `--black` are left alone. Craft uses `--white` more often as ink on a
  * coloured fill (button labels, badge text, the lightswitch handle) than as a surface,
  * so swapping them breaks more than it fixes. Surfaces are patched individually.
+ *
+ * Worth knowing before reorganising this: 71 of the 122 dark-scoped rules below set
+ * nothing but `var()` values, so they aren't dark-specific at all — they're places Craft
+ * wrote a literal where a custom property already existed, and pointing it back at the
+ * property is right for any theme. `stone.css` repeats a handful of them for the same
+ * reason on the light side.
+ *
+ * That duplication is deliberate. Hoisting the shared half into a base loaded for every
+ * theme would be a large change to a file whose light behaviour nobody has verified,
+ * against a saving of about forty lines, for a second consumer that may never exist —
+ * light themes mostly run with Craft's grain and don't hit this. Revisit if a second
+ * light theme ever needs to retint the ramp.
  */
 
 html[data-cast-scheme="dark"] {

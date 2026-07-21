@@ -62,3 +62,46 @@ html[data-cast-theme="stone-dark"] .code:not(input, textarea, select, .text) {
 html[data-cast-theme="stone-dark"] .pane pre {
     background-color: transparent;
 }
+
+/* Prism's blocks carry an attribute selector, which outranks the plain `pre` rule above,
+   so they keep the base's blue-black unless matched at the same weight. */
+html[data-cast-theme="stone-dark"] :not(pre) > code[class*="language-"],
+html[data-cast-theme="stone-dark"] pre[class*="language-"] {
+    background: hsl(var(--gray-050-hsl));
+}
+
+/* The image editor is built for the dark end of the ramp, so the base pins its chrome to
+   fixed values rather than letting an inversion turn the whole modal white. Those values
+   are blue, so they're restated here at the same lightnesses in stone's hue. */
+html[data-cast-theme="stone-dark"] .modal.imageeditor {
+    background-color: hsl(20, 12%, 8%);
+}
+
+html[data-cast-theme="stone-dark"] .modal.imageeditor .body .tabs,
+html[data-cast-theme="stone-dark"] .modal.imageeditor .body .tabs ul li {
+    border-color: hsl(20, 14%, 4%);
+}
+
+/* The straightening rule fades its ends out to the canvas colour, so the fade has to be
+   restated whenever that colour moves. */
+html[data-cast-theme="stone-dark"] .slide-rule .overlay {
+    background-image: linear-gradient(
+        to right,
+        hsl(20, 12%, 8%) 0,
+        rgb(0 0 0 / 0%) 15%,
+        rgb(0 0 0 / 0%) 85%,
+        hsl(20, 12%, 8%) 100%
+    );
+}
+
+html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder) {
+    background-color: hsl(28, 6%, 26%);
+}
+
+html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder):hover {
+    background-color: hsl(28, 6%, 32%);
+}
+
+html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder).active {
+    background-color: hsl(28, 6%, 38%);
+}

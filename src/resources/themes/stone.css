@@ -56,6 +56,12 @@ html[data-cast-theme="stone"] {
        patches this same property for the same reason. */
     --fg-input: hsl(var(--gray-550-hsl));
 
+    /* Cast's own. The dark base declares these for every dark theme; a light theme that
+       retints the ramp needs them too, because the surfaces they name are pinned to
+       literal blues in Craft's light CSS. */
+    --cast-chip: hsl(var(--gray-200-hsl));
+    --cast-chip-active: hsl(var(--gray-300-hsl));
+
     /* Shadows are neutral black, which greys a warm ground. Hairlines off the ramp keep
        the tint through the separation. */
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 3px hsl(24, 10%, 10%, 6%);
@@ -88,6 +94,46 @@ html[data-cast-theme="stone"] .element-index .source-path {
 /* A blue pinned inside a shadow, where a custom property can't reach it. */
 html[data-cast-theme="stone"] .fld-container .fld-workspace {
     box-shadow: inset 0 1px 3px -1px hsl(var(--gray-300-hsl));
+}
+
+/* Body text, written as #3f4d5a rather than read from --text-color. Menus, select
+   controls, selectize and autosuggest all pin it, so the ramp never reaches them and
+   the text stays cool against warm chrome. */
+html[data-cast-theme="stone"] .token,
+html[data-cast-theme="stone"] .menu ul li .menu-item,
+html[data-cast-theme="stone"] .menu ul li .menu-option,
+html[data-cast-theme="stone"] .menu:not(.menu--disclosure) ul li a,
+html[data-cast-theme="stone"] .menu--disclosure ul li > .menu-item:hover,
+html[data-cast-theme="stone"] .menu--disclosure ul li > .menu-option:hover,
+html[data-cast-theme="stone"] .select:not(.selectize) select,
+html[data-cast-theme="stone"] .selectize.select .selectize-input,
+html[data-cast-theme="stone"] .selectize.multiselect .selectize-input > .item,
+html[data-cast-theme="stone"] body .selectize-dropdown .optgroup-header,
+html[data-cast-theme="stone"] body .selectize-dropdown .option,
+html[data-cast-theme="stone"] .autosuggest__results-container .autosuggest__results-item {
+    color: var(--text-color);
+}
+
+/* The same again for secondary text, pinned as #606d7b and #596673. */
+html[data-cast-theme="stone"] .h6,
+html[data-cast-theme="stone"] h6,
+html[data-cast-theme="stone"] .readable .h6,
+html[data-cast-theme="stone"] .readable h6,
+html[data-cast-theme="stone"] .readable blockquote:not(.note),
+html[data-cast-theme="stone"] .autosuggest__results-container .autosuggest__results-before {
+    color: var(--light-text-color);
+}
+
+/* Chips: tokens and the items inside a multiselect. Both pin their fills, and both are
+   what --cast-chip exists to name. */
+html[data-cast-theme="stone"] .token,
+html[data-cast-theme="stone"] .selectize.multiselect .selectize-input > .item {
+    background-color: var(--cast-chip);
+}
+
+html[data-cast-theme="stone"] .token:focus,
+html[data-cast-theme="stone"] .selectize.multiselect .selectize-input > .item.active {
+    background-color: var(--cast-chip-active);
 }
 
 html[data-cast-theme="stone"] #trial-info {
