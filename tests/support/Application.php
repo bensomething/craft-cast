@@ -53,6 +53,17 @@ class Application extends ConsoleApplication
     }
 
     /**
+     * Craft's users service, as far as Cast uses it: somewhere to save a preference.
+     */
+    public function getUsers(): UsersService
+    {
+        /** @var UsersService $component */
+        $component = $this->get('users');
+
+        return $component;
+    }
+
+    /**
      * Sets who's logged in for the rest of the test.
      */
     public function setIdentity(?TestUser $user): void

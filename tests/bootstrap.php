@@ -9,6 +9,7 @@ use bensomething\cast\tests\support\Application;
 use bensomething\cast\tests\support\Dir;
 use bensomething\cast\tests\support\Request;
 use bensomething\cast\tests\support\UserComponent;
+use bensomething\cast\tests\support\UsersService;
 use craft\services\Config;
 use yii\i18n\PhpMessageSource;
 
@@ -50,6 +51,7 @@ new Application([
         'request' => ['class' => Request::class],
         'config' => ['class' => Config::class, 'configDir' => $tmp . '/config'],
         'user' => ['class' => UserComponent::class],
+        'users' => ['class' => UsersService::class],
         // Themes are published rather than linked, so this is exercised for real: the
         // URLs the tests assert on are the ones Craft's asset manager produces.
         'assetManager' => [
