@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## Unreleased
+## 1.0.0-beta.4 - 2026-07-25
 
 ### Changed
 - The high contrast themes are rebuilt on pure white and pure black surfaces and a desaturated ramp. Craft's neutrals carry a blue cast, and its containers are separated by a few percent of tint; here every container is bounded by a solid border instead, and no hue is spent on chrome.
