@@ -109,6 +109,14 @@ class Plugin extends \craft\base\Plugin
         // overriding.
         $depends = ['depends' => [ThemeAsset::class, CpAsset::class]];
 
+        // Patches that hold for any theme, first so that everything after can override
+        // them. They restate values Craft wrote out as literals as the properties those
+        // literals were copied from, which is a baseline a dark or per-theme rule refines
+        // rather than contradicts.
+        if ($themes !== []) {
+            $view->registerCssFile($this->themes->getBaseUrl() . '/themes/_shared.css', $depends);
+        }
+
         // Dark themes are deltas on the shared dark base, so it must load exactly once
         // and first. Importing it per theme broke when two dark themes loaded together,
         // as the second import re-declared the base after the first theme's overrides.
@@ -119,13 +127,10 @@ class Plugin extends \craft\base\Plugin
             }
         }
 
-        // Patches that hold for every theme, ahead of the themes so they stay overridable,
-        // and the opt-out reset behind them. Both are for any theme rather than only dark
-        // ones — the reset used to ride along inside the dark base, which meant
-        // `data-cast-ignore` was accepted and silently did nothing under a light theme
-        // that had moved the ramp.
+        // The opt-out reset, for any theme rather than only dark ones. It used to ride
+        // along inside the dark base, which meant `data-cast-ignore` was accepted and
+        // silently did nothing under a light theme that had moved the ramp.
         if ($themes !== []) {
-            $view->registerCssFile($this->themes->getBaseUrl() . '/themes/_shared.css', $depends);
             $view->registerCssFile($this->themes->getBaseUrl() . '/themes/_stock.css', $depends);
         }
 

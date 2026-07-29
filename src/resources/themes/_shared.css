@@ -1,26 +1,36 @@
 /**
  * Cast: shared patches.
  *
- * Corrections that hold for every theme, light or dark, and belong to none of them in
- * particular. Craft draws a few surfaces from literal values rather than from the
- * properties around them, so a theme that moves those properties leaves the literal
- * sitting where it was. Each patch below restates the literal as the property it was
- * copied from, which makes it a no-op on a stock CP and correct under any theme.
+ * Craft's palette is a `--gray-*-hsl` ramp, but in a few dozen rules a ramp step is
+ * written out as the literal it happens to evaluate to — `#606d7b` for `--gray-500`,
+ * `hsla(212, 30%, 85%, .5)` for `--gray-200` at half alpha, and so on. Those are correct
+ * only for as long as the ramp is Craft's own. Move it and each literal stays exactly
+ * where it was, a cool blue-grey on whatever the theme did instead.
  *
- * Patching here rather than per theme also covers a project theme dropped in
- * `cast-themes/`, which would otherwise have to rediscover every one of these.
+ * Every rule below restates one as the ramp reference it was copied from. That makes each
+ * a no-op on a stock CP — same colour, computed rather than typed — and correct under any
+ * theme, light or dark, including a project theme dropped in `cast-themes/` that would
+ * otherwise have to rediscover the whole list.
+ *
+ * Loaded first, ahead of `_dark-base.css` and the themes, so this is a baseline they
+ * refine. Where a dark or per-theme rule already has a considered value for one of these
+ * surfaces, that rule still wins.
  *
  * Scoped on `html[data-cast-theme]`, as `_stock.css` is: matching the attribute's presence
  * keeps one selector for every theme, and the attribute is removed outright when no theme
  * is active, so nothing here reaches a CP that never asked for one.
  *
- * Loaded before the themes themselves, so a theme can still override anything below.
+ * Note the alpha syntax. The ramp triplets are comma-separated — `212,50%,93%` — so
+ * `hsl(var(--gray-100-hsl) / 75%)` expands to `hsl(212,50%,93% / 75%)`, which mixes the
+ * legacy and modern grammars and is thrown out whole. `hsla(var(--x-hsl), 0.75)` stays in
+ * the comma form throughout and parses.
  */
 
-/* The sticky page header and the stuck footer are the page colour at 75% behind a blur —
-   except Craft writes that colour out as a literal rather than reading the triplet it was
-   taken from, so both bars stay a pale blue-grey however far a theme moves the ramp. It's
-   the most visible thing left unthemed on a long index. */
+/* The sticky page header and the stuck footer are the page colour at 75% behind a blur.
+   Craft writes it as stock `--gray-100-hsl`, which is `--body-bg` there — but a theme that
+   moves the page off `--gray-100` wants the bar to follow the page rather than the ramp
+   step, so this reads the background triplet instead. It's the same colour on a stock CP
+   either way. */
 html[data-cast-theme] body.fixed-header #header,
 html[data-cast-theme] #footer.stuck {
     background-color: hsla(var(--bg-color-hsl), 0.75);
@@ -31,4 +41,99 @@ html[data-cast-theme] #footer.stuck {
    stock CP and follows the pane everywhere else. */
 html[data-cast-theme] #footer {
     border-block-start-color: var(--pane-bg);
+}
+
+/* Live preview's two panel headers take the same frosted literal. These are panel chrome
+   rather than an overlay on the page, so they keep the ramp step Craft named. */
+html[data-cast-theme] .lp-editor-container > header,
+html[data-cast-theme] .lp-preview-container > header,
+html[data-cast-theme] .lp-preview-container .lp-preview-header {
+    background-color: hsla(var(--gray-100-hsl), 0.75);
+}
+
+/* `#606d7b` is `--gray-500` typed out. Sixth-level headings use it as their whole colour,
+   and the two list headers borrow it to sit quieter than the items under them. */
+html[data-cast-theme] .h6,
+html[data-cast-theme] h6,
+html[data-cast-theme] body .selectize-dropdown .optgroup-header,
+html[data-cast-theme] .autosuggest__results-container .autosuggest__results-before {
+    color: hsl(var(--gray-500-hsl));
+}
+
+/* The global header's buttons wash themselves on hover with `--gray-300` at 15%. */
+html[data-cast-theme] .btn.header-btn:not(:active):not(.active):not([aria-expanded="true"]):hover,
+html[data-cast-theme] #announcements-btn:not(:active):not(.active):not([aria-expanded="true"]):hover {
+    background-color: hsla(var(--gray-300-hsl), 0.15);
+}
+
+/* A pane header is separated from its pane by an inset rule rather than a border. */
+html[data-cast-theme] .pane-header {
+    box-shadow: inset 0 -1px 0 0 hsla(var(--gray-300-hsl), 0.25);
+}
+
+/* A dashed button's own outline — the "Add a row" control under an editable table, and
+   the field layout designer's new tab button. `rgba(96, 125, 159, .5)` is `--fg-input` at
+   half alpha, written out. Craft derives the control fills from that property with this
+   exact expression and then types the border, so a theme repointing `--fg-input` moves
+   every control around this one and leaves its outline on Craft's blue. */
+html[data-cast-theme] .btn.dashed {
+    border-color: rgb(from var(--fg-input) r g b / 50%);
+}
+
+/* The same literal at other alphas: grouped and `.hairline` panes, the card view
+   designer's preview, and the details pane's own text inputs while unfocused. Craft
+   stamps the pane rules `!important`, so those have to be restated whole. */
+html[data-cast-theme] .pane.hairline,
+html[data-cast-theme] .pane:is(fieldset),
+html[data-cast-theme] .cvd-preview-container {
+    border: 1px solid rgb(from var(--fg-input) r g b / 25%) !important;
+}
+
+html[data-cast-theme] .details > .text:not(:focus) {
+    border-color: rgb(from var(--fg-input) r g b / 40%);
+}
+
+/* Dashed buttons fill with `--gray-200` — a tenth on focus, a quarter once pressed. */
+html[data-cast-theme] .btn.dashed:focus-visible {
+    background-color: hsla(var(--gray-200-hsl), 0.1);
+}
+
+html[data-cast-theme] .btn.dashed:not(.disabled).active,
+html[data-cast-theme] .btn.dashed:not(.disabled):active,
+html[data-cast-theme] .btn.dashed:not(.disabled)[aria-expanded="true"] {
+    background-color: hsla(var(--gray-200-hsl), 0.25);
+}
+
+/* Dividers between the fields of a `.flex-fields` row. */
+html[data-cast-theme] .flex-fields > :not(h2, hr, .line-break):before,
+html[data-cast-theme] .flex-fields > :not(h2, hr, .line-break):last-child:before {
+    background-color: hsla(var(--gray-200-hsl), 0.5);
+}
+
+/* Transparency is shown as a chequerboard — on a colour swatch, and on the thumbnail of
+   an asset with an alpha channel. It's four gradients of `rgba(154, 165, 177, .25)`,
+   `--gray-300` at a quarter, laid over whatever surface is behind with no fill of its own.
+   Once the ramp inverts, the squares land dark on a dark surface and the swatch reads as a
+   blob rather than as a colour that isn't set yet. The whole value has to be restated to
+   reach the one colour inside it. */
+html[data-cast-theme] .color.small,
+html[data-cast-theme] .color:not(.small),
+html[data-cast-theme] .chip > .thumb.checkered img,
+html[data-cast-theme] .preview-thumb-container.checkered img {
+    background-image:
+        linear-gradient(45deg, hsla(var(--gray-300-hsl), 0.25) 25%, transparent 0),
+        linear-gradient(135deg, hsla(var(--gray-300-hsl), 0.25) 25%, transparent 0),
+        linear-gradient(45deg, transparent 75%, hsla(var(--gray-300-hsl), 0.25) 0),
+        linear-gradient(135deg, transparent 75%, hsla(var(--gray-300-hsl), 0.25) 0);
+}
+
+/* The placeholder a card leaves behind while it's being dragged. */
+html[data-cast-theme] .card-placeholder {
+    border-color: hsl(var(--gray-300-hsl));
+}
+
+/* A disabled cell in an editable table is veiled by a pseudo-element rather than filled,
+   so the veil has to be the surface it's covering. */
+html[data-cast-theme] table.editable tbody tr td.disabled:after {
+    background-color: hsla(var(--gray-050-hsl), 0.75);
 }

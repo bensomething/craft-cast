@@ -1,9 +1,12 @@
 # Release Notes for Cast
 
-## Unreleased
+## 1.0.0-beta.6 - 2026-07-29
 
 ### Fixed
-- The sticky page header and footer stayed pale blue-grey on every theme, Craft writing the page colour out as a literal rather than reading the triplet it came from. Patched in a new `_shared.css`, loaded for any active theme, so a project theme gets it too.
+- Craft writes a `--gray-*` step out as a literal in a few dozen rules, which a theme moving the ramp then leaves behind. The sticky header and footer, live preview's headers, `h6`, optgroup and autosuggest headers, header button hovers, pane headers, dashed buttons, flex-field dividers and disabled table cells now read the ramp — in a new `_shared.css`, so a project theme gets them too.
+- Colour swatches and transparent asset thumbnails drew their chequerboard in the same literal, so an unset colour read as a dark blob. The card drag placeholder took it as a dashed border.
+- `--fg-input` is written out in four rules, leaving their outlines on Craft's blue while every control fill around them followed the theme: dashed buttons like an editable table's **Add a row**, grouped and hairline panes, the card view designer's preview, and the details pane's unfocused inputs.
+- Three declarations in the dark base mixed `hsl()`'s comma and slash syntaxes, so browsers threw them out whole. The dark sticky header, the element index's refresh veil and live preview's headers had been falling back to Craft's own colour.
 
 ## 1.0.0-beta.5 - 2026-07-29
 

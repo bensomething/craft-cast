@@ -376,7 +376,7 @@ html[data-cast-scheme="dark"] .draft-notice .discard-changes-btn:active {
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] body.fixed-header #header {
-    background-color: hsl(var(--gray-050-hsl) / 75%);
+    background-color: hsla(var(--gray-050-hsl), 0.75);
 }
 
 /* The selected tab's ring (`rgba(51,64,77,.1)`) vanishes on dark while its `--gray-200`
@@ -477,7 +477,7 @@ html[data-cast-scheme="dark"] .cp-image-controls .progress-shade {
 /* The element index veils itself in white while refreshing, which flashes a bright
    block over the pane. Fade toward the pane colour instead. */
 html[data-cast-scheme="dark"] .elements.busy:after {
-    background: hsl(var(--gray-100-hsl) / 75%);
+    background: hsla(var(--gray-100-hsl), 0.75);
 }
 
 /* Field layout designer: every surface in it is `var(--white)`. */
@@ -751,7 +751,7 @@ html[data-cast-scheme="dark"] .lp-preview-container {
 html[data-cast-scheme="dark"] .lp-editor-container > header,
 html[data-cast-scheme="dark"] .lp-preview-container > header,
 html[data-cast-scheme="dark"] .lp-preview-container .lp-preview-header {
-    background-color: hsl(var(--gray-100-hsl) / 75%);
+    background-color: hsla(var(--gray-100-hsl), 0.75);
     box-shadow: 0 1px 0 var(--border-hairline);
 }
 
