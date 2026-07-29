@@ -9,7 +9,8 @@ A theme is a stylesheet redeclaring the custom properties Craft already ships in
 
 ## Requirements
 
-Craft CMS 5.10+ and PHP 8.2+.
+- Craft CMS 5.10+
+- PHP 8.2+
 
 ## Installation
 
