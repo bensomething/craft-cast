@@ -1,0 +1,34 @@
+/**
+ * Cast: shared patches.
+ *
+ * Corrections that hold for every theme, light or dark, and belong to none of them in
+ * particular. Craft draws a few surfaces from literal values rather than from the
+ * properties around them, so a theme that moves those properties leaves the literal
+ * sitting where it was. Each patch below restates the literal as the property it was
+ * copied from, which makes it a no-op on a stock CP and correct under any theme.
+ *
+ * Patching here rather than per theme also covers a project theme dropped in
+ * `cast-themes/`, which would otherwise have to rediscover every one of these.
+ *
+ * Scoped on `html[data-cast-theme]`, as `_stock.css` is: matching the attribute's presence
+ * keeps one selector for every theme, and the attribute is removed outright when no theme
+ * is active, so nothing here reaches a CP that never asked for one.
+ *
+ * Loaded before the themes themselves, so a theme can still override anything below.
+ */
+
+/* The sticky page header and the stuck footer are the page colour at 75% behind a blur —
+   except Craft writes that colour out as a literal rather than reading the triplet it was
+   taken from, so both bars stay a pale blue-grey however far a theme moves the ramp. It's
+   the most visible thing left unthemed on a long index. */
+html[data-cast-theme] body.fixed-header #header,
+html[data-cast-theme] #footer.stuck {
+    background-color: hsla(var(--bg-color-hsl), 0.75);
+}
+
+/* The footer's 2px top rule is `--white`, where every surface it sits against is a
+   property. Craft declares `--pane-bg: var(--white)`, so this is the same colour on a
+   stock CP and follows the pane everywhere else. */
+html[data-cast-theme] #footer {
+    border-block-start-color: var(--pane-bg);
+}

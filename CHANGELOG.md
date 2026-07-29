@@ -1,5 +1,10 @@
 # Release Notes for Cast
 
+## Unreleased
+
+### Fixed
+- The sticky page header and footer stayed pale blue-grey on every theme, Craft writing the page colour out as a literal rather than reading the triplet it came from. Patched in a new `_shared.css`, loaded for any active theme, so a project theme gets it too.
+
 ## 1.0.0-beta.5 - 2026-07-29
 
 ### Fixed

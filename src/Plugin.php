@@ -119,10 +119,13 @@ class Plugin extends \craft\base\Plugin
             }
         }
 
-        // The opt-out reset, for any theme rather than only dark ones. It used to ride
-        // along inside the dark base, which meant `data-cast-ignore` was accepted and
-        // silently did nothing under a light theme that had moved the ramp.
+        // Patches that hold for every theme, ahead of the themes so they stay overridable,
+        // and the opt-out reset behind them. Both are for any theme rather than only dark
+        // ones — the reset used to ride along inside the dark base, which meant
+        // `data-cast-ignore` was accepted and silently did nothing under a light theme
+        // that had moved the ramp.
         if ($themes !== []) {
+            $view->registerCssFile($this->themes->getBaseUrl() . '/themes/_shared.css', $depends);
             $view->registerCssFile($this->themes->getBaseUrl() . '/themes/_stock.css', $depends);
         }
 
@@ -308,6 +311,7 @@ JS, View::POS_READY, 'cast-ignore-menus');
         // loading them on every CP page is wasteful. They're appended on first open.
         $urls = [
             $this->themes->getBaseUrl() . '/themes/_dark-base.css',
+            $this->themes->getBaseUrl() . '/themes/_shared.css',
             $this->themes->getBaseUrl() . '/themes/_stock.css',
         ];
 
