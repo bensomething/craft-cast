@@ -41,10 +41,28 @@ html[data-cast-theme="stone-dark"] {
        selected one that follows the ramp. stone-400 matches the lightness it replaces. */
     --fg-input: hsl(var(--gray-700-hsl));
 
+    /* The base pins the input border to its own blue-grey as well, hsl(212, 15%, 60%) at
+       35%. It draws every text input, the password wrapper, CodeMirror and the
+       multiselects, so leaving it puts a cool line around most of a form. stone-400 again
+       for the lightness, and the alpha is kept — the same border sits on the pane, on
+       --input-bg, and inside table cells. */
+    --input-border-color: rgb(from hsl(var(--gray-700-hsl)) r g b / 35%);
+
     /* Shadows do the separating on the stock dark base. Against a warm ground a neutral
        black shadow greys the edge, so panes get a hairline off the ramp as well. */
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 6px hsl(20, 14%, 4%, 40%);
     --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px hsl(20, 14%, 4%, 60%);
+}
+
+/* A CKEditor field draws its whole box — the toolbar, the editable, the rule between them
+   and the word count — off `--ck-color-base-border`, which the plugin pins to a 25% alpha
+   blue-grey rather than mapping onto a Craft token the way it does the editor's own
+   inputs. The base's own hairline is a translucent white, which carries about the same
+   weight over a dark surface without the blue. The plugin declares the property
+   `!important` on `:root`, so this does too, and the attribute selector wins on
+   specificity. */
+html[data-cast-theme="stone-dark"] {
+    --ck-color-base-border: var(--border-hairline) !important;
 }
 
 /* The base's link blue is left alone deliberately. It's the one hue that shouldn't follow

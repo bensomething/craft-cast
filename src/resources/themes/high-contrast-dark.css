@@ -125,6 +125,16 @@ html[data-cast-theme="high-contrast-dark"] .selectize.select .selectize-input {
     border: var(--input-border);
 }
 
+/* A CKEditor field draws its whole box — the toolbar, the editable, the rule between
+   them and the word count — off `--ck-color-base-border`, which the plugin pins to a
+   25% alpha blue-grey rather than mapping onto a Craft token the way it does the
+   editor's own inputs. It stays a hairline while the text inputs beside it go solid.
+   The plugin declares it `!important` on `:root`, so this does too, and the attribute
+   selector wins on specificity. */
+html[data-cast-theme="high-contrast-dark"] {
+    --ck-color-base-border: var(--input-border-color) !important;
+}
+
 /* The main nav is the one surface Craft paints from a literal grey rather than a token,
    so it stays lighter than everything around it. Its own border already draws the edge. */
 html[data-cast-theme="high-contrast-dark"] .global-sidebar {

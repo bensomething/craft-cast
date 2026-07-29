@@ -41,6 +41,13 @@ html[data-cast-theme="stone"] {
        pane that Craft intends, on the right side of neutral. */
     --input-bg: hsl(var(--gray-050-hsl));
 
+    /* The border beside it is a blue-grey literal too — hsl(212, 25%, 50%) at 40%, which
+       is #607d9f again, the same colour --fg-input is pinned to. It draws every text
+       input, the password wrapper, CodeMirror and the multiselects, so leaving it puts a
+       cool line around most of a form. The alpha is kept rather than composited to a flat
+       value: the same border sits on the pane, on --input-bg, and inside table cells. */
+    --input-border-color: rgb(from hsl(var(--gray-500-hsl)) r g b / 40%);
+
     /* stone-800 on white is 15.2:1, and stone-500 as the secondary reaches 4.80:1 — both
        clear AA. Anything lighter than stone-500 doesn't, which is why the ramp isn't
        allowed to supply it. */
@@ -62,10 +69,31 @@ html[data-cast-theme="stone"] {
     --cast-chip: hsl(var(--gray-200-hsl));
     --cast-chip-active: hsl(var(--gray-300-hsl));
 
+    /* Craft derives --border-hairline from --gray-800, so it retints on its own. The other
+       two are pinned literals — a flat blue-grey and a blue-grey at 50% — and they draw
+       the hairline buttons, context labels and menus, and the condition footer, which is
+       enough cool line to read as a mistake next to warm chrome. Matched on lightness:
+       #cfd8e3 is 85%, against stone-300 at 83%, and hsl(210, 10%, 53%) against the
+       interpolated 500 at 54%. */
+    --border-hairline-medium: hsl(var(--gray-300-hsl));
+    --border-hairline-dark: rgb(from hsl(var(--gray-500-hsl)) r g b / 50%);
+
     /* Shadows are neutral black, which greys a warm ground. Hairlines off the ramp keep
        the tint through the separation. */
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 3px hsl(24, 10%, 10%, 6%);
     --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px hsl(24, 10%, 10%, 20%);
+}
+
+/* A CKEditor field draws its whole box — the toolbar, the editable, the rule between them
+   and the word count — off `--ck-color-base-border`, which the plugin pins to a 25% alpha
+   blue-grey rather than mapping onto a Craft token the way it does the editor's own
+   inputs. It's the same blue-grey as --input-border-color above at a lighter alpha, so it
+   takes the same treatment — Craft draws the editor's box lighter than a text input's
+   border, and that relationship is worth keeping. The plugin declares the property
+   `!important` on `:root`, so this does too, and the attribute selector wins on
+   specificity. */
+html[data-cast-theme="stone"] {
+    --ck-color-base-border: rgb(from hsl(var(--gray-500-hsl)) r g b / 25%) !important;
 }
 
 /* Code blocks take stone-200, so they separate from the pane without introducing a grey.
