@@ -1045,9 +1045,14 @@ html[data-cast-scheme="dark"] .zilch img {
 
 /* Craft also puts `.code` on form controls (handle fields, template pickers) where it
    means monospace, not code block. Those are excluded so they keep the input
-   background and match the text fields beside them. */
+   background and match the text fields beside them.
+
+   `.light` goes with them. Craft pairs the two on a muted monospace label rather than a
+   block — a colour field's `#` prefix, a menu item's description — and puts it on an
+   editable table's cells for a monospace column. A block fill behind any of them is a
+   grey slab in the middle of a control. */
 html[data-cast-scheme="dark"] pre,
-html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text) {
+html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: hsl(210, 24%, 8%);
     color: var(--gray-800);
 }

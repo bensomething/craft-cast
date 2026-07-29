@@ -34,9 +34,10 @@ html[data-cast-theme="dim"] {
 }
 
 /* Code blocks only. Inline `<code>` is left alone, as Craft leaves it, and form controls
-   marked `.code` keep the input background. */
+   marked `.code` keep the input background, as do `.light` labels and monospace
+   table cells, both of which Craft also marks `.code`. */
 html[data-cast-theme="dim"] pre,
-html[data-cast-theme="dim"] .code:not(input, textarea, select, .text) {
+html[data-cast-theme="dim"] .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: hsl(213, 20%, 13%);
 }
 

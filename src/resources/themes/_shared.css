@@ -132,6 +132,25 @@ html[data-cast-theme] .card-placeholder {
     border-color: hsl(var(--gray-300-hsl));
 }
 
+/* Craft veils a region in flat white while it's working — behind an upload's progress
+   bar, over an element index mid-refresh, over the icon picker's list while it loads.
+   Each is covering the pane, and `--pane-bg: var(--white)` on a stock CP, so reading the
+   property leaves all three as they were and lets them follow a theme. Alphas are Craft's
+   own and differ per veil. */
+html[data-cast-theme] .elementselect .progress-shade {
+    background-color: rgb(from var(--pane-bg) r g b / 80%);
+}
+
+html[data-cast-theme] .elements.busy:after,
+html[data-cast-theme] .icon-picker-modal .body .icon-picker-modal--list.loading:after {
+    background-color: rgb(from var(--pane-bg) r g b / 75%);
+}
+
+/* Tooltips are near-white with the body ink on top, so they invert as a pair. */
+html[data-cast-theme] .tooltip {
+    background: rgb(from var(--pane-bg) r g b / 90%);
+}
+
 /* A disabled cell in an editable table is veiled by a pseudo-element rather than filled,
    so the veil has to be the surface it's covering. */
 html[data-cast-theme] table.editable tbody tr td.disabled:after {

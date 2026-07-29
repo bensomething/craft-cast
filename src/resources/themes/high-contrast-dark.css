@@ -195,9 +195,10 @@ html[data-cast-theme="high-contrast-dark"] .card:not(.sel) > .card-titlebar {
     border-block-end: 1px solid var(--border-hairline);
 }
 
-/* Form controls keep the input background — `.code` means monospace there, not code block. */
+/* Form controls keep the input background, as do `.light` labels and monospace table cells
+   — `.code` means monospace in all three, not a code block. */
 html[data-cast-theme="high-contrast-dark"] pre,
-html[data-cast-theme="high-contrast-dark"] .code:not(input, textarea, select, .text) {
+html[data-cast-theme="high-contrast-dark"] .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: #000;
     color: var(--text-color);
 }

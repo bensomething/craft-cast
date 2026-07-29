@@ -71,9 +71,10 @@ html[data-cast-theme="stone-dark"] {
 
 /* Code blocks drop below the pane rather than rising above it, the floor being stone-950.
    Inline `<code>` is left alone, as Craft leaves it, and form controls marked `.code`
-   keep the input background. */
+   keep the input background, as do `.light` labels and monospace table
+   cells, both of which Craft also marks `.code`. */
 html[data-cast-theme="stone-dark"] pre,
-html[data-cast-theme="stone-dark"] .code:not(input, textarea, select, .text) {
+html[data-cast-theme="stone-dark"] .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: hsl(var(--gray-050-hsl));
 }
 

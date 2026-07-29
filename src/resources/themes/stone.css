@@ -98,9 +98,10 @@ html[data-cast-theme="stone"] {
 
 /* Code blocks take stone-200, so they separate from the pane without introducing a grey.
    Inline `<code>` is left alone, as Craft leaves it, and form controls marked `.code`
-   keep the input background. */
+   keep the input background, as do `.light` labels and monospace table
+   cells, both of which Craft also marks `.code`. */
 html[data-cast-theme="stone"] pre,
-html[data-cast-theme="stone"] .code:not(input, textarea, select, .text) {
+html[data-cast-theme="stone"] .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: hsl(var(--gray-200-hsl));
 }
 

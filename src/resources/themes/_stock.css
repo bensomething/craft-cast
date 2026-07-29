@@ -184,9 +184,9 @@ html[data-cast-theme] body.cast-ignore-plugin-store :is(#app, .ps-wrapper) {
 /* Code blocks are the one patch above that hard-codes its colours, and readmes and
    changelogs inside an ignored region are full of them. */
 html[data-cast-theme] [data-cast-ignore] pre,
-html[data-cast-theme] [data-cast-ignore] .code:not(input, textarea, select, .text),
+html[data-cast-theme] [data-cast-ignore] .code:not(input, textarea, select, .text, .light, td, th),
 html[data-cast-theme] body.cast-ignore-plugin-store .ps-wrapper pre,
-html[data-cast-theme] body.cast-ignore-plugin-store .ps-wrapper .code:not(input, textarea, select, .text) {
+html[data-cast-theme] body.cast-ignore-plugin-store .ps-wrapper .code:not(input, textarea, select, .text, .light, td, th) {
     background-color: var(--gray-100);
     color: var(--text-color);
 }
