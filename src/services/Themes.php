@@ -36,6 +36,12 @@ class Themes extends Component
     /** The user-preference key holding the chosen theme handle. */
     public const PREF_KEY = 'castTheme';
 
+    /** The user-preference key holding the light half of their own Auto pair. */
+    public const PREF_LIGHT_KEY = 'castThemeLight';
+
+    /** The user-preference key holding the dark half of their own Auto pair. */
+    public const PREF_DARK_KEY = 'castThemeDark';
+
     /** Shipped with Cast. */
     public const SOURCE_BUNDLED = 'bundled';
 
@@ -229,6 +235,30 @@ class Themes extends Component
     }
 
     /**
+     * Themes of one colour scheme as select options, for one half of an Auto pair.
+     *
+     * Flat rather than grouped: a "Light themes" heading over a list that can only hold
+     * light themes says nothing. Craft's stock appearance leads, as it does in the light
+     * group above, and stands in for "no stylesheet" on either side.
+     *
+     * @param Theme[] $themes
+     * @param bool $dark Which half to build: the dark one, or the light one.
+     * @return array<int, array{label: string, value: string}>
+     */
+    public function toSchemeOptions(array $themes, bool $dark): array
+    {
+        $options = [['label' => Craft::t('cast', 'Craft Default'), 'value' => Settings::THEME_NONE]];
+
+        foreach ($themes as $theme) {
+            if ($theme->getIsDark() === $dark) {
+                $options[] = ['label' => $theme->name, 'value' => $theme->handle];
+            }
+        }
+
+        return $options;
+    }
+
+    /**
      * The theme handle in effect for a user: their own choice when allowed one, otherwise
      * the site-wide default. May be `auto`, a theme handle, or an empty string for Craft's
      * stock appearance.
@@ -259,23 +289,74 @@ class Themes extends Component
     }
 
     /**
+     * The two themes `auto` resolves between for a user: their own pair where they've set
+     * one, otherwise the site-wide pair.
+     *
+     * Applies whenever the resolved handle is `auto`, however it got there. A user who
+     * has named a pair means it for any Auto they end up on, including the one they
+     * inherit from the default.
+     *
+     * @return array{0: string, 1: string} Light half, then dark. Either may be an empty
+     * string, meaning Craft's stock appearance.
+     */
+    public function getAutoPairForUser(?User $user = null): array
+    {
+        $settings = $this->settings();
+        $user ??= Craft::$app->getUser()->getIdentity();
+
+        if (!$settings->allowUserOverride || !$user) {
+            return [$settings->autoLightTheme, $settings->autoDarkTheme];
+        }
+
+        return [
+            $this->autoSide($user, self::PREF_LIGHT_KEY, $settings->autoLightTheme, false),
+            $this->autoSide($user, self::PREF_DARK_KEY, $settings->autoDarkTheme, true),
+        ];
+    }
+
+    /**
+     * One half of a user's Auto pair, falling back to the site-wide half.
+     *
+     * Anything that isn't a currently offered theme of the right scheme defers, so a pair
+     * survives a theme being uninstalled or dropped from the enabled list, and a stale
+     * value can't leave a dark theme sitting on the light side.
+     */
+    private function autoSide(User $user, string $key, string $default, bool $dark): string
+    {
+        $handle = $user->getPreference($key);
+
+        // Null means "never chose", `inherit` means "chose to follow the admin", matching
+        // how the theme preference itself reads.
+        if ($handle === null || $handle === Settings::THEME_INHERIT) {
+            return $default;
+        }
+
+        // A deliberate "no stylesheet", which the admin's own pair can hold too.
+        if ($handle === Settings::THEME_NONE) {
+            return Settings::THEME_NONE;
+        }
+
+        $theme = $this->getEnabledThemes()[$handle] ?? null;
+
+        return $theme !== null && $theme->getIsDark() === $dark ? $handle : $default;
+    }
+
+    /**
      * The stylesheets to load for a handle: one for a concrete theme, or the light/dark
      * pair for `auto`.
      *
      * @return Theme[]
      */
-    public function getThemesToLoad(string $handle): array
+    public function getThemesToLoad(string $handle, ?User $user = null): array
     {
         if ($handle !== Settings::THEME_AUTO) {
             return array_filter([$this->getThemeByHandle($handle)]);
         }
 
-        $settings = $this->settings();
-
-        return array_filter([
-            $this->getThemeByHandle($settings->autoLightTheme),
-            $this->getThemeByHandle($settings->autoDarkTheme),
-        ]);
+        return array_filter(array_map(
+            fn(string $side) => $this->getThemeByHandle($side),
+            $this->getAutoPairForUser($user),
+        ));
     }
 
     public function getBaseUrl(): string

@@ -24,7 +24,7 @@ If Composer refuses, your project's `minimum-stability` is `stable`. Set it to `
 
 **Settings → Plugins → Cast** sets the site-wide default and which themes users can pick from. Users choose their own under **Account → Preferences → Colour mode**.
 
-**Auto is a pair, not a theme.** Anyone set to Auto gets the two themes configured on the **Auto** tab, so the **Default theme** has no effect on them.
+**Auto is a pair, not a theme.** Anyone set to Auto gets the two themes configured on the **Auto** tab, so the **Default theme** has no effect on them. That pair is the starting point rather than the last word: a user who can pick their own theme can also name their own light or dark half, and either half falls back to the admin's if the theme it names goes away.
 
 > **If the picker doesn't appear on the preferences screen**, run `php craft clear-caches/compiled-templates`. Cast renders it through Craft's `cp.users.edit.prefs` hook, and a stale compiled template silently skips it.
 

@@ -30,17 +30,8 @@
 
 {% set themeOptions = plugin.themes.toGroupedOptions(themes) %}
 
-{# The Auto pair is already one scheme per field, so those two stay flat: a "Light themes"
-   heading over a list that can only hold light themes says nothing. #}
-{% set lightOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
-{% set darkOptions = [{ label: 'Craft Default' | t('cast'), value: '' }] %}
-{% for theme in themes %}
-    {% if theme.isDark %}
-        {% set darkOptions = darkOptions | merge([{ label: theme.name, value: theme.handle }]) %}
-    {% else %}
-        {% set lightOptions = lightOptions | merge([{ label: theme.name, value: theme.handle }]) %}
-    {% endif %}
-{% endfor %}
+{% set lightOptions = plugin.themes.toSchemeOptions(themes, false) %}
+{% set darkOptions = plugin.themes.toSchemeOptions(themes, true) %}
 
 {% block content %}
     {{ actionInput('plugins/save-plugin-settings') }}
@@ -172,6 +163,10 @@
 
             <div class="readable">
                 <p>{{ 'When a user is set to **Auto**, their browser’s `prefers-color-scheme` setting decides which of these two themes they get. Auto is a pair, so the **Default theme** above has no effect on anyone using it.' | t('cast') | md }}</p>
+
+                {% if settings.allowUserOverride %}
+                    <p class="light">{{ 'This is the pair everyone starts from. A user who picks their own theme can name a different light or dark half in their account preferences.' | t('cast') | md }}</p>
+                {% endif %}
             </div>
 
             {{ forms.selectField({

@@ -66,4 +66,38 @@ class GroupedOptionsTest extends TestCase
 
         self::assertSame([], $this->themes->toGroupedOptions([], false));
     }
+
+    /**
+     * Either half of an Auto pair holds one scheme, so those lists stay flat.
+     */
+    public function testAPairsHalvesAreFlatAndHoldOneSchemeEach(): void
+    {
+        $themes = $this->themes->getAllThemes();
+
+        self::assertSame([
+            ['label' => 'Craft Default', 'value' => ''],
+            ['label' => 'Stone', 'value' => 'stone'],
+            ['label' => 'High Contrast', 'value' => 'high-contrast'],
+        ], $this->themes->toSchemeOptions($themes, false));
+
+        self::assertSame([
+            ['label' => 'Craft Default', 'value' => ''],
+            ['label' => 'Dark', 'value' => 'dark'],
+            ['label' => 'Dim', 'value' => 'dim'],
+            ['label' => 'Stone Dark', 'value' => 'stone-dark'],
+            ['label' => 'High Contrast Dark', 'value' => 'high-contrast-dark'],
+        ], $this->themes->toSchemeOptions($themes, true));
+    }
+
+    /**
+     * The stock CP is a legitimate half of a pair, so it stays even where no theme of
+     * that scheme is on offer.
+     */
+    public function testCraftDefaultSurvivesAHalfWithNoThemesInIt(): void
+    {
+        self::assertSame(
+            [['label' => 'Craft Default', 'value' => '']],
+            $this->themes->toSchemeOptions([], true),
+        );
+    }
 }

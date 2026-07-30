@@ -2,6 +2,8 @@
 {# @var plugin \bensomething\cast\Plugin #}
 {# @var user \craft\elements\User #}
 {# @var themes \bensomething\cast\models\Theme[] #}
+{# @var lightThemes array #}
+{# @var darkThemes array #}
 {# @var settings \bensomething\cast\models\Settings #}
 
 {% import '_includes/forms.twig' as forms %}
@@ -24,8 +26,37 @@
     { label: 'Site default ({theme})' | t('cast', { theme: defaultLabel }), value: 'inherit' },
     { label: 'Auto (match my system)' | t('cast'), value: 'auto' },
 ] | merge(plugin.themes.toGroupedOptions(themes)) %}
+
+{# Each half of the Auto pair, led by a row handing that half back to the admin. The
+   admin's own half may be a theme this user can't otherwise pick, so it's named from the
+   full registry rather than from the enabled list behind `themes`. #}
+{% set siteLight = plugin.themes.getThemeByHandle(settings.autoLightTheme) %}
+{% set siteDark = plugin.themes.getThemeByHandle(settings.autoDarkTheme) %}
+
+{% set lightOptions = [{
+    label: 'Site default ({theme})' | t('cast', { theme: siteLight ? siteLight.name : 'Craft Default' | t('cast') }),
+    value: 'inherit',
+}] | merge(lightThemes) %}
+
+{% set darkOptions = [{
+    label: 'Site default ({theme})' | t('cast', { theme: siteDark ? siteDark.name : 'Craft Default' | t('cast') }),
+    value: 'inherit',
+}] | merge(darkThemes) %}
+
+{# A pair is only worth configuring if at least one side offers something past the two
+   rows every list has. On a site whose themes are all dark, it's not a choice. #}
+{% set pairIsWorthAsking = lightOptions | length > 2 or darkOptions | length > 2 %}
+
+{# Shown for Auto however the user arrived at it, matching Themes::getAutoPairForUser().
+   Rendered hidden rather than omitted, so the fields still post and switching away from
+   Auto and back doesn't lose the pair. #}
+{% set showsPair = current == 'auto' or (current == 'inherit' and default == 'auto') %}
 <hr>
-<div>
+{# The hook this is rendered through is the last thing on the page, which for an admin
+   puts a display preference below the debug settings. The section is moved up by JS, so
+   the divider is its sibling rather than its child: Craft's full-bleed rule only reaches
+   an `<hr>` at the top level of the pane. #}
+<div id="cast-prefs">
     <h2>{{ 'Colour mode' | t('cast') }}</h2>
 
     {{ forms.selectField({
@@ -36,4 +67,133 @@
         options: options,
         value: current,
     }) }}
+
+    {% if pairIsWorthAsking %}
+        {% tag 'div' with {
+            id: 'cast-auto-pair',
+            class: not showsPair ? 'hidden' : null,
+        } %}
+            {{ forms.selectField({
+                id: 'castThemeLight',
+                name: 'castThemeLight',
+                label: 'Light theme' | t('cast'),
+                instructions: 'Used when your system is set to light.' | t('cast'),
+                options: lightOptions,
+                value: user.getPreference('castThemeLight') ?? 'inherit',
+            }) }}
+
+            {{ forms.selectField({
+                id: 'castThemeDark',
+                name: 'castThemeDark',
+                label: 'Dark theme' | t('cast'),
+                instructions: 'Used when your system is set to dark.' | t('cast'),
+                options: darkOptions,
+                value: user.getPreference('castThemeDark') ?? 'inherit',
+            }) }}
+        {% endtag %}
+    {% endif %}
 </div>
+
+{% js %}
+    (function() {
+        var section = document.getElementById('cast-prefs');
+        var rule = section ? section.previousElementSibling : null;
+
+        // `cp.users.edit.prefs` fires after everything else on the page, so an admin gets
+        // Colour mode below Development. Moved to sit with Accessibility instead, above
+        // the block of debug settings, anchored on a field only that block has. Bails out
+        // if Craft restructures the page, costing the position and not the fields.
+        if (section && rule && rule.tagName === 'HR') {
+            var handles = document.getElementById('showFieldHandles');
+            var block = handles;
+
+            // Up from the field to whichever ancestor is our own sibling: the section
+            // itself, whose divider precedes it exactly as ours precedes us.
+            while (block && block.parentNode !== section.parentNode) {
+                block = block.parentNode;
+            }
+
+            if (block) {
+                var anchor = block.previousElementSibling;
+                anchor = anchor && anchor.tagName === 'HR' ? anchor : block;
+
+                block.parentNode.insertBefore(rule, anchor);
+                block.parentNode.insertBefore(section, anchor);
+            }
+        }
+
+        var main = document.getElementById('castTheme');
+        var pair = document.getElementById('cast-auto-pair');
+        var light = document.getElementById('castThemeLight');
+        var dark = document.getElementById('castThemeDark');
+
+        // The pair is only offered where there's something to pick.
+        if (!main || !pair || !light || !dark) {
+            return;
+        }
+
+        var site = {{ {
+            light: settings.autoLightTheme,
+            dark: settings.autoDarkTheme,
+            default: settings.defaultTheme,
+        } | json_encode | raw }};
+
+        // "Site default" defers to the admin's half, as the server does.
+        function side(select, fallback) {
+            return select.value === 'inherit' ? fallback : select.value;
+        }
+
+        function isAuto() {
+            return main.value === 'auto'
+                || (main.value === 'inherit' && site.default === 'auto');
+        }
+
+        // The preview resolves Auto against Cast.pair, so the pair has to track the two
+        // selects rather than the values the page was rendered with.
+        function sync(animate) {
+            Cast.auto(side(light, site.light), side(dark, site.dark));
+
+            var $pair = $(pair);
+            var wanted = isAuto();
+
+            if (wanted === !$pair.hasClass('hidden')) {
+                return;
+            }
+
+            if (!animate) {
+                $pair.toggleClass('hidden', !wanted);
+                return;
+            }
+
+            // Craft's own field toggles slide rather than jump. Garnish zeroes the
+            // duration under `prefers-reduced-motion`, and jQuery reads that as instant.
+            var duration = Garnish.getUserPreferredAnimationDuration('fast');
+
+            $pair.stop(true, true);
+
+            if (wanted) {
+                $pair.removeClass('hidden').hide().slideDown(duration);
+            } else {
+                $pair.slideUp(duration, function() {
+                    // Back to Craft's own class, so nothing is left leaning on the inline
+                    // `display` jQuery wrote.
+                    $pair.addClass('hidden').css('display', '');
+                });
+            }
+        }
+
+        [main, light, dark].forEach(function(select) {
+            select.addEventListener('change', function() {
+                sync(true);
+
+                // The theme select repaints itself through Plugin::registerPreview(); the
+                // two halves have to ask, and only Auto is showing them.
+                if (select !== main) {
+                    Cast.apply(main.value, false);
+                }
+            });
+        });
+
+        sync(false);
+    })();
+{% endjs %}

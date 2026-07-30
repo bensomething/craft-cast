@@ -154,14 +154,11 @@ class Plugin extends \craft\base\Plugin
             'cast-schemes-' . implode('-', array_keys($schemes)),
         );
 
-        // "Auto" resolves against the configured pair, not whatever dark theme happens
-        // to be loaded. The preview loads all of them.
-        $settings = $this->getSettings();
+        // "Auto" resolves against the pair in effect for this user, not whatever dark
+        // theme happens to be loaded. The preview loads all of them.
+        [$light, $dark] = $this->themes->getAutoPairForUser();
         $view->registerJs(
-            sprintf('Cast.auto(%s, %s);',
-                Json::encode($settings->autoLightTheme),
-                Json::encode($settings->autoDarkTheme),
-            ),
+            sprintf('Cast.auto(%s, %s);', Json::encode($light), Json::encode($dark)),
             View::POS_HEAD,
             'cast-auto',
         );
@@ -523,6 +520,7 @@ JS, Json::encode($html));
 window.Cast = {
     schemes: {},
     pair: { light: '', dark: '' },
+    inherits: '',
     watching: false,
     buttonColors: {},
     buttonColorHandle: null,
@@ -589,6 +587,10 @@ window.Cast = {
         this.pair = { light: light, dark: dark };
     },
 
+    learnInherit: function(handle) {
+        this.inherits = handle;
+    },
+
     // Monaco (nystudio107/craft-code-editor) defaults to its light `vs` theme. Plugins
     // that embed it for settings — CKEditor's config editors, say — pass no theme at
     // all, so those follow the CP. A caller that names one is honoured as-is, which
@@ -642,6 +644,12 @@ window.Cast = {
     },
 
     resolve: function(handle) {
+        // "Site default" is a rule rather than a theme, and the rule it defers to may
+        // itself be Auto, so it resolves first and falls through.
+        if (handle === 'inherit') {
+            handle = this.inherits;
+        }
+
         if (handle !== 'auto') {
             return handle;
         }
@@ -691,6 +699,14 @@ JS;
     {
         $this->registerThemes($this->themes->getEnabledThemes(), null);
 
+        // Only the preferences picker offers "Site default", but naming what it resolves
+        // to is harmless where it doesn't.
+        Craft::$app->getView()->registerJs(
+            sprintf('Cast.learnInherit(%s);', Json::encode($this->getSettings()->defaultTheme)),
+            View::POS_HEAD,
+            'cast-inherit',
+        );
+
         $this->bindPreview($selector, 'Cast.apply(this.value, false)');
     }
 
@@ -718,10 +734,14 @@ JS;
 
             $this->registerPreview('#castTheme');
 
+            $themes = $this->themes->getEnabledThemes();
+
             return Craft::$app->getView()->renderTemplate('cast/_prefs.twig', [
                 'plugin' => $this,
                 'user' => $user,
-                'themes' => $this->themes->getEnabledThemes(),
+                'themes' => $themes,
+                'lightThemes' => $this->themes->toSchemeOptions($themes, false),
+                'darkThemes' => $this->themes->toSchemeOptions($themes, true),
                 'settings' => $this->getSettings(),
             ], View::TEMPLATE_MODE_CP);
         });
@@ -742,27 +762,65 @@ JS;
                     return;
                 }
 
-                $handle = $request->getBodyParam(Themes::PREF_KEY);
                 $user = Craft::$app->getUser()->getIdentity();
 
-                if ($handle === null || !$user) {
+                if (!$user) {
                     return;
                 }
 
-                // An unknown handle would silently fall back to the default on every
-                // render, so don't persist it.
-                if (
-                    $handle !== Settings::THEME_AUTO &&
-                    $handle !== Settings::THEME_NONE &&
-                    $handle !== Settings::THEME_INHERIT &&
-                    !$this->themes->getThemeByHandle($handle)
-                ) {
-                    return;
-                }
+                // The Auto pair posts even while hidden, so switching away from Auto and
+                // back doesn't lose it. Each key is validated on its own, and one that
+                // doesn't hold up is dropped rather than failing the save: the rest of
+                // the preferences form has already been written by Craft's own action.
+                $prefs = array_filter([
+                    Themes::PREF_KEY => $this->postedTheme($request, Themes::PREF_KEY, null),
+                    Themes::PREF_LIGHT_KEY => $this->postedTheme($request, Themes::PREF_LIGHT_KEY, false),
+                    Themes::PREF_DARK_KEY => $this->postedTheme($request, Themes::PREF_DARK_KEY, true),
+                ], static fn(?string $handle) => $handle !== null);
 
-                Craft::$app->getUsers()->saveUserPreferences($user, [Themes::PREF_KEY => $handle]);
+                if ($prefs !== []) {
+                    Craft::$app->getUsers()->saveUserPreferences($user, $prefs);
+                }
             }
         );
+    }
+
+    /**
+     * A posted theme preference, or null if it wasn't posted or isn't storable.
+     *
+     * An unknown handle would silently fall back to the default on every render, so it
+     * isn't persisted at all.
+     *
+     * @param bool|null $dark Which half of the Auto pair this key holds, restricting it
+     * to themes of that scheme. Null for the theme preference itself, which additionally
+     * accepts `auto`.
+     */
+    private function postedTheme(Request $request, string $key, ?bool $dark): ?string
+    {
+        $handle = $request->getBodyParam($key);
+
+        if (!is_string($handle)) {
+            return null;
+        }
+
+        // Neither is a handle discovery ever produces, but both are rows the picker
+        // offers: hand the choice back, or take no stylesheet at all.
+        if ($handle === Settings::THEME_INHERIT || $handle === Settings::THEME_NONE) {
+            return $handle;
+        }
+
+        if ($handle === Settings::THEME_AUTO) {
+            return $dark === null ? $handle : null;
+        }
+
+        $theme = $this->themes->getEnabledThemes()[$handle] ?? null;
+
+        if ($theme === null) {
+            return null;
+        }
+
+        // A pair whose halves both painted dark would leave one of them unreachable.
+        return $dark === null || $theme->getIsDark() === $dark ? $handle : null;
     }
 
     protected function createSettingsModel(): ?Model

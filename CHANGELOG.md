@@ -1,5 +1,16 @@
 # Release Notes for Cast
 
+## Unreleased
+
+### Added
+- A user on **Auto** can name their own light and dark themes in **Account → Preferences**, instead of being held to the admin's pair. Both halves start at **Site default**, so nothing moves for anyone who leaves them alone, and either one defers again if the theme it names is uninstalled or dropped from the enabled list.
+
+### Changed
+- **Colour mode** sits with the rest of the display preferences rather than below an admin's Development settings.
+
+### Fixed
+- **Site default** previewed as Craft's stock light CP rather than as the theme it resolves to.
+
 ## 1.0.0-beta.6 - 2026-07-29
 
 ### Fixed
