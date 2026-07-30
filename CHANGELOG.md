@@ -3,12 +3,11 @@
 ## 1.0.0-beta.6 - 2026-07-29
 
 ### Fixed
-- Craft writes a `--gray-*` step out as a literal in a few dozen rules, which a theme moving the ramp then leaves behind. The sticky header and footer, live preview's headers, `h6`, optgroup and autosuggest headers, header button hovers, pane headers, dashed buttons, flex-field dividers and disabled table cells now read the ramp — in a new `_shared.css`, so a project theme gets them too.
-- Colour swatches and transparent asset thumbnails drew their chequerboard in the same literal, so an unset colour read as a dark blob. The card drag placeholder took it as a dashed border.
-- A colour cell in a table took the code block fill across its whole width, and the `#` prefix inside it took another. Craft puts `.code` on an editable table's cells for a monospace column and pairs it with `.light` on a muted label, neither meaning a code block, so cells and `.light` labels now join the form controls the fill skips. Menu item descriptions come with them.
-- The white veils Craft lays over a region while it works stayed white: behind an asset upload's progress bar, over an element index mid-refresh, and over the icon picker while it loads. Tooltips went with them.
-- `--fg-input` is written out in four rules, leaving their outlines on Craft's blue while every control fill around them followed the theme: dashed buttons like an editable table's **Add a row**, grouped and hairline panes, the card view designer's preview, and the details pane's unfocused inputs.
-- Three declarations in the dark base mixed `hsl()`'s comma and slash syntaxes, so browsers threw them out whole. The dark sticky header, the element index's refresh veil and live preview's headers had been falling back to Craft's own colour.
+- Craft writes ramp steps and `--fg-input` out as literals in a few dozen rules, so they stayed put while a theme moved around them. Now read from the properties, in a new `_shared.css` that project themes get too.
+- Chequerboards behind colour swatches and transparent thumbnails, so an unset colour read as a dark blob.
+- The white veils over a region Craft is working on: asset uploads, index refreshes, the icon picker, tooltips.
+- `.code` on a table cell or a `.light` label means monospace, not a code block. Both took the block fill.
+- Three dark base declarations mixed `hsl()`'s comma and slash syntaxes and were dropped whole, so the dark sticky header had never worked.
 
 ## 1.0.0-beta.5 - 2026-07-29
 
