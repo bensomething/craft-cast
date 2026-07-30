@@ -7,7 +7,8 @@
  *
  * The base derives nearly everything from the ramp, so redeclaring it moves the whole CP.
  * What follows the ramp is the short list the base pins to literal blues, which would
- * otherwise sit cold against a warm neutral.
+ * otherwise sit cold against a warm neutral. Those are all `--cast-*` tokens, so retinting
+ * them is a declaration each rather than a restatement of the base's rules.
  *
  * Stone palette from Tailwind CSS, MIT licensed. See https://tailwindcss.com
  */
@@ -52,6 +53,21 @@ html[data-cast-theme="stone-dark"] {
        black shadow greys the edge, so panes get a hairline off the ramp as well. */
     --pane-shadow: 0 0 0 1px hsl(var(--gray-200-hsl)), 0 1px 6px hsl(20, 14%, 4%, 40%);
     --modal-shadow: 0 0 0 1px hsl(var(--gray-300-hsl)), 0 25px 100px hsl(20, 14%, 4%, 60%);
+
+    /* Code blocks drop below the pane rather than rising above it, the floor being
+       stone-950. Inline `<code>` is left alone, as Craft leaves it, and form controls
+       marked `.code` keep the input background, as do `.light` labels and monospace table
+       cells, both of which Craft also marks `.code`. */
+    --cast-code-bg: hsl(var(--gray-050-hsl));
+
+    /* The image editor is built for the dark end of the ramp, so the base pins its chrome
+       to fixed values rather than letting an inversion turn the whole modal white. Those
+       values are blue, so they're restated at the same lightnesses in stone's hue. */
+    --cast-editor-canvas: hsl(20, 12%, 8%);
+    --cast-editor-rule: hsl(20, 14%, 4%);
+    --cast-editor-btn: hsl(28, 6%, 26%);
+    --cast-editor-btn-hover: hsl(28, 6%, 32%);
+    --cast-editor-btn-active: hsl(28, 6%, 38%);
 }
 
 /* A CKEditor field draws its whole box — the toolbar, the editable, the rule between them
@@ -68,59 +84,3 @@ html[data-cast-theme="stone-dark"] {
 /* The base's link blue is left alone deliberately. It's the one hue that shouldn't follow
    the palette — a link that stops reading as a link costs more than the warmth gains —
    and it already clears AA on a dark ground. */
-
-/* Code blocks drop below the pane rather than rising above it, the floor being stone-950.
-   Inline `<code>` is left alone, as Craft leaves it, and form controls marked `.code`
-   keep the input background, as do `.light` labels and monospace table
-   cells, both of which Craft also marks `.code`. */
-html[data-cast-theme="stone-dark"] pre,
-html[data-cast-theme="stone-dark"] .code:not(input, textarea, select, .text, .light, td, th) {
-    background-color: hsl(var(--gray-050-hsl));
-}
-
-html[data-cast-theme="stone-dark"] .pane pre {
-    background-color: transparent;
-}
-
-/* Prism's blocks carry an attribute selector, which outranks the plain `pre` rule above,
-   so they keep the base's blue-black unless matched at the same weight. */
-html[data-cast-theme="stone-dark"] :not(pre) > code[class*="language-"],
-html[data-cast-theme="stone-dark"] pre[class*="language-"] {
-    background: hsl(var(--gray-050-hsl));
-}
-
-/* The image editor is built for the dark end of the ramp, so the base pins its chrome to
-   fixed values rather than letting an inversion turn the whole modal white. Those values
-   are blue, so they're restated here at the same lightnesses in stone's hue. */
-html[data-cast-theme="stone-dark"] .modal.imageeditor {
-    background-color: hsl(20, 12%, 8%);
-}
-
-html[data-cast-theme="stone-dark"] .modal.imageeditor .body .tabs,
-html[data-cast-theme="stone-dark"] .modal.imageeditor .body .tabs ul li {
-    border-color: hsl(20, 14%, 4%);
-}
-
-/* The straightening rule fades its ends out to the canvas colour, so the fade has to be
-   restated whenever that colour moves. */
-html[data-cast-theme="stone-dark"] .slide-rule .overlay {
-    background-image: linear-gradient(
-        to right,
-        hsl(20, 12%, 8%) 0,
-        rgb(0 0 0 / 0%) 15%,
-        rgb(0 0 0 / 0%) 85%,
-        hsl(20, 12%, 8%) 100%
-    );
-}
-
-html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder) {
-    background-color: hsl(28, 6%, 26%);
-}
-
-html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder):hover {
-    background-color: hsl(28, 6%, 32%);
-}
-
-html[data-cast-theme="stone-dark"] .modal.imageeditor .btn:not(.submit, .noborder).active {
-    background-color: hsl(28, 6%, 38%);
-}

@@ -74,7 +74,7 @@ html[data-cast-theme] body.cast-ignore-plugin-store :is(#app, .ps-wrapper) {
     --gray-900-hsl: 210, 24%, 16%;
     --gray-1000-hsl: 210, 24%, 10%;
     --body-bg: var(--gray-100);
-    --bg-color-hsl: 212deg, 50%, 93%;
+    --bg-color-hsl: 212, 50%, 93%;
     --text-color: var(--gray-700);
     --light-text-color: var(--gray-550);
     --link-color: #2563eb;
@@ -90,7 +90,7 @@ html[data-cast-theme] body.cast-ignore-plugin-store :is(#app, .ps-wrapper) {
     --login-modal-bg: var(--gray-100);
     --shade-bg: hsl(from var(--gray-900) h s l / 50%);
     --input-bg: hsl(212, 50%, 99%);
-    --input-border-color: hsl(212deg 25% 50% / 40%);
+    --input-border-color: hsla(212, 25%, 50%, 0.4);
     --fg-input: #607d9f;
     --bg-error: var(--red-100);
     --bg-warning: var(--amber-100);
@@ -109,7 +109,7 @@ html[data-cast-theme] body.cast-ignore-plugin-store :is(#app, .ps-wrapper) {
     --error-color-rgb: 216 31 35;
     --border-hairline: rgb(from var(--gray-800) r g b/10%);
     --border-hairline-medium: #cfd8e3;
-    --border-hairline-dark: rgb(from hsl(210deg 10% 53%) r g b/50%);
+    --border-hairline-dark: rgb(from hsl(210, 10%, 53%) r g b / 50%);
     --bg-selection-light: var(--gray-200);
     --bg-selection-dark: var(--gray-500);
     --focus-outline-light: var(--blue-300);

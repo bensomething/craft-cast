@@ -18,17 +18,12 @@
  * The opt-out reset that used to close this file now lives in `_stock.css`, which loads
  * for any theme rather than only dark ones.
  *
- * Worth knowing before reorganising what's left: 69 of the 118 dark-scoped rules below
- * set nothing but `var()` values, so they aren't dark-specific at all — they're places
- * Craft wrote a literal where a custom property already existed, and pointing it back at
- * the property is right for any theme. `stone.css` repeats a handful of them for the same
- * reason on the light side.
- *
- * That duplication is deliberate. Hoisting the shared half into a base loaded for every
- * theme would be a large change to a file whose light behaviour nobody has verified,
- * against a saving of about forty lines, for a second consumer that may never exist —
- * light themes mostly run with Craft's grain and don't hit this. Revisit if a second
- * light theme ever needs to retint the ramp.
+ * Worth knowing before reorganising what's left: a large share of the rules below set
+ * nothing but `var()` values, so they aren't dark-specific at all — they're places Craft
+ * wrote a literal where a custom property already existed, and pointing it back at the
+ * property is right for any theme. `stone.css` repeats a handful of them for the same
+ * reason on the light side. Hoisting those into a base that loads for every theme is a
+ * separate job, and some are worth upstreaming to Craft rather than carrying here.
  */
 
 html[data-cast-scheme="dark"] {
@@ -59,6 +54,17 @@ html[data-cast-scheme="dark"] {
     --cast-popover-outline: rgb(255 255 255 / 14%);
     --cast-popover-shadow: 0 0 0 1px var(--cast-popover-outline), 0 5px 20px rgb(0 0 0 / 45%);
 
+    /* Surfaces that sit below the ramp's floor rather than on it. Code blocks drop under
+       the pane they're in, and the image editor is Craft's one already-dark screen, so it
+       gets pinned rather than inverted (see below). Both are held here so a theme can
+       retint them from its ramp instead of restating the rules. */
+    --cast-code-bg: hsl(210, 24%, 8%);
+    --cast-editor-canvas: hsl(210, 24%, 8%);
+    --cast-editor-rule: hsl(210, 22%, 4%);
+    --cast-editor-btn: hsl(210, 14%, 26%);
+    --cast-editor-btn-hover: hsl(210, 14%, 32%);
+    --cast-editor-btn-active: hsl(210, 14%, 38%);
+
     /* General */
     --body-bg: hsl(var(--gray-050-hsl));
     --bg-color-hsl: var(--gray-050-hsl);
@@ -83,7 +89,7 @@ html[data-cast-scheme="dark"] {
 
     /* Inputs */
     --input-bg: hsl(210, 22%, 15%);
-    --input-border-color: hsl(212deg 15% 60% / 35%);
+    --input-border-color: hsla(212, 15%, 60%, 0.35);
     --fg-input: #8ba7c7;
 
     /* Craft's light status tints are far too bright as fills, so these are deep
@@ -464,10 +470,6 @@ html[data-cast-scheme="dark"] .meta > .flex-fields h2 {
     background-color: var(--secondary-pane-bg);
 }
 
-html[data-cast-scheme="dark"] .lp-editor-container {
-    background-color: var(--pane-bg);
-}
-
 /* Loading and progress shades assume a light page underneath. */
 html[data-cast-scheme="dark"] .icon-picker-modal .body .icon-picker-modal--list.loading:after,
 html[data-cast-scheme="dark"] .cp-image-controls .progress-shade {
@@ -600,7 +602,7 @@ html[data-cast-scheme="dark"] pre[class*="language-"] {
 
 html[data-cast-scheme="dark"] :not(pre) > code[class*="language-"],
 html[data-cast-scheme="dark"] pre[class*="language-"] {
-    background: hsl(210, 24%, 8%);
+    background: var(--cast-code-bg);
 }
 
 html[data-cast-scheme="dark"] .token.comment,
@@ -947,13 +949,13 @@ html[data-cast-scheme="dark"] .cp-image-controls .btn {
    -------------------------------------------------------------------------- */
 
 html[data-cast-scheme="dark"] .modal.imageeditor {
-    background-color: hsl(210, 24%, 8%);
+    background-color: var(--cast-editor-canvas);
     color: #fff;
 }
 
 html[data-cast-scheme="dark"] .modal.imageeditor .body .tabs,
 html[data-cast-scheme="dark"] .modal.imageeditor .body .tabs ul li {
-    border-color: hsl(210, 22%, 4%);
+    border-color: var(--cast-editor-rule);
 }
 
 /* The straightening rule fades its ends out to `--gray-900`, so the fade has to be
@@ -961,24 +963,24 @@ html[data-cast-scheme="dark"] .modal.imageeditor .body .tabs ul li {
 html[data-cast-scheme="dark"] .slide-rule .overlay {
     background-image: linear-gradient(
         to right,
-        hsl(210, 24%, 8%) 0,
+        var(--cast-editor-canvas) 0,
         rgb(0 0 0 / 0%) 15%,
         rgb(0 0 0 / 0%) 85%,
-        hsl(210, 24%, 8%) 100%
+        var(--cast-editor-canvas) 100%
     );
 }
 
 html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder) {
-    background-color: hsl(210, 14%, 26%);
+    background-color: var(--cast-editor-btn);
     color: #fff;
 }
 
 html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder):hover {
-    background-color: hsl(210, 14%, 32%);
+    background-color: var(--cast-editor-btn-hover);
 }
 
 html[data-cast-scheme="dark"] .modal.imageeditor .btn:not(.submit, .noborder).active {
-    background-color: hsl(210, 14%, 38%);
+    background-color: var(--cast-editor-btn-active);
 }
 
 /* --------------------------------------------------------------------------
@@ -1053,7 +1055,7 @@ html[data-cast-scheme="dark"] .zilch img {
    grey slab in the middle of a control. */
 html[data-cast-scheme="dark"] pre,
 html[data-cast-scheme="dark"] .code:not(input, textarea, select, .text, .light, td, th) {
-    background-color: hsl(210, 24%, 8%);
+    background-color: var(--cast-code-bg);
     color: var(--gray-800);
 }
 
