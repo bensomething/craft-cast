@@ -112,11 +112,38 @@ tokens.
 The shape of the plugin changes. Today Cast is mostly a palette that happens to have a
 picker attached. On 6.x it is mostly a picker that happens to generate palettes.
 
+## How a theme reaches inside a component
+
+Components don't author against colours. They author against nine **generic** properties —
+`--c-color-{fill,border,on}-{loud,normal,quiet}` — and a `variant` attribute on the host
+remaps those nine onto a semantic group, in `styles/variants.styles.ts`. The groups
+themselves live in the generated `colorable.css`: 486 properties at `:root`, being 21 hues
+and six semantics at nine each.
+
+All of that is declared outside the shadow root and inherits inward. So a plugin
+stylesheet does reach into every component, for colour — override
+`--c-color-danger-fill-loud` at `:root` and every danger surface follows, component or
+not. `colorable.css` carries no dark block of its own; it resolves through `--color-*`,
+which flips under `[data-theme='dark']`, so it adapts for free.
+
+That is the entry point a 6.x Cast would theme through, and it's a much better one than
+selectors: 486 properties, declared in one generated file, covering surfaces Cast can't
+currently reach at all.
+
+The system is early, though. Four of 58 components import `variants.styles.ts`; six
+declare a `variant` property. `static-variants.styles.ts` is imported by nothing.
+And the `default` → `neutral` rename from #18791 landed in `constants/variants.ts` but not
+in `variants.styles.ts`, which still keys on `[variant~='default']` — so that block matches
+nothing, and `variant="neutral"` gets no mapping. Callout hides it with `:host` fallbacks
+to the neutral group. The Storybook page documents the intended system rather than the
+built one; read the source alongside it.
+
 ## Two structural problems
 
-**Shadow DOM.** 58 Lit components with constructed stylesheets in shadow roots. Custom
-properties inherit in — `tokens.css` is scoped `:root, :host`, deliberately — but nothing
-else does. Cast currently carries ~206 selector-based patches:
+**Shadow DOM, for everything that isn't colour.** 58 Lit components with constructed
+stylesheets in shadow roots. Custom properties inherit in, as above — but nothing else
+does, so any patch needing an actual selector is out of reach. Cast currently carries
+~206 selector-based patches:
 
 | File | Rule blocks | Selector patches |
 | --- | --- | --- |
@@ -130,14 +157,17 @@ else does. Cast currently carries ~206 selector-based patches:
 | `stone-dark.css` | 2 | 0 |
 | `dark.css` | 0 | 0 |
 
-Every one of those that targets something now shipping as a component — `combobox`
-(selectize), `select`, `input`, `checkbox`, `radio`, `slide-picker` (range inputs), `tab`,
-`tabs`, `dialog`, `popover`, `tooltip`, `card`, `chip`, `badge`, `pane`, `nav-item`,
-`status` — stops working. Not "needs updating": there is no selector that reaches inside.
-If Craft doesn't expose a token or a `::part()`, the answer is to file for one.
+Any of those targeting something now shipping as a component — `combobox` (selectize),
+`select`, `input`, `checkbox`, `radio`, `slide-picker` (range inputs), `tab`, `tabs`,
+`dialog`, `popover`, `tooltip`, `card`, `chip`, `badge`, `pane`, `nav-item`, `status` —
+needs to become a token override or go. There is no selector that reaches inside, and if
+Craft exposes neither a token nor a `::part()` for something, the answer is to file for
+one.
 
-This is a real ceiling that didn't exist in 5.x, and it argues for auditing the patch
-list against the component list early rather than porting and discovering it.
+The audit is worth doing early, and it should sort the 206 into three piles: colour, which
+the token layer absorbs; geometry and layout, which needs a `::part()` or an upstream fix;
+and rules that were only ever working around a Craft literal, which the compat layer may
+already have retired.
 
 **No inline head hook on the new shell.** `Plugins::addStyle()` and `addScript()` take
 URLs only; `getAssetsHtml()` emits `<link>` and `<script src … defer>`. A deferred script
@@ -159,6 +189,14 @@ necessary there.
 
 It persists on the legacy half wherever Craft still writes literals. Re-audit rather than
 assume: `_compat.scss` may already have caught most of them.
+
+**Button colour is the clearest win.** `button.styles.ts` derives its active state as
+`hsl(from var(--c-color-fill-loud) h s calc(l - 10))` — relative colour syntax off the
+token — and takes its label from the ramp's foreground stop, where contrast is structural.
+The README currently has to explain that each of the nine colours is shaded per mode so
+the white label clears AA, with Amber a knowing compromise at 3.19:1. On 6.x that becomes
+picking a hue. And `colorable.css` already generates 21 of them behind
+`[data-color='…']`, so Cast's nine are a subset of something Craft ships.
 
 Concretely:
 
