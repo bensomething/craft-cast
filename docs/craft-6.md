@@ -82,7 +82,7 @@ and a run of layout widths.
 
 The generated half of that (the `-hsl` variants, the missing stops, the button family)
 is mechanical. The `--CHANGE` half needs design decisions that are Craft's to make.
-Drafted as an upstream report in [craft-6-compat-issue.md](craft-6-compat-issue.md).
+Worth raising with Craft either way.
 
 Worth knowing: 189 legacy Twig templates and ~14.3k lines of legacy SCSS still render
 most of the CP, against 41 Inertia pages. `ThemeAsset` survives as
