@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## Unreleased
+## 1.0.0-beta.7 - 2026-07-31
 
 ### Added
 - A user on **Auto** can name their own light and dark themes in **Account → Preferences**, instead of being held to the admin's pair. Both halves start at **Site default**, so nothing moves for anyone who leaves them alone, and either one defers again if the theme it names is uninstalled or dropped from the enabled list.
