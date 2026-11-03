@@ -8,6 +8,60 @@ Checked against `craftcms/cms` `6.x` at `18e2816` (30 July 2026), the Storybook 
 [#18745](https://github.com/craftcms/cms/pull/18745) (merged 1 May 2026) and
 [#18791](https://github.com/craftcms/cms/pull/18791) (merged 5 June 2026).
 
+## Update, November 2026
+
+Rechecked against `6.x` at `d1f5652` (2 November 2026), ~7,000 commits on, tagged as far
+as `6.0.0-alpha.9`. The rest of this document is the July reading; where the two disagree,
+this section wins.
+
+**Craft shipped the switch.** `73f42eeb3e` (13 October,
+[#19966](https://github.com/craftcms/cms/pull/19966)) adds a Theme user preference —
+Light, Dark, or System, the default — under Preferences → General.
+
+- Dark is stamped as `data-theme="dark"` on `<html>` server-side. System stamps it from an
+  inline script ahead of any styles, in both `resources/views/app.blade.php` and the legacy
+  `resources/templates/_layouts/base.twig`, so neither shell flashes.
+- `resources/js/common/composables/useTheme.ts` follows the OS as it changes and applies a
+  saved preference without a reload.
+- A `CraftTheme` cookie (`RememberTheme` middleware) carries the resolved theme to
+  logged-out pages and lets the server know what System resolved to.
+- The command palette can set it too (`set-theme-*` actions in `Cp/CommandPalette/Actions.php`).
+- The commit calls the dark theme work in progress, and fixes were still landing on
+  29 October.
+
+So four rows of the table below are now Craft's: stamping the mode, the per-user
+preference, Auto/OS pairing, and flash-free application. The watch list's "whether Craft
+ships a native toggle" has resolved.
+
+**What's still Cast's.** `CraftCms\Cms\Cp\Enums\Theme` is a closed enum of three cases with
+no registration point. There is no site-wide default (System is hard-coded in
+`Theme::forUser()`), no way to limit the choice, no modes beyond light and dark, no theme
+API, no button colour, no independent light/dark halves for System, and no opt-out region.
+`forced-colors` is mostly unticked items in the components' `a11y.md` checklists, so high
+contrast is untouched.
+
+**The head blocker is probably gone.** The Inertia shell now prints `{!! $headHtml !!}`,
+fed from `HtmlStack` by `HandleInertiaRequests`, and `HtmlStack::js()` takes
+`Position::Head`. That should let a plugin put an inline script ahead of first paint on
+Inertia pages. Untested.
+
+**Unchanged.** `_compat.scss` is 620 lines with 30 `var(--CHANGE)` placeholders (32 in
+July). `ThemeAsset` survives in `src/View/LegacyAssets/`. The CP is 51 Inertia pages
+against 130 legacy Twig templates, with 74 Lit components.
+
+**What it means for the port:**
+
+- Ride Craft's `data-theme`, don't compete with it. A Cast dark theme should resolve
+  Craft to dark and declare deltas over it, as `_dark-base.css` does today. Craft's own
+  Dark likely makes Cast's redundant.
+- That has to reach the server, not just the attribute: asset icons pick their dark
+  variants through `Theme::resolveFor()`, which reads the user's preference and the
+  cookie. A Cast dark theme over Craft's Light gets light icons.
+- Two pickers is the real UX problem. Craft's enum is closed, so Cast needs its own
+  preference beside Craft's, and has to decide which wins, or hide Craft's while installed.
+- Don't build against Craft's dark yet. It was still moving last week, and the token names
+  are pre-1.0.
+
 ## What Craft 6 ships
 
 A generated palette. `packages/craftcms-ui/src/styles/color-definitions.js` feeds colour
