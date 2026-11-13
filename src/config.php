@@ -10,7 +10,7 @@
  * Craft's usual `*`, `dev`, `staging` and `production` keys.
  */
 
-use bensomething\cast\models\Settings;
+use bensomething\cast\Settings;
 
 return [
     // Fill for primary buttons: red, amber, green, teal, sky, blue, violet, pink or gray.
