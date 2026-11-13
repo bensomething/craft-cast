@@ -92,6 +92,62 @@
         // Every theme's stylesheet is already on the page, so each change repaints at once.
         var keys = { light: 'castLight', dark: 'castDark' };
 
+        // Fields moved out of the fragment are beyond Craft's cleanup of an old render,
+        // so whatever an earlier render moved goes before this one moves its own.
+        document.querySelectorAll('[data-cast-moved]').forEach(function(old) {
+            old.remove();
+        });
+
+        function move(field, after) {
+            field.setAttribute('data-cast-moved', '');
+            after.parentNode.insertBefore(field, after.nextSibling);
+        }
+
+        var fields = Array.prototype.slice.call(root.querySelectorAll('[data-cast-field]'));
+        var widths = ['width-25', 'width-33', 'width-50', 'width-66', 'width-75'];
+
+        // The appearances share a row with Craft's Theme field, in its own group. Craft
+        // gives plugins no hook there; this places them after it. If Craft's markup
+        // changes, they stay in Cast's group below, costing the layout and not the fields.
+        var themeField = document.querySelector('craft-field-group > craft-radio-group[name="theme"]');
+
+        if (themeField) {
+            fields.slice().reverse().forEach(function(field) {
+                move(field, themeField);
+            });
+        }
+
+        // Splits the row between Theme and whichever appearances its value shows: thirds
+        // for System, halves for Light or Dark. The group stacks them again when narrow.
+        function layout(theme) {
+            var shown = fields.filter(function(field) {
+                var scheme = field.getAttribute('data-cast-field');
+                var visible = theme === 'system' || theme === scheme;
+
+                field.style.display = visible ? '' : 'none';
+
+                return visible;
+            });
+
+            // Without Craft's field to share a row with, each keeps a full one.
+            if (!themeField) {
+                return;
+            }
+
+            var width = { 1: 'width-50', 2: 'width-33' }[shown.length];
+
+            [themeField].concat(shown).forEach(function(el) {
+                el.classList.remove.apply(el.classList, widths);
+
+                if (width) {
+                    el.classList.add(width);
+                }
+            });
+        }
+
+        var checked = document.querySelector('input[name="theme"][type="radio"]:checked');
+        layout(checked ? checked.value : {{ craftTheme | json_encode | raw }});
+
         // Follow Craft's Theme field as it changes, before it's saved. Delegated from the
         // document, as Vue owns those radios and may replace them. One listener for the
         // page, swapped for this render's, so re-renders don't stack them.
@@ -102,16 +158,9 @@
         window.CastThemeListener = function(event) {
             var input = event.target;
 
-            if (!input || input.name !== 'theme' || input.type !== 'radio' || !input.checked) {
-                return;
+            if (input && input.name === 'theme' && input.type === 'radio' && input.checked) {
+                layout(input.value);
             }
-
-            root.querySelectorAll('[data-cast-field]').forEach(function(field) {
-                var scheme = field.getAttribute('data-cast-field');
-                var shown = input.value === 'system' || input.value === scheme;
-
-                field.style.display = shown ? '' : 'none';
-            });
         };
 
         document.addEventListener('change', window.CastThemeListener);
@@ -150,18 +199,16 @@
         // straight after Display Settings. It's placed beside Craft's own fields rather
         // than inside one, which Vue re-renders. If Craft's markup changes, it stays put
         // under Appearance, costing the position and not the setting.
-        //
-        // Once moved, the switch is outside the fragment, so Craft's cleanup of an old
-        // render never reaches it. Whatever an earlier render moved goes first.
         var display = document.querySelector('#preferences-accessibility craft-field-group > craft-checkbox-select');
 
         if (display) {
-            document.querySelectorAll('[data-cast-moved]').forEach(function(old) {
-                old.remove();
-            });
+            move(contrastField, display);
+        }
 
-            contrastField.setAttribute('data-cast-moved', '');
-            display.parentNode.insertBefore(contrastField, display.nextSibling);
+        // With everything placed in Craft's groups, Cast's own is empty; don't let it
+        // leave a gap at the end of the section.
+        if (!root.children.length) {
+            root.style.display = 'none';
         }
     })();
 {% endjs %}
