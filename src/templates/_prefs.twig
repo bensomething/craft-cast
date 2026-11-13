@@ -18,8 +18,8 @@
    fields 24px, so the difference goes on top to sit these at the field spacing. #}
 <craft-field-group id="cast-prefs" style="margin-block-start: calc(var(--c-spacing) * 3)">
     {% for field in [
-        { scheme: 'light', label: 'Light Appearance' | t('cast'), help: 'Used when the control panel theme is light.' | t('cast'), options: lightOptions, value: lightValue },
-        { scheme: 'dark', label: 'Dark Appearance' | t('cast'), help: 'Used when the control panel theme is dark.' | t('cast'), options: darkOptions, value: darkValue },
+        { scheme: 'light', label: 'Light Appearance' | t('cast'), options: lightOptions, value: lightValue },
+        { scheme: 'dark', label: 'Dark Appearance' | t('cast'), options: darkOptions, value: darkValue },
     ] %}
         {# Only worth asking where there's more than Craft's own to choose from. #}
         {% if field.options | length > 2 %}
@@ -31,7 +31,6 @@
                 style: craftTheme not in [field.scheme, 'system'] ? 'display: none' : false,
             } %}
                 <label slot="label" for="cast-{{ field.scheme }}">{{ field.label }}</label>
-                <span slot="help-text">{{ field.help }}</span>
                 <select slot="input" id="cast-{{ field.scheme }}" data-cast-scheme="{{ field.scheme }}">
                     {% for option in field.options %}
                         <option value="{{ option.value }}" {{ option.value == field.value ? 'selected' }}>{{ option.label }}</option>
