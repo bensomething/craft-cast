@@ -29,10 +29,13 @@ class Plugin extends BasePlugin
 
     /**
      * Every theme loads on every CP page. They're small and scoped to their own
-     * attribute, and it's what lets a change repaint without a reload.
+     * attribute, and it's what lets a change repaint without a reload. Appearances stand
+     * down under high contrast by selector, so order doesn't decide between them.
      */
     protected array $styles = [
+        __DIR__.'/../resources/themes/stone.css' => 'themes/stone.css',
         __DIR__.'/../resources/themes/dim.css' => 'themes/dim.css',
+        __DIR__.'/../resources/themes/high-contrast.css' => 'themes/high-contrast.css',
     ];
 
     public function boot(Router $router, TemplateHooks $hooks): void
@@ -51,7 +54,7 @@ class Plugin extends BasePlugin
         return new Settings;
     }
 
-    /** The light and dark appearance fields, under Craft's own Theme field. */
+    /** The appearance fields, under Craft's own Theme field, and the contrast switch. */
     private function preferencesHtml(): string
     {
         /** @var Settings $settings */
@@ -71,6 +74,7 @@ class Plugin extends BasePlugin
             'darkValue' => $themes->storedChoice($user, Themes::SCHEME_DARK),
             'lightDefault' => $themes->siteDefault(Themes::SCHEME_LIGHT),
             'darkDefault' => $themes->siteDefault(Themes::SCHEME_DARK),
+            'highContrast' => $themes->highContrastForUser($user),
             'saveUrl' => Url::actionUrl('cast/preferences'),
             'csrfToken' => csrf_token(),
         ], templateMode: TemplateMode::Cp);

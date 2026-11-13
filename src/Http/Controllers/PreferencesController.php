@@ -50,6 +50,16 @@ final readonly class PreferencesController
             $prefs[$this->themes->prefKey($scheme)] = $value;
         }
 
+        if ($request->has('highContrast')) {
+            $value = $request->input('highContrast');
+
+            if (! is_bool($value)) {
+                return response()->json(['message' => t('Contrast must be on or off.', category: 'cast')], 422);
+            }
+
+            $prefs[Themes::PREF_CONTRAST] = $value;
+        }
+
         if ($prefs !== []) {
             // Merges into what's stored, so Craft's own preferences are untouched.
             $this->users->saveUserPreferences($user, $prefs);

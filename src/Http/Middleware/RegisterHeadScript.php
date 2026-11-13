@@ -55,6 +55,10 @@ final readonly class RegisterHeadScript
             }
         }
 
+        if ($this->themes->highContrastForUser($user)) {
+            $set[] = 'd.castContrast="more";';
+        }
+
         return $set === [] ? '' : 'var d=document.documentElement.dataset;'.implode('', $set);
     }
 }

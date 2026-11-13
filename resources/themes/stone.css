@@ -1,0 +1,71 @@
+/**
+ * Cast: Stone
+ *
+ * Craft's neutrals with the chill taken off. Craft's surfaces (the base ramp) and its
+ * text and borders (the slate ramp) carry a blue-grey cast; Stone swaps that for the warm
+ * hue and chroma of Craft's own stone ramp.
+ *
+ * Every step keeps the luminance of the Craft step it replaces, so every contrast ratio
+ * in the control panel is exactly Craft's. Only the hue moves. Generated against Craft
+ * 6.0.0-beta.1's palette; Craft's original value follows each line in the source this was
+ * computed from, and pure white is left as it is.
+ *
+ * One stylesheet for both modes: Stone is offered as a light and as a dark appearance.
+ * Anything Craft draws in its slate hue on purpose (a slate chip, say) warms with it.
+ */
+
+html:not([data-theme='dark'])[data-cast-light='stone']:not([data-cast-contrast]) {
+    /* Surfaces: the base ramp. */
+    --color-base-50: #ffffff;
+    --color-base-100: #f6f5f4;
+    --color-base-200: #ecebea;
+    --color-base-300: #d4d3d0;
+    --color-base-400: #b3b0ac;
+    --color-base-500: #7f7974;
+    --color-base-600: #6f6964;
+    --color-base-700: #5e5954;
+    --color-base-800: #3f3c38;
+    --color-base-900: #2b2824;
+    --color-base-950: #171411;
+
+    /* Text and borders: the slate ramp. */
+    --color-slate-50: #eeedec;
+    --color-slate-100: #d9d8d6;
+    --color-slate-200: #c7c5c2;
+    --color-slate-300: #a5a19c;
+    --color-slate-400: #938e89;
+    --color-slate-500: #817b76;
+    --color-slate-600: #6e6863;
+    --color-slate-700: #5b5651;
+    --color-slate-800: #494540;
+    --color-slate-900: #383431;
+    --color-slate-950: #292623;
+}
+
+html[data-theme='dark'][data-cast-dark='stone']:not([data-cast-contrast]) {
+    /* Surfaces: the base ramp. */
+    --color-base-50: #32302b;
+    --color-base-100: #3f3c37;
+    --color-base-200: #45423d;
+    --color-base-300: #56524c;
+    --color-base-400: #6e6963;
+    --color-base-500: #a09b96;
+    --color-base-600: #b1aeaa;
+    --color-base-700: #c9c7c4;
+    --color-base-800: #f8f7f6;
+    --color-base-900: #ffffff;
+    --color-base-950: #ffffff;
+
+    /* Text and borders: the slate ramp. */
+    --color-slate-50: #44413c;
+    --color-slate-100: #5d5953;
+    --color-slate-200: #6c6761;
+    --color-slate-300: #7c7671;
+    --color-slate-400: #8d8782;
+    --color-slate-500: #9e9994;
+    --color-slate-600: #b3b0ac;
+    --color-slate-700: #c2c0bc;
+    --color-slate-800: #d5d3d1;
+    --color-slate-900: #e6e6e5;
+    --color-slate-950: #f7f6f5;
+}

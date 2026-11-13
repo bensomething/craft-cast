@@ -67,4 +67,7 @@ class Settings extends PluginSettings
 
     /** The light appearance for users who haven't chosen one. Empty means Craft's own. */
     public string $autoLightTheme = self::THEME_NONE;
+
+    /** Whether users who haven't set the switch themselves get increased contrast. */
+    public bool $highContrast = false;
 }

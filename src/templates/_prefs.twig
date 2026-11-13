@@ -1,20 +1,22 @@
 {# Rendered through the `cp.users.edit.prefs` hook, which Craft 6 places directly under
    its own Theme field. Craft's field picks light or dark; these pick what each looks like.
+   The contrast switch is moved to Accessibility by the script below.
 
-   The page's own form never posts these, so each select saves itself on change. #}
+   The page's own form never posts these, so each control saves itself on change. #}
 {# @var lightOptions array #}
 {# @var darkOptions array #}
 {# @var lightValue string #}
 {# @var darkValue string #}
 {# @var lightDefault string #}
 {# @var darkDefault string #}
+{# @var highContrast bool #}
 {# @var saveUrl string #}
 {# @var csrfToken string #}
 
 <craft-field-group id="cast-prefs">
     {% for field in [
-        { scheme: 'light', label: 'Light appearance' | t('cast'), help: 'Used whenever the control panel is light.' | t('cast'), options: lightOptions, value: lightValue },
-        { scheme: 'dark', label: 'Dark appearance' | t('cast'), help: 'Used whenever the control panel is dark.' | t('cast'), options: darkOptions, value: darkValue },
+        { scheme: 'light', label: 'Light Appearance' | t('cast'), help: 'Used whenever the control panel is light.' | t('cast'), options: lightOptions, value: lightValue },
+        { scheme: 'dark', label: 'Dark Appearance' | t('cast'), help: 'Used whenever the control panel is dark.' | t('cast'), options: darkOptions, value: darkValue },
     ] %}
         {# Only worth asking where there's more than Craft's own to choose from. #}
         {% if field.options | length > 2 %}
@@ -29,6 +31,14 @@
             </craft-select>
         {% endif %}
     {% endfor %}
+
+    <craft-checkbox-group id="cast-contrast-field">
+        <label slot="label">{{ 'Contrast' | t('cast') }}</label>
+        <craft-checkbox>
+            <input slot="input" type="checkbox" id="cast-contrast" {{ highContrast ? 'checked' }}>
+            <label slot="label" for="cast-contrast">{{ 'Increase contrast' | t('cast') }}</label>
+        </craft-checkbox>
+    </craft-checkbox-group>
 </craft-field-group>
 
 {% js %}
@@ -45,6 +55,28 @@
             defaults: { light: lightDefault, dark: darkDefault },
         } | json_encode | raw }};
 
+        var dataset = document.documentElement.dataset;
+
+        function save(body, what) {
+            fetch(config.url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': config.token,
+                },
+                body: JSON.stringify(body),
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+            }).catch(function() {
+                console.error('Cast couldn’t save the ' + what + '.');
+            });
+        }
+
+        // Every theme's stylesheet is already on the page, so each change repaints at once.
         var keys = { light: 'castLight', dark: 'castDark' };
 
         root.querySelectorAll('select[data-cast-scheme]').forEach(function(select) {
@@ -52,33 +84,39 @@
                 var scheme = select.getAttribute('data-cast-scheme');
                 var handle = select.value === 'inherit' ? config.defaults[scheme] : select.value;
 
-                // Every theme's stylesheet is already on the page, so this repaints at once.
                 if (handle) {
-                    document.documentElement.dataset[keys[scheme]] = handle;
+                    dataset[keys[scheme]] = handle;
                 } else {
-                    delete document.documentElement.dataset[keys[scheme]];
+                    delete dataset[keys[scheme]];
                 }
 
                 var body = {};
                 body[scheme] = select.value;
-
-                fetch(config.url, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': config.token,
-                    },
-                    body: JSON.stringify(body),
-                }).then(function(response) {
-                    if (!response.ok) {
-                        throw new Error(response.statusText);
-                    }
-                }).catch(function() {
-                    console.error('Cast couldn’t save the ' + scheme + ' appearance.');
-                });
+                save(body, scheme + ' appearance');
             });
         });
+
+        var contrastField = document.getElementById('cast-contrast-field');
+        var contrast = document.getElementById('cast-contrast');
+
+        contrast.addEventListener('change', function() {
+            if (contrast.checked) {
+                dataset.castContrast = 'more';
+            } else {
+                delete dataset.castContrast;
+            }
+
+            save({ highContrast: contrast.checked }, 'contrast setting');
+        });
+
+        // Craft gives plugins no hook on the Accessibility tab, so the switch moves there,
+        // straight after Display Settings. It's placed beside Craft's own fields rather
+        // than inside one, which Vue re-renders. If Craft's markup changes, it stays put
+        // under Appearance, costing the position and not the setting.
+        var display = document.querySelector('#preferences-accessibility craft-field-group > craft-checkbox-select');
+
+        if (display) {
+            display.parentNode.insertBefore(contrastField, display.nextSibling);
+        }
     })();
 {% endjs %}

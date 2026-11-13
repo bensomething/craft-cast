@@ -16,10 +16,14 @@ return [
     // Craft decides whether the control panel is light or dark, from each user's own
     // Theme preference. Cast decides what light and dark each look like.
 
-    // The appearances for users who haven't chosen their own: a theme handle ('dim' is
-    // the bundled dark one so far), or '' for Craft's own.
+    // The appearances for users who haven't chosen their own: a theme handle, or '' for
+    // Craft's own. Light takes 'stone'; dark takes 'stone' or 'dim'.
     'autoLightTheme' => Settings::THEME_NONE,
     'autoDarkTheme' => Settings::THEME_NONE,
+
+    // Whether users who haven't set it themselves get increased contrast, in light and
+    // dark alike. It replaces the appearance while on.
+    'highContrast' => false,
 
     // Whether users may pick their own appearances, under Craft's Theme field in
     // their account preferences.
