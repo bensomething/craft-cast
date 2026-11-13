@@ -68,7 +68,8 @@ class Plugin extends BasePlugin
     /**
      * The site-wide defaults behind each user's own choices. Laid out like the fields
      * they're defaults for: the two appearances and the button colour on one row, as
-     * they sit beside Theme in each user's preferences.
+     * they sit beside Theme in each user's preferences. Instructions go under the
+     * inputs, so the row's selects line up however their text wraps.
      */
     #[Override]
     public function settingsUi(UiContext $context = new UiContext): ?Ui
@@ -93,24 +94,29 @@ class Plugin extends BasePlugin
                 ->options($appearances(Themes::SCHEME_LIGHT))
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
+                ->instructionsPosition('after')
                 ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast')),
 
             Field::make(t('Dark Appearance', category: 'cast'), Choice::make('autoDarkTheme')
                 ->options($appearances(Themes::SCHEME_DARK))
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
+                ->instructionsPosition('after')
                 ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast')),
 
             Field::make(t('Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
                 ->options($buttonColors)
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
+                ->instructionsPosition('after')
                 ->instructions(t('Primary buttons, for anyone who hasn’t chosen their own.', category: 'cast')),
 
             Field::make(t('Increase Contrast', category: 'cast'), Lightswitch::make('highContrast'))
+                ->instructionsPosition('after')
                 ->instructions(t('On by default for anyone who hasn’t set it themselves, in light and dark alike.', category: 'cast')),
 
             Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
+                ->instructionsPosition('after')
                 ->instructions(t('Offer the appearances, button colour and contrast switch in each user’s preferences. Off, everyone gets the defaults above.', category: 'cast')),
         ]);
     }
