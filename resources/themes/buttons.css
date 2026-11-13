@@ -111,3 +111,27 @@ html[data-cast-button='gray'] craft-button[variant~='primary'] {
     --c-color-accent-on-normal: var(--c-color-gray-on-normal);
     --c-color-accent-on-loud: var(--c-color-gray-on-loud);
 }
+
+/* The picker's swatches, as the buttons they stand for. Craft's colour picker paints a
+   swatch like a card header (each hue's quiet fill and border); on Cast's picker those
+   point at the loud ones a primary button uses, so each swatch is its button's fill in
+   the mode being viewed. Craft Red's swatch is already its hex. Copies the picker makes
+   of a swatch, as its chosen value, sit inside it and inherit the same. */
+craft-select-color#cast-button {
+    --c-color-blue-fill-quiet: var(--c-color-blue-fill-loud);
+    --c-color-blue-border-quiet: var(--c-color-blue-border-loud);
+    --c-color-amber-fill-quiet: var(--c-color-amber-fill-loud);
+    --c-color-amber-border-quiet: var(--c-color-amber-border-loud);
+    --c-color-green-fill-quiet: var(--c-color-green-fill-loud);
+    --c-color-green-border-quiet: var(--c-color-green-border-loud);
+    --c-color-teal-fill-quiet: var(--c-color-teal-fill-loud);
+    --c-color-teal-border-quiet: var(--c-color-teal-border-loud);
+    --c-color-sky-fill-quiet: var(--c-color-sky-fill-loud);
+    --c-color-sky-border-quiet: var(--c-color-sky-border-loud);
+    --c-color-violet-fill-quiet: var(--c-color-violet-fill-loud);
+    --c-color-violet-border-quiet: var(--c-color-violet-border-loud);
+    --c-color-pink-fill-quiet: var(--c-color-pink-fill-loud);
+    --c-color-pink-border-quiet: var(--c-color-pink-border-loud);
+    --c-color-gray-fill-quiet: var(--c-color-gray-fill-loud);
+    --c-color-gray-border-quiet: var(--c-color-gray-border-loud);
+}
