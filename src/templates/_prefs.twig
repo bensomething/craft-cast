@@ -161,7 +161,10 @@
 
         document.addEventListener('change', window.CastThemeListener);
 
-        root.querySelectorAll('select[data-cast-scheme]').forEach(function(select) {
+        // Through the fields held from before the move: they're no longer inside `root`.
+        fields.forEach(function(field) {
+            var select = field.querySelector('select[data-cast-scheme]');
+
             select.addEventListener('change', function() {
                 var scheme = select.getAttribute('data-cast-scheme');
                 var handle = select.value === 'inherit' ? config.defaults[scheme] : select.value;
