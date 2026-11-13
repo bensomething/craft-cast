@@ -21,8 +21,8 @@
         { scheme: 'light', label: 'Light Appearance' | t('cast'), options: lightOptions, value: lightValue },
         { scheme: 'dark', label: 'Dark Appearance' | t('cast'), options: darkOptions, value: darkValue },
     ] %}
-        {# Only worth asking where there's more than Craft's own to choose from. #}
-        {% if field.options | length > 2 %}
+        {# Only worth asking where there's a theme to choose besides Craft's own. #}
+        {% if field.options | filter(o => o.value not in ['inherit', '']) | length %}
             {# Only the modes Craft's Theme can show: one for Light or Dark, both for
                System. Hidden inline rather than with `hidden`, which the component's own
                `:host` display would override. #}

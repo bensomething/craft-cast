@@ -67,17 +67,27 @@ final class Themes
     /**
      * Options for a scheme's picker, led by a row that defers to the site default.
      *
+     * While the site default is Craft's own, that row is simply "Craft default": a
+     * separate one would do the same thing. It still stores `inherit`, so an admin who
+     * later sets a default reaches everyone who never chose otherwise.
+     *
      * @return array<int, array{value: string, label: string}>
      */
     public function options(string $scheme): array
     {
+        $default = $this->siteDefault($scheme);
+
         $options = [[
             'value' => Settings::THEME_INHERIT,
-            'label' => t('Site default ({theme})', ['theme' => $this->name($this->siteDefault($scheme))], 'cast'),
+            'label' => $default === ''
+                ? $this->name('')
+                : t('Site default ({theme})', ['theme' => $this->name($default)], 'cast'),
         ]];
 
         foreach ($this->handles($scheme) as $handle) {
-            $options[] = ['value' => $handle, 'label' => $this->name($handle)];
+            if ($handle !== '' || $default !== '') {
+                $options[] = ['value' => $handle, 'label' => $this->name($handle)];
+            }
         }
 
         return $options;
@@ -105,12 +115,21 @@ final class Themes
         return $this->siteDefault($scheme);
     }
 
-    /** What a user's choice is stored as: a handle, or `inherit` for the site default. */
+    /**
+     * The option a user's picker should show as chosen: a handle, or `inherit` for the
+     * site default. A stored Craft default shows as `inherit` while the two are one row.
+     */
     public function storedChoice(?User $user, string $scheme): string
     {
         $chosen = $user?->getPreference($this->prefKey($scheme));
 
-        return is_string($chosen) && $this->isValid($chosen, $scheme) ? $this->normalize($chosen) : Settings::THEME_INHERIT;
+        if (! is_string($chosen) || ! $this->isValid($chosen, $scheme)) {
+            return Settings::THEME_INHERIT;
+        }
+
+        $chosen = $this->normalize($chosen);
+
+        return $chosen === '' && $this->siteDefault($scheme) === '' ? Settings::THEME_INHERIT : $chosen;
     }
 
     public function isValid(string $handle, string $scheme): bool
