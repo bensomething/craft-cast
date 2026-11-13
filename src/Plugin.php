@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace bensomething\cast;
 
 use bensomething\cast\Http\Middleware\RegisterHeadScript;
+use CraftCms\Cms\Cp\Enums\Theme;
 use CraftCms\Cms\Plugin\Plugin as BasePlugin;
 use CraftCms\Cms\Plugin\PluginSettings;
 use CraftCms\Cms\Support\Url;
@@ -75,6 +76,7 @@ class Plugin extends BasePlugin
             'lightDefault' => $themes->siteDefault(Themes::SCHEME_LIGHT),
             'darkDefault' => $themes->siteDefault(Themes::SCHEME_DARK),
             'highContrast' => $themes->highContrastForUser($user),
+            'craftTheme' => Theme::forUser($user)->value,
             'saveUrl' => Url::actionUrl('cast/preferences'),
             'csrfToken' => csrf_token(),
         ], templateMode: TemplateMode::Cp);

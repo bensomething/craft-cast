@@ -12,6 +12,7 @@
 {# @var highContrast bool #}
 {# @var saveUrl string #}
 {# @var csrfToken string #}
+{# @var craftTheme string Craft's saved Theme: light, dark or system. #}
 
 <craft-field-group id="cast-prefs">
     {% for field in [
@@ -20,7 +21,13 @@
     ] %}
         {# Only worth asking where there's more than Craft's own to choose from. #}
         {% if field.options | length > 2 %}
-            <craft-select>
+            {# Only the modes Craft's Theme can show: one for Light or Dark, both for
+               System. Hidden inline rather than with `hidden`, which the component's own
+               `:host` display would override. #}
+            {% tag 'craft-select' with {
+                'data-cast-field': field.scheme,
+                style: craftTheme not in [field.scheme, 'system'] ? 'display: none' : false,
+            } %}
                 <label slot="label" for="cast-{{ field.scheme }}">{{ field.label }}</label>
                 <span slot="help-text">{{ field.help }}</span>
                 <select slot="input" id="cast-{{ field.scheme }}" data-cast-scheme="{{ field.scheme }}">
@@ -28,7 +35,7 @@
                         <option value="{{ option.value }}" {{ option.value == field.value ? 'selected' }}>{{ option.label }}</option>
                     {% endfor %}
                 </select>
-            </craft-select>
+            {% endtag %}
         {% endif %}
     {% endfor %}
 
@@ -78,6 +85,23 @@
 
         // Every theme's stylesheet is already on the page, so each change repaints at once.
         var keys = { light: 'castLight', dark: 'castDark' };
+
+        // Follow Craft's Theme field as it changes, before it's saved. Delegated from the
+        // document, as Vue owns those radios and may replace them.
+        document.addEventListener('change', function(event) {
+            var input = event.target;
+
+            if (!input || input.name !== 'theme' || input.type !== 'radio' || !input.checked) {
+                return;
+            }
+
+            root.querySelectorAll('[data-cast-field]').forEach(function(field) {
+                var scheme = field.getAttribute('data-cast-field');
+                var shown = input.value === 'system' || input.value === scheme;
+
+                field.style.display = shown ? '' : 'none';
+            });
+        });
 
         root.querySelectorAll('select[data-cast-scheme]').forEach(function(select) {
             select.addEventListener('change', function() {
