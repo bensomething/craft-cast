@@ -8,11 +8,56 @@ Checked against `craftcms/cms` `6.x` at `18e2816` (30 July 2026), the Storybook 
 [#18745](https://github.com/craftcms/cms/pull/18745) (merged 1 May 2026) and
 [#18791](https://github.com/craftcms/cms/pull/18791) (merged 5 June 2026).
 
-## Update, November 2026
+## Update, 13 November 2026
+
+Rechecked against `6.x` at `fe67db9` (13 November 2026), after `6.0.0-beta.1` (10 November).
+Sections are newest first; where they disagree, the newer one wins.
+
+**The compat layer is gone.** `270afa5090` (4 November, "Drop the legacy CP stylesheet,
+fonts and unused images") deleted the legacy CP SCSS, `_compat.scss` with it. Its message
+says nothing had loaded the legacy `cp.css` since September. `--gray-*`, `--gray-*-hsl`,
+`--body-bg` and the rest of Craft 5's palette are defined nowhere now, and only a handful
+of leftover files read them: `packages/craftcms-legacy/theme/src/cp.css`, a few legacy
+package stylesheets (dashboard, routes, installer, updater, plugins, Craft Support
+widget), GraphiQL and the global sidebar. `--primary-button-bg` has one reader left.
+
+So "The compat layer" below no longer applies, and neither does the premise under it that
+stamping `data-theme` would carry the legacy CP. Every Cast stylesheet overrides
+properties nothing reads. The upstream issue draft about `_compat.scss` is moot and has
+been dropped.
+
+**Old Twig screens are now bridged into the Inertia shell.** A legacy controller's page
+template still renders through `pageTemplate()`, so `PageTemplateRendering` (and the
+adapter's `View::EVENT_BEFORE_RENDER_PAGE_TEMPLATE`) still fires. But its output goes to
+`LegacyScreenFragments` with the `_layouts/cp-fragments.twig` layout, and
+`BridgedScreen` serves it as the `cp/Screen` Inertia page. `_layouts/cp.twig`, and with it
+`#account-menu` and `#user-info`, only renders when fragments are switched off.
+
+**What that means for 1.x under `craftcms/yii2-adapter`.** It loads: every class Cast
+imports exists under `yii2-adapter/legacy/`, `View::hook()` registers into Craft 6's
+`TemplateHooks`, `registerJs`/`registerCss` land in `HtmlStack` (whose head the Inertia
+shell prints), and the adapter gives Laravel-routed requests a stub
+`Craft::$app->controller`, so `getSettingsResponse()` renders. It doesn't work:
+
+- The themes paint nothing (above).
+- `EVENT_BEFORE_RENDER_PAGE_TEMPLATE` fires for bridged screens only, not native Inertia
+  pages, so the head script and stylesheets are present on some page loads and not others.
+- The account-menu switcher bails, as `#account-menu` isn't rendered.
+- `cp.users.edit.prefs` still fires on the Vue preferences page (`UserPreferencesViewModel::prefsHook()`),
+  but its fields aren't in the page's `useForm`, `UserPreferencesRequest` keeps only its
+  own keys, and the save is `Http\Controllers\Users\PreferencesController`, so
+  `UsersController::EVENT_AFTER_ACTION` never fires. The fields render and never save.
+- Craft's own Theme defaults to System, so a dark OS gets `data-theme="dark"` regardless
+  of Cast.
+- The Plugin Store is a Vue page; `ignorePluginStore()` never matches.
+
+Packaging: `craftcms/yii2-adapter` requires `craftcms/cms: self.version`, so a release that
+needs it can't also install on Craft 5. A Craft 6 Cast is its own major version.
+
+## Update, 3 November 2026
 
 Rechecked against `6.x` at `d1f5652` (2 November 2026), ~7,000 commits on, tagged as far
-as `6.0.0-alpha.9`. The rest of this document is the July reading; where the two disagree,
-this section wins.
+as `6.0.0-alpha.9`. The rest of this document is the July reading.
 
 **Craft shipped the switch.** `73f42eeb3e` (13 October,
 [#19966](https://github.com/craftcms/cms/pull/19966)) adds a Theme user preference —
@@ -105,6 +150,8 @@ Storybook. One `forced-colors: active` block in the codebase, in `slide-picker`.
 Craft 6 has built the paint. Cast is the switch.
 
 ## The compat layer
+
+*Removed upstream on 4 November 2026; see the 13 November update. Kept for the record.*
 
 `packages/craftcms-legacy/cp/src/css/_compat.scss` (621 lines, first import in
 `craft.scss`) re-points Craft 5's variables at the new tokens — `--body-bg` at
