@@ -78,6 +78,17 @@ final class Themes
      */
     public function handles(string $scheme): array
     {
+        return self::handlesFor($scheme);
+    }
+
+    /**
+     * {@see handles()}, for callers that can't take the service, such as the settings'
+     * own validation, which the service depends on.
+     *
+     * @return string[]
+     */
+    public static function handlesFor(string $scheme): array
+    {
         return ['', ...array_keys(array_filter(self::BUNDLED, fn (array $schemes) => in_array($scheme, $schemes, true)))];
     }
 
@@ -250,6 +261,12 @@ final class Themes
     }
 
     private function normalize(string $handle): string
+    {
+        return self::normalizeHandle($handle);
+    }
+
+    /** A handle as 2.x reads it, 1.x's handles translated. */
+    public static function normalizeHandle(string $handle): string
     {
         return self::LEGACY[$handle] ?? $handle;
     }

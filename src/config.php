@@ -21,6 +21,11 @@ return [
     'autoLightTheme' => Settings::THEME_NONE,
     'autoDarkTheme' => Settings::THEME_NONE,
 
+    // The primary button colour for users who haven't chosen their own: red (Craft
+    // Red, Craft 5's own), amber, green, teal, sky, violet, pink or gray, or '' for
+    // Craft's own blue.
+    'defaultButtonColor' => '',
+
     // Whether users who haven't set it themselves get increased contrast, in light and
     // dark alike, on top of the appearance.
     'highContrast' => false,
@@ -29,9 +34,8 @@ return [
     // their account preferences.
     'allowUserOverride' => true,
 
-    // Not yet used in 2.x: button colour, limiting the themes on offer, and a themes
-    // folder all come back once the bundled themes have settled on Craft 6's tokens.
-    // 'buttonColor' => 'red',
+    // Not yet used in 2.x: limiting the themes on offer, and a themes folder, both
+    // come back once the bundled themes have settled on Craft 6's tokens.
     // 'enabledThemes' => '*',
     // 'themesPath' => '@root/cast-themes',
 ];

@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace bensomething\cast;
 
 use CraftCms\Cms\Plugin\PluginSettings;
+use Illuminate\Validation\Rule;
+use Override;
+
+use function CraftCms\Cms\t;
 
 /**
- * Carried over from 1.x so `config/cast.php` keeps working. What each setting means on
- * Craft 6 is still open: Craft now has its own Light, Dark and System preference, and
- * the colour vocabulary 1.x themed is gone. See `docs/craft-6.md`.
+ * Site-wide defaults for what each user can choose in their own preferences, edited
+ * under Settings → Plugins → Cast or in `config/cast.php`.
  *
- * 1.x validated these through Yii `rules()`. On Craft 6 that belongs to a settings
- * request class, which arrives with the settings UI.
+ * Several 1.x settings are kept only so a 1.x `config/cast.php` doesn't fail: Craft 6
+ * decides light or dark itself, and the colour vocabulary 1.x themed is gone. See
+ * `docs/craft-6.md`.
  */
 class Settings extends PluginSettings
 {
@@ -74,4 +78,45 @@ class Settings extends PluginSettings
 
     /** Whether users who haven't set the switch themselves get increased contrast. */
     public bool $highContrast = false;
+
+    #[Override]
+    public function getRules(): array
+    {
+        return [
+            'autoLightTheme' => ['string', Rule::in(Themes::handlesFor(Themes::SCHEME_LIGHT))],
+            'autoDarkTheme' => ['string', Rule::in(Themes::handlesFor(Themes::SCHEME_DARK))],
+            'defaultButtonColor' => ['string', Rule::in(['', ...Themes::BUTTON_COLORS])],
+            'highContrast' => ['boolean'],
+            'allowUserOverride' => ['boolean'],
+        ];
+    }
+
+    /** Names for validation messages, matching the settings screen. */
+    #[Override]
+    public function attributeLabels(): array
+    {
+        return [
+            'autoLightTheme' => t('Light Appearance', category: 'cast'),
+            'autoDarkTheme' => t('Dark Appearance', category: 'cast'),
+            'defaultButtonColor' => t('Button Colour', category: 'cast'),
+            'highContrast' => t('Increase Contrast', category: 'cast'),
+            'allowUserOverride' => t('Let Users Choose', category: 'cast'),
+        ];
+    }
+
+    /**
+     * 1.x's handles read as 2.x's, so a 1.x value like `dark` shows, validates and
+     * saves as what it now means rather than failing.
+     */
+    #[Override]
+    public function validationData(): array
+    {
+        $data = parent::validationData();
+
+        foreach (['autoLightTheme', 'autoDarkTheme'] as $key) {
+            $data[$key] = Themes::normalizeHandle((string) ($data[$key] ?? ''));
+        }
+
+        return $data;
+    }
 }
