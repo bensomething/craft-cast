@@ -13,6 +13,10 @@
 {# @var saveUrl string #}
 {# @var csrfToken string #}
 {# @var craftTheme string Craft's saved Theme: light, dark or system. #}
+{# @var buttonOptions array{colors: string[], labels: array} #}
+{# @var buttonValue string The colour shown as chosen, Craft's own as `blue`. #}
+{# @var buttonDefault string The site's default colour, or empty for Craft's. #}
+{# @var buttonHandles array Picker values that aren't colour names, to the names stored. #}
 
 {# A group of its own, after Craft's. The section spaces groups 12px apart and a group's
    fields 24px, so the difference goes on top to sit these at the field spacing. #}
@@ -40,6 +44,16 @@
         {% endif %}
     {% endfor %}
 
+    {# Always shown: unlike the appearances, it applies in either mode. #}
+    <craft-select-color
+        data-cast-field="button"
+        id="cast-button"
+        label="{{ 'Button Colour' | t('cast') }}"
+        colors="{{ buttonOptions.colors | json_encode }}"
+        labels="{{ buttonOptions.labels | json_encode }}"
+        value="{{ buttonValue }}"
+    ></craft-select-color>
+
     <craft-checkbox-group id="cast-contrast-field">
         <label slot="label">{{ 'Contrast' | t('cast') }}</label>
         <craft-checkbox>
@@ -58,5 +72,7 @@
         token: csrfToken,
         defaults: { light: lightDefault, dark: darkDefault },
         craftTheme: craftTheme,
+        buttonDefault: buttonDefault,
+        buttonHandles: buttonHandles,
     } | json_encode | raw }});
 {% endjs %}

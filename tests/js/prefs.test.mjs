@@ -25,6 +25,7 @@ function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) 
     <craft-field-group id="cast-prefs">
       ${select('light', light, ['inherit', '', 'stone'])}
       ${select('dark', dark, ['inherit', '', 'stone', 'dim'])}
+      <craft-select-color data-cast-field="button" id="cast-button"></craft-select-color>
       <craft-checkbox-group id="cast-contrast-field">
         <craft-checkbox>
           <input slot="input" type="checkbox" id="cast-contrast" ${contrast ? 'checked' : ''}>
@@ -33,7 +34,7 @@ function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) 
     </craft-field-group>`;
 }
 
-function page({theme = 'system', withTheme = true, withDisplay = true} = {}) {
+function page({theme = 'system', withTheme = true, withDisplay = true, buttonDefault = ''} = {}) {
   const radios = ['light', 'dark', 'system']
     .map((v) => `<input type="radio" name="theme" value="${v}" ${v === theme ? 'checked' : ''}>`)
     .join('');
@@ -78,6 +79,8 @@ function page({theme = 'system', withTheme = true, withDisplay = true} = {}) {
       token: 'csrf',
       defaults: {light: '', dark: 'dim'},
       craftTheme: theme,
+      buttonDefault,
+      buttonHandles: {'#dc2626': 'red'},
     });
 
   // Craft re-rendering the fragment: a fresh copy in the hook's container, then the
@@ -107,7 +110,7 @@ const ids = (nodes) => Array.from(nodes, (n) => n.id || n.getAttribute('data-cas
 test('places the appearances after Theme and the switch after Display Settings', () => {
   const {document} = page();
 
-  assert.deepEqual(ids(document.getElementById('general').children), ['time-zone', 'craft-radio-group', 'light', 'dark']);
+  assert.deepEqual(ids(document.getElementById('general').children), ['time-zone', 'craft-radio-group', 'light', 'dark', 'cast-button']);
   assert.deepEqual(ids(document.getElementById('accessibility').children), [
     'display',
     'cast-contrast-field',
@@ -116,22 +119,23 @@ test('places the appearances after Theme and the switch after Display Settings',
   assert.equal(document.getElementById('cast-prefs').style.display, 'none');
 });
 
-test('shows both appearances under System, all in thirds', () => {
+test('shows both appearances under System, all in quarters', () => {
   const {document} = page({theme: 'system'});
   const theme = document.querySelector('craft-radio-group');
 
   for (const el of [theme, ...document.querySelectorAll('[data-cast-field]')]) {
     assert.equal(el.style.display, '');
-    assert.ok(el.classList.contains('width-33'));
+    assert.ok(el.classList.contains('width-25'));
   }
 });
 
-test('shows only the appearance Theme can use, keeping thirds', () => {
+test('shows only the appearance Theme can use, keeping quarters', () => {
   const {document} = page({theme: 'dark'});
 
   assert.equal(document.querySelector('[data-cast-field="light"]').style.display, 'none');
   assert.equal(document.querySelector('[data-cast-field="dark"]').style.display, '');
-  assert.ok(document.querySelector('craft-radio-group').classList.contains('width-33'));
+  assert.ok(document.querySelector('craft-radio-group').classList.contains('width-25'));
+  assert.equal(document.getElementById('cast-button').style.display, '', 'the button colour applies in either mode');
 });
 
 test('follows Theme as it changes, before saving', () => {
@@ -189,7 +193,7 @@ test('a re-render replaces what the last one moved rather than adding to it', ()
 
   assert.equal(document.querySelectorAll('[data-cast-field="dark"]').length, 1);
   assert.equal(document.querySelectorAll('#cast-contrast-field').length, 1);
-  assert.deepEqual(ids(document.getElementById('general').children), ['time-zone', 'craft-radio-group', 'light', 'dark']);
+  assert.deepEqual(ids(document.getElementById('general').children), ['time-zone', 'craft-radio-group', 'light', 'dark', 'cast-button']);
 });
 
 test("a re-render's fields are the ones that respond", () => {
@@ -219,10 +223,71 @@ test("without Craft's fields to join, everything stays in Cast's group at full w
   const {document} = page({withTheme: false, withDisplay: false});
   const group = document.getElementById('cast-prefs');
 
-  assert.deepEqual(ids(group.children), ['light', 'dark', 'cast-contrast-field']);
+  assert.deepEqual(ids(group.children), ['light', 'dark', 'cast-button', 'cast-contrast-field']);
   assert.equal(group.style.display, '');
 
   for (const field of group.querySelectorAll('[data-cast-field]')) {
+    assert.equal(field.style.display, '');
     assert.equal(field.className, '');
   }
+});
+
+test('a button colour repaints and saves', () => {
+  const {window, document, html, saves} = page();
+
+  change(window, document.getElementById('cast-button'), 'red');
+
+  assert.equal(html.dataset.castButton, 'red');
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'red'});
+});
+
+test("Craft's blue follows the site default while that's Craft's own", () => {
+  const {window, document, html, saves} = page();
+
+  change(window, document.getElementById('cast-button'), 'red');
+  change(window, document.getElementById('cast-button'), 'blue');
+
+  assert.equal(html.dataset.castButton, undefined);
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'inherit'});
+});
+
+test("with a site default colour, it follows the site and blue pins Craft's", () => {
+  const {window, document, html, saves} = page({buttonDefault: 'teal'});
+  const button = document.getElementById('cast-button');
+
+  change(window, button, 'teal');
+  assert.equal(html.dataset.castButton, 'teal');
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'inherit'});
+
+  change(window, button, 'blue');
+  assert.equal(html.dataset.castButton, undefined);
+  assert.deepEqual(saves.at(-1).body, {buttonColor: ''});
+});
+
+test("a re-render's button colour is the one that responds", () => {
+  const {window, document, html, saves, rerender} = page();
+
+  rerender();
+  change(window, document.getElementById('cast-button'), 'pink');
+
+  assert.equal(document.querySelectorAll('#cast-button').length, 1);
+  assert.equal(html.dataset.castButton, 'pink');
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'pink'});
+});
+
+test('Craft Red, picked by its hex, is stored and stamped as red', () => {
+  const {window, document, html, saves} = page();
+
+  change(window, document.getElementById('cast-button'), '#dc2626');
+
+  assert.equal(html.dataset.castButton, 'red');
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'red'});
+});
+
+test('Craft Red as the site default is followed, not pinned', () => {
+  const {window, document, saves} = page({buttonDefault: 'red'});
+
+  change(window, document.getElementById('cast-button'), '#dc2626');
+
+  assert.deepEqual(saves.at(-1).body, {buttonColor: 'inherit'});
 });

@@ -29,14 +29,18 @@ class Settings extends PluginSettings
      */
     public const string THEME_INHERIT = 'inherit';
 
-    /** The button colour Craft ships with. */
-    public const string BUTTON_COLOR_DEFAULT = 'red';
+    /**
+     * Retired in 2.x. 1.x stored `red` here for everyone, red being Craft 5's own, so
+     * reading it would turn every upgraded site's buttons red. Still accepted so a 1.x
+     * `config/cast.php` doesn't fail, and otherwise ignored for `defaultButtonColor`.
+     */
+    public string $buttonColor = 'red';
 
     /**
-     * Fill for primary buttons. 1.x shaded nine colours by hand per mode; on Craft 6 the
-     * palette guarantees contrast by stop, so the table of shades is not carried over.
+     * The primary button colour for users who haven't chosen one: one of
+     * {@see Themes::BUTTON_COLORS}, or empty for Craft's own (blue on Craft 6).
      */
-    public string $buttonColor = self::BUTTON_COLOR_DEFAULT;
+    public string $defaultButtonColor = self::THEME_NONE;
 
     /**
      * Retired in 2.x: Craft now decides light or dark, from its own Theme preference.

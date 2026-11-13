@@ -1,0 +1,113 @@
+/**
+ * Cast: button colour
+ *
+ * Recolours primary buttons only. Craft 6 draws them from its accent tokens, which
+ * also colour selections, focus and table hovers; those stay Craft's. Each colour
+ * points the primary button's nine accent tokens at the same nine of one of Craft's
+ * palette hues, so fill, hover, border and label all come from Craft's generated
+ * tokens, and follow light and dark with them. Labels hold 4.6:1 or better against
+ * their fill in both modes, against Craft 6.0.0-beta.1's palette.
+ *
+ * One block per colour in `Themes::BUTTON_COLORS`, generated from Craft's tokens apart
+ * from Craft Red, which is Craft 5's own values.
+ */
+
+/* Craft Red: Craft 5's primary button, #dc2626 with a white label (4.83:1), in both
+   modes as Craft 5 had no dark one. Craft 6 derives hover and pressed by darkening the
+   fill inside the button, so those land near Craft 5's #b91c1c and #991b1b rather than
+   on them. The quieter tokens, which primary buttons don't use, follow Craft 6's red. */
+html[data-cast-button='red'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-red-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-red-fill-normal);
+    --c-color-accent-fill-loud: #dc2626;
+    --c-color-accent-border-quiet: var(--c-color-red-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-red-border-normal);
+    --c-color-accent-border-loud: #dc2626;
+    --c-color-accent-on-quiet: var(--c-color-red-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-red-on-normal);
+    --c-color-accent-on-loud: #ffffff;
+}
+
+html[data-cast-button='amber'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-amber-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-amber-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-amber-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-amber-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-amber-border-normal);
+    --c-color-accent-border-loud: var(--c-color-amber-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-amber-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-amber-on-normal);
+    --c-color-accent-on-loud: var(--c-color-amber-on-loud);
+}
+
+html[data-cast-button='green'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-green-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-green-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-green-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-green-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-green-border-normal);
+    --c-color-accent-border-loud: var(--c-color-green-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-green-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-green-on-normal);
+    --c-color-accent-on-loud: var(--c-color-green-on-loud);
+}
+
+html[data-cast-button='teal'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-teal-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-teal-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-teal-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-teal-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-teal-border-normal);
+    --c-color-accent-border-loud: var(--c-color-teal-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-teal-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-teal-on-normal);
+    --c-color-accent-on-loud: var(--c-color-teal-on-loud);
+}
+
+html[data-cast-button='sky'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-sky-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-sky-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-sky-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-sky-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-sky-border-normal);
+    --c-color-accent-border-loud: var(--c-color-sky-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-sky-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-sky-on-normal);
+    --c-color-accent-on-loud: var(--c-color-sky-on-loud);
+}
+
+html[data-cast-button='violet'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-violet-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-violet-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-violet-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-violet-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-violet-border-normal);
+    --c-color-accent-border-loud: var(--c-color-violet-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-violet-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-violet-on-normal);
+    --c-color-accent-on-loud: var(--c-color-violet-on-loud);
+}
+
+html[data-cast-button='pink'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-pink-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-pink-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-pink-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-pink-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-pink-border-normal);
+    --c-color-accent-border-loud: var(--c-color-pink-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-pink-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-pink-on-normal);
+    --c-color-accent-on-loud: var(--c-color-pink-on-loud);
+}
+
+html[data-cast-button='gray'] craft-button[variant~='primary'] {
+    --c-color-accent-fill-quiet: var(--c-color-gray-fill-quiet);
+    --c-color-accent-fill-normal: var(--c-color-gray-fill-normal);
+    --c-color-accent-fill-loud: var(--c-color-gray-fill-loud);
+    --c-color-accent-border-quiet: var(--c-color-gray-border-quiet);
+    --c-color-accent-border-normal: var(--c-color-gray-border-normal);
+    --c-color-accent-border-loud: var(--c-color-gray-border-loud);
+    --c-color-accent-on-quiet: var(--c-color-gray-on-quiet);
+    --c-color-accent-on-normal: var(--c-color-gray-on-normal);
+    --c-color-accent-on-loud: var(--c-color-gray-on-loud);
+}

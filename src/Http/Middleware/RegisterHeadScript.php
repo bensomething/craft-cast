@@ -55,6 +55,10 @@ final readonly class RegisterHeadScript
             }
         }
 
+        if (($button = $this->themes->buttonColorForUser($user)) !== '') {
+            $set[] = sprintf('d.castButton=%s;', json_encode($button, JSON_THROW_ON_ERROR | JSON_HEX_TAG));
+        }
+
         if ($this->themes->highContrastForUser($user)) {
             $set[] = 'd.castContrast="more";';
         }

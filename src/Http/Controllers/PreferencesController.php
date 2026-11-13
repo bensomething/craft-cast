@@ -50,6 +50,17 @@ final readonly class PreferencesController
             $prefs[$this->themes->prefKey($scheme)] = $value;
         }
 
+        if ($request->has('buttonColor')) {
+            $value = $request->input('buttonColor');
+
+            // An empty string is Craft's own colour.
+            if (! is_string($value) || ($value !== Settings::THEME_INHERIT && ! $this->themes->isValidButtonColor($value))) {
+                return response()->json(['message' => t('That colour isn’t available.', category: 'cast')], 422);
+            }
+
+            $prefs[Themes::PREF_BUTTON] = $value;
+        }
+
         if ($request->has('highContrast')) {
             $value = $request->input('highContrast');
 

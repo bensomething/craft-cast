@@ -12,6 +12,10 @@
  *   for each mode, which "Site default" applies. Empty is Craft's own.
  * @param {string} config.craftTheme Craft's saved Theme, for when its radios can't be
  *   read: light, dark or system.
+ * @param {string} config.buttonDefault The site's default button colour, or empty for
+ *   Craft's own.
+ * @param {Object<string, string>} [config.buttonHandles] Picker values that aren't
+ *   colour names (Craft Red's hex), to the names Cast stores.
  */
 function CastPreferences(config) {
   // Craft re-renders this fragment as the page updates, and runs this again each time,
@@ -52,6 +56,9 @@ function CastPreferences(config) {
   // Every theme's stylesheet is already on the page, so each change repaints at once.
   var keys = {light: 'castLight', dark: 'castDark'};
 
+  // The colour Craft's own primary buttons are, as the picker names it.
+  var craftButton = 'blue';
+
   // Fields moved out of the fragment are beyond Craft's cleanup of an old render, so
   // whatever an earlier render moved goes before this one moves its own.
   document.querySelectorAll('[data-cast-moved]').forEach(function (old) {
@@ -69,9 +76,9 @@ function CastPreferences(config) {
   var contrast = root.querySelector('#cast-contrast');
   var widths = ['width-25', 'width-33', 'width-50', 'width-66', 'width-75'];
 
-  // The appearances share a row with Craft's Theme field, in its own group. Craft gives
-  // plugins no hook there; this places them after it. If Craft's markup changes, they
-  // stay in Cast's group below, costing the layout and not the fields.
+  // The appearances and button colour share a row with Craft's Theme field, in its own
+  // group. Craft gives plugins no hook there; this places them after it. If Craft's
+  // markup changes, they stay in Cast's group below, costing the layout and not them.
   var themeField = document.querySelector('craft-field-group > craft-radio-group[name="theme"]');
 
   if (themeField) {
@@ -83,12 +90,13 @@ function CastPreferences(config) {
       });
   }
 
-  // Shows the appearances Theme's value can use, all in thirds of Theme's row: both for
-  // System, one for Light or Dark. The group stacks them again when narrow.
+  // Shows the appearances Theme's value can use (both for System, one for Light or
+  // Dark) and always the button colour, each a quarter of Theme's row. The group stacks
+  // them again when narrow.
   function layout(theme) {
     var shown = fields.filter(function (field) {
       var scheme = field.getAttribute('data-cast-field');
-      var visible = theme === 'system' || theme === scheme;
+      var visible = !(scheme in keys) || theme === 'system' || theme === scheme;
 
       field.style.display = visible ? '' : 'none';
 
@@ -100,10 +108,10 @@ function CastPreferences(config) {
       return;
     }
 
-    // Always thirds, so Theme holds its width as the appearances come and go.
+    // Always quarters, so Theme holds its width as the appearances come and go.
     [themeField].concat(shown).forEach(function (el) {
       el.classList.remove.apply(el.classList, widths);
-      el.classList.add('width-33');
+      el.classList.add('width-25');
     });
   }
 
@@ -130,6 +138,10 @@ function CastPreferences(config) {
   fields.forEach(function (field) {
     var select = field.querySelector('select[data-cast-scheme]');
 
+    if (!select) {
+      return;
+    }
+
     select.addEventListener('change', function () {
       var scheme = select.getAttribute('data-cast-scheme');
       var handle = select.value === 'inherit' ? config.defaults[scheme] : select.value;
@@ -145,6 +157,34 @@ function CastPreferences(config) {
       save(body, scheme + ' appearance');
     });
   });
+
+  // The picker shows each colour once. Craft's own blue stores as Craft's own, and the
+  // site default's colour stores as following the site default, so a user can hand
+  // control back without a row for it.
+  var button = fields.filter(function (field) {
+    return field.getAttribute('data-cast-field') === 'button';
+  })[0];
+
+  if (button) {
+    button.addEventListener('change', function () {
+      var color = (config.buttonHandles || {})[button.value] || button.value;
+
+      if (!color) {
+        return;
+      }
+
+      var applied = color === craftButton ? '' : color;
+      var stored = color === (config.buttonDefault || craftButton) ? 'inherit' : applied;
+
+      if (applied) {
+        dataset.castButton = applied;
+      } else {
+        delete dataset.castButton;
+      }
+
+      save({buttonColor: stored}, 'button colour');
+    });
+  }
 
   if (contrast) {
     contrast.addEventListener('change', function () {

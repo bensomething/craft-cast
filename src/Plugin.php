@@ -37,6 +37,7 @@ class Plugin extends BasePlugin
         __DIR__.'/../resources/themes/stone.css' => 'themes/stone.css',
         __DIR__.'/../resources/themes/dim.css' => 'themes/dim.css',
         __DIR__.'/../resources/themes/high-contrast.css' => 'themes/high-contrast.css',
+        __DIR__.'/../resources/themes/buttons.css' => 'themes/buttons.css',
     ];
 
     public function boot(Router $router, TemplateHooks $hooks): void
@@ -55,7 +56,7 @@ class Plugin extends BasePlugin
         return new Settings;
     }
 
-    /** The appearance fields, under Craft's own Theme field, and the contrast switch. */
+    /** The appearance and button colour fields beside Craft's Theme field, and the contrast switch. */
     private function preferencesHtml(): string
     {
         /** @var Settings $settings */
@@ -77,6 +78,12 @@ class Plugin extends BasePlugin
             'darkDefault' => $themes->siteDefault(Themes::SCHEME_DARK),
             'highContrast' => $themes->highContrastForUser($user),
             'craftTheme' => Theme::forUser($user)->value,
+            'buttonOptions' => $themes->buttonColorOptions(),
+            // The swatch shown as chosen: Craft's own reads as its blue.
+            'buttonValue' => $themes->pickerValue($themes->buttonColorForUser($user) ?: Themes::CRAFT_BUTTON_COLOR),
+            // The picker's values that aren't colour names, back to the names Cast stores.
+            'buttonHandles' => [Themes::CRAFT_RED => 'red'],
+            'buttonDefault' => $themes->siteButtonColor(),
             'saveUrl' => Url::actionUrl('cast/preferences'),
             'csrfToken' => csrf_token(),
         ], templateMode: TemplateMode::Cp);
