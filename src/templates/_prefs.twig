@@ -50,11 +50,16 @@
 
 {% js %}
     (function() {
-        var root = document.getElementById('cast-prefs');
+        // Craft re-renders this fragment as the page updates, and runs this again each
+        // time, so it has to be safe to repeat. Bind to the newest copy, once.
+        var roots = document.querySelectorAll('#cast-prefs');
+        var root = roots[roots.length - 1];
 
-        if (!root) {
+        if (!root || root.hasAttribute('data-cast-ready')) {
             return;
         }
+
+        root.setAttribute('data-cast-ready', '');
 
         var config = {{ {
             url: saveUrl,
@@ -87,8 +92,13 @@
         var keys = { light: 'castLight', dark: 'castDark' };
 
         // Follow Craft's Theme field as it changes, before it's saved. Delegated from the
-        // document, as Vue owns those radios and may replace them.
-        document.addEventListener('change', function(event) {
+        // document, as Vue owns those radios and may replace them. One listener for the
+        // page, swapped for this render's, so re-renders don't stack them.
+        if (window.CastThemeListener) {
+            document.removeEventListener('change', window.CastThemeListener);
+        }
+
+        window.CastThemeListener = function(event) {
             var input = event.target;
 
             if (!input || input.name !== 'theme' || input.type !== 'radio' || !input.checked) {
@@ -101,7 +111,9 @@
 
                 field.style.display = shown ? '' : 'none';
             });
-        });
+        };
+
+        document.addEventListener('change', window.CastThemeListener);
 
         root.querySelectorAll('select[data-cast-scheme]').forEach(function(select) {
             select.addEventListener('change', function() {
@@ -120,8 +132,8 @@
             });
         });
 
-        var contrastField = document.getElementById('cast-contrast-field');
-        var contrast = document.getElementById('cast-contrast');
+        var contrastField = root.querySelector('#cast-contrast-field');
+        var contrast = root.querySelector('#cast-contrast');
 
         contrast.addEventListener('change', function() {
             if (contrast.checked) {
@@ -137,9 +149,17 @@
         // straight after Display Settings. It's placed beside Craft's own fields rather
         // than inside one, which Vue re-renders. If Craft's markup changes, it stays put
         // under Appearance, costing the position and not the setting.
+        //
+        // Once moved, the switch is outside the fragment, so Craft's cleanup of an old
+        // render never reaches it. Whatever an earlier render moved goes first.
         var display = document.querySelector('#preferences-accessibility craft-field-group > craft-checkbox-select');
 
         if (display) {
+            document.querySelectorAll('[data-cast-moved]').forEach(function(old) {
+                old.remove();
+            });
+
+            contrastField.setAttribute('data-cast-moved', '');
             display.parentNode.insertBefore(contrastField, display.nextSibling);
         }
     })();
