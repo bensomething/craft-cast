@@ -22,7 +22,7 @@ return [
     'autoDarkTheme' => Settings::THEME_NONE,
 
     // Whether users who haven't set it themselves get increased contrast, in light and
-    // dark alike. It replaces the appearance while on.
+    // dark alike, on top of the appearance.
     'highContrast' => false,
 
     // Whether users may pick their own appearances, under Craft's Theme field in

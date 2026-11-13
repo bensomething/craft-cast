@@ -2,8 +2,10 @@
  * Cast: High Contrast
  *
  * Behind the "Increase contrast" switch under Accessibility, rather than an appearance:
- * it applies in whichever mode Craft is in, and replaces the user's appearance while on
- * (every appearance rule stands down under `data-cast-contrast`).
+ * it applies in whichever mode Craft is in, on top of the user's appearance. Stone keeps
+ * its warmth, as these move along whatever ramps are in place. Where an appearance sets
+ * the same token (Dim lowers contrast on purpose), this wins, by `:root` specificity
+ * rather than load order.
  *
  * Text and borders move up Craft's own slate ramp, hairlines go solid, links darken or
  * lighten a step, and the focus ring widens. Dark also deepens its surfaces. Against
@@ -19,14 +21,14 @@
  * Light figures are on Craft's raised (white) surface, dark on its default surface.
  */
 
-html[data-cast-contrast='more'] {
+html:root[data-cast-contrast='more'] {
     --c-focus-outline-width: 3px;
 
     /* Craft draws quiet borders as a colour fading 40% into transparency. Solid here. */
     --c-color-border-quiet-transparency: 0%;
 }
 
-html:not([data-theme='dark'])[data-cast-contrast='more'] {
+html:root:not([data-theme='dark'])[data-cast-contrast='more'] {
     --c-text-default: var(--color-slate-950);
     --c-text-quiet: var(--color-slate-800);
     --c-text-link: var(--color-blue-700);
@@ -34,7 +36,7 @@ html:not([data-theme='dark'])[data-cast-contrast='more'] {
     --c-border-raised: var(--color-slate-500);
 }
 
-html[data-theme='dark'][data-cast-contrast='more'] {
+html:root[data-theme='dark'][data-cast-contrast='more'] {
     /* Craft mixes 15% black into the surface and 25% into sunken. */
     --c-surface-default: color-mix(in oklab, var(--color-base-50), var(--color-black) 35%);
     --c-surface-sunken: color-mix(in oklab, var(--color-base-50), var(--color-black) 55%);

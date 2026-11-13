@@ -14,7 +14,7 @@
  * Anything Craft draws in its slate hue on purpose (a slate chip, say) warms with it.
  */
 
-html:not([data-theme='dark'])[data-cast-light='stone']:not([data-cast-contrast]) {
+html:not([data-theme='dark'])[data-cast-light='stone'] {
     /* Surfaces: the base ramp. */
     --color-base-50: #ffffff;
     --color-base-100: #f6f5f4;
@@ -42,7 +42,7 @@ html:not([data-theme='dark'])[data-cast-light='stone']:not([data-cast-contrast])
     --color-slate-950: #292623;
 }
 
-html[data-theme='dark'][data-cast-dark='stone']:not([data-cast-contrast]) {
+html[data-theme='dark'][data-cast-dark='stone'] {
     /* Surfaces: the base ramp. */
     --color-base-50: #32302b;
     --color-base-100: #3f3c37;

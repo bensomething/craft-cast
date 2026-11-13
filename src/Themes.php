@@ -13,8 +13,8 @@ use function CraftCms\Cms\t;
  *
  * Craft owns the mode: Light, Dark, or System following the OS. Cast picks what each
  * mode looks like. An empty handle is Craft's own appearance for that mode, so "Dark"
- * is simply Craft's dark. Increased contrast is separate from both, and replaces the
- * appearance in whichever mode is showing.
+ * is simply Craft's dark. Increased contrast is separate from both, and sits on top of
+ * the appearance in whichever mode is showing.
  *
  * Bundled themes only for now. Folder discovery and the registration event come back
  * once the bundled set has settled on Craft 6's tokens.

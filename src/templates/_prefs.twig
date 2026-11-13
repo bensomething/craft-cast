@@ -14,7 +14,9 @@
 {# @var csrfToken string #}
 {# @var craftTheme string Craft's saved Theme: light, dark or system. #}
 
-<craft-field-group id="cast-prefs">
+{# A group of its own, after Craft's. The section spaces groups 12px apart and a group's
+   fields 24px, so the difference goes on top to sit these at the field spacing. #}
+<craft-field-group id="cast-prefs" style="margin-block-start: calc(var(--c-spacing) * 3)">
     {% for field in [
         { scheme: 'light', label: 'Light Appearance' | t('cast'), help: 'Used whenever the control panel is light.' | t('cast'), options: lightOptions, value: lightValue },
         { scheme: 'dark', label: 'Dark Appearance' | t('cast'), help: 'Used whenever the control panel is dark.' | t('cast'), options: darkOptions, value: darkValue },
