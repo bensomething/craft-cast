@@ -117,8 +117,8 @@
             });
         }
 
-        // Splits the row between Theme and whichever appearances its value shows: thirds
-        // for System, halves for Light or Dark. The group stacks them again when narrow.
+        // Shows the appearances Theme's value can use, all in thirds of Theme's row: both
+        // for System, one for Light or Dark. The group stacks them again when narrow.
         function layout(theme) {
             var shown = fields.filter(function(field) {
                 var scheme = field.getAttribute('data-cast-field');
@@ -134,14 +134,10 @@
                 return;
             }
 
-            var width = { 1: 'width-50', 2: 'width-33' }[shown.length];
-
+            // Always thirds, so Theme holds its width as the appearances come and go.
             [themeField].concat(shown).forEach(function(el) {
                 el.classList.remove.apply(el.classList, widths);
-
-                if (width) {
-                    el.classList.add(width);
-                }
+                el.classList.add('width-33');
             });
         }
 
