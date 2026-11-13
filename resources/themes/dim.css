@@ -1,0 +1,28 @@
+/**
+ * Cast: Dim
+ *
+ * A softer take on Craft's dark theme for long editing sessions. Surfaces lift off the
+ * near-black Craft mixes in, and body text stops a step short of full brightness, so
+ * chrome and copy sit closer together.
+ *
+ * Applies only while Craft is dark, whether the user chose Dark or System resolved to
+ * it, so Craft decides the mode and this only changes what dark looks like.
+ *
+ * Contrast, against Craft 6.0.0-beta.1's dark palette:
+ *
+ * - Body text (slate-800) on the surface: 7.8:1. Craft's is 11.2:1.
+ * - Quiet text (slate-600) on the surface: 5.4:1, and 6.1:1 sunken.
+ * - Quiet text on the white surface: 4.85:1, with white mixed in at 4% rather than
+ *   Craft's 10%, which on this lighter surface would drop it to 4.1:1.
+ * - Form-control borders (slate-400) on the surface: 3.3:1.
+ */
+
+html[data-theme='dark'][data-cast-dark='dim'] {
+    /* Craft's own mixes, less the black: 15% on the surface, 25% sunken. */
+    --c-surface-default: color-mix(in oklab, var(--color-base-100), var(--color-base-50) 30%);
+    --c-surface-sunken: var(--color-base-50);
+
+    --c-surface-white: color-mix(in oklab, var(--c-surface-raised), var(--color-white) 4%);
+
+    --c-text-default: var(--color-slate-800);
+}

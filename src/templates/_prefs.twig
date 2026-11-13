@@ -1,0 +1,84 @@
+{# Rendered through the `cp.users.edit.prefs` hook, which Craft 6 places directly under
+   its own Theme field. Craft's field picks light or dark; these pick what each looks like.
+
+   The page's own form never posts these, so each select saves itself on change. #}
+{# @var lightOptions array #}
+{# @var darkOptions array #}
+{# @var lightValue string #}
+{# @var darkValue string #}
+{# @var lightDefault string #}
+{# @var darkDefault string #}
+{# @var saveUrl string #}
+{# @var csrfToken string #}
+
+<craft-field-group id="cast-prefs">
+    {% for field in [
+        { scheme: 'light', label: 'Light appearance' | t('cast'), help: 'Used whenever the control panel is light.' | t('cast'), options: lightOptions, value: lightValue },
+        { scheme: 'dark', label: 'Dark appearance' | t('cast'), help: 'Used whenever the control panel is dark.' | t('cast'), options: darkOptions, value: darkValue },
+    ] %}
+        {# Only worth asking where there's more than Craft's own to choose from. #}
+        {% if field.options | length > 2 %}
+            <craft-select>
+                <label slot="label" for="cast-{{ field.scheme }}">{{ field.label }}</label>
+                <span slot="help-text">{{ field.help }}</span>
+                <select slot="input" id="cast-{{ field.scheme }}" data-cast-scheme="{{ field.scheme }}">
+                    {% for option in field.options %}
+                        <option value="{{ option.value }}" {{ option.value == field.value ? 'selected' }}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </craft-select>
+        {% endif %}
+    {% endfor %}
+</craft-field-group>
+
+{% js %}
+    (function() {
+        var root = document.getElementById('cast-prefs');
+
+        if (!root) {
+            return;
+        }
+
+        var config = {{ {
+            url: saveUrl,
+            token: csrfToken,
+            defaults: { light: lightDefault, dark: darkDefault },
+        } | json_encode | raw }};
+
+        var keys = { light: 'castLight', dark: 'castDark' };
+
+        root.querySelectorAll('select[data-cast-scheme]').forEach(function(select) {
+            select.addEventListener('change', function() {
+                var scheme = select.getAttribute('data-cast-scheme');
+                var handle = select.value === 'inherit' ? config.defaults[scheme] : select.value;
+
+                // Every theme's stylesheet is already on the page, so this repaints at once.
+                if (handle) {
+                    document.documentElement.dataset[keys[scheme]] = handle;
+                } else {
+                    delete document.documentElement.dataset[keys[scheme]];
+                }
+
+                var body = {};
+                body[scheme] = select.value;
+
+                fetch(config.url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': config.token,
+                    },
+                    body: JSON.stringify(body),
+                }).then(function(response) {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+                }).catch(function() {
+                    console.error('Cast couldn’t save the ' + scheme + ' appearance.');
+                });
+            });
+        });
+    })();
+{% endjs %}

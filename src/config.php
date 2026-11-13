@@ -13,27 +13,21 @@
 use bensomething\cast\Settings;
 
 return [
-    // Fill for primary buttons: red, amber, green, teal, sky, blue, violet, pink or gray.
-    'buttonColor' => 'red',
+    // Craft decides whether the control panel is light or dark, from each user's own
+    // Theme preference. Cast decides what light and dark each look like.
 
-    // Theme applied to users who haven't chosen one. A theme handle — dark, dim,
-    // high-contrast or high-contrast-dark for the bundled ones — or 'auto' to follow the
-    // OS colour-scheme preference, or '' for Craft's stock appearance.
-    'defaultTheme' => Settings::THEME_AUTO,
+    // The appearances for users who haven't chosen their own: a theme handle ('dim' is
+    // the bundled dark one so far), or '' for Craft's own.
+    'autoLightTheme' => Settings::THEME_NONE,
+    'autoDarkTheme' => Settings::THEME_NONE,
 
-    // Whether users may pick their own theme in their account preferences.
+    // Whether users may pick their own appearances, under Craft's Theme field in
+    // their account preferences.
     'allowUserOverride' => true,
 
-    // Theme handles offered in the picker, or '*' for all. The default theme above is
-    // always available, whether or not it's listed here.
-    'enabledThemes' => '*',
-
-    // Themes used when 'auto' resolves to dark and to light. An empty handle means
-    // Craft's stock light control panel.
-    'autoDarkTheme' => 'dark',
-    'autoLightTheme' => Settings::THEME_NONE,
-
-    // Folder scanned for theme stylesheets, as a path or alias. Every `.css` file in it
-    // is a theme. It's published to `cpresources`, so it needn't sit in the web root.
-    'themesPath' => '@root/cast-themes',
+    // Not yet used in 2.x: button colour, limiting the themes on offer, and a themes
+    // folder all come back once the bundled themes have settled on Craft 6's tokens.
+    // 'buttonColor' => 'red',
+    // 'enabledThemes' => '*',
+    // 'themesPath' => '@root/cast-themes',
 ];

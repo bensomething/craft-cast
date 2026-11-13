@@ -39,8 +39,8 @@ class Settings extends PluginSettings
     public string $buttonColor = self::BUTTON_COLOR_DEFAULT;
 
     /**
-     * Theme applied to users who haven't chosen one. A theme handle, `auto`, or an empty
-     * string for Craft's stock appearance.
+     * Retired in 2.x: Craft now decides light or dark, from its own Theme preference.
+     * Still accepted so a 1.x `config/cast.php` doesn't fail, and otherwise ignored.
      */
     public string $defaultTheme = self::THEME_AUTO;
 
@@ -58,9 +58,13 @@ class Settings extends PluginSettings
     /** Folder scanned for theme stylesheets, as a path or alias. */
     public string $themesPath = '@root/cast-themes';
 
-    /** Theme used when "Auto" resolves to dark. */
-    public string $autoDarkTheme = 'dark';
+    /**
+     * The dark appearance for users who haven't chosen one, used whenever Craft is dark.
+     * Empty means Craft's own dark. Named for 1.x's Auto pair, which this generalises;
+     * 1.x's `dark` is read as Craft's own.
+     */
+    public string $autoDarkTheme = self::THEME_NONE;
 
-    /** Theme used when "Auto" resolves to light. Empty means Craft's stock light CP. */
+    /** The light appearance for users who haven't chosen one. Empty means Craft's own. */
     public string $autoLightTheme = self::THEME_NONE;
 }

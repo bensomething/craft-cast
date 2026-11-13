@@ -7,27 +7,72 @@ namespace bensomething\cast;
 use bensomething\cast\Http\Middleware\RegisterHeadScript;
 use CraftCms\Cms\Plugin\Plugin as BasePlugin;
 use CraftCms\Cms\Plugin\PluginSettings;
+use CraftCms\Cms\Support\Url;
+use CraftCms\Cms\View\TemplateHooks;
+use CraftCms\Cms\View\TemplateMode;
 use Illuminate\Routing\Router;
 use Override;
+
+use function CraftCms\Cms\currentUserElement;
+use function CraftCms\Cms\template;
 
 /**
  * Cast: colour modes for the control panel, Craft 6 line.
  *
- * Starting point only. 1.x lives on `develop`; `docs/craft-6.md` records why it doesn't
- * carry over and what's still Cast's to do on Craft 6.
+ * Craft 6 owns light, dark and following the OS. Cast picks what light and dark each
+ * look like: Craft's own, or one of Cast's themes, which override Craft's colour tokens
+ * while Craft's mode matches. See `docs/craft-6.md` for how 2.x got here.
  */
 class Plugin extends BasePlugin
 {
     public string $schemaVersion = '2.0.0';
 
-    public function boot(Router $router): void
+    /**
+     * Every theme loads on every CP page. They're small and scoped to their own
+     * attribute, and it's what lets a change repaint without a reload.
+     */
+    protected array $styles = [
+        __DIR__.'/../resources/themes/dim.css' => 'themes/dim.css',
+    ];
+
+    public function boot(Router $router, TemplateHooks $hooks): void
     {
+        $this->app->bind(Settings::class, fn () => $this->getSettings());
+        $this->app->scoped(Themes::class);
+
         $router->pushMiddlewareToGroup('craft.cp', RegisterHeadScript::class);
+
+        $hooks->register('cp.users.edit.prefs', fn (array &$context) => $this->preferencesHtml());
     }
 
     #[Override]
     protected static function createSettings(): ?PluginSettings
     {
         return new Settings;
+    }
+
+    /** The light and dark appearance fields, under Craft's own Theme field. */
+    private function preferencesHtml(): string
+    {
+        /** @var Settings $settings */
+        $settings = $this->getSettings();
+
+        if (! $settings->allowUserOverride) {
+            return '';
+        }
+
+        $themes = $this->app->make(Themes::class);
+        $user = currentUserElement();
+
+        return template('cast/_prefs.twig', [
+            'lightOptions' => $themes->options(Themes::SCHEME_LIGHT),
+            'darkOptions' => $themes->options(Themes::SCHEME_DARK),
+            'lightValue' => $themes->storedChoice($user, Themes::SCHEME_LIGHT),
+            'darkValue' => $themes->storedChoice($user, Themes::SCHEME_DARK),
+            'lightDefault' => $themes->siteDefault(Themes::SCHEME_LIGHT),
+            'darkDefault' => $themes->siteDefault(Themes::SCHEME_DARK),
+            'saveUrl' => Url::actionUrl('cast/preferences'),
+            'csrfToken' => csrf_token(),
+        ], templateMode: TemplateMode::Cp);
     }
 }
