@@ -18,8 +18,8 @@
    fields 24px, so the difference goes on top to sit these at the field spacing. #}
 <craft-field-group id="cast-prefs" style="margin-block-start: calc(var(--c-spacing) * 3)">
     {% for field in [
-        { scheme: 'light', label: 'Light Appearance' | t('cast'), help: 'Used whenever the control panel is light.' | t('cast'), options: lightOptions, value: lightValue },
-        { scheme: 'dark', label: 'Dark Appearance' | t('cast'), help: 'Used whenever the control panel is dark.' | t('cast'), options: darkOptions, value: darkValue },
+        { scheme: 'light', label: 'Light Appearance' | t('cast'), help: 'Used when the control panel theme is light.' | t('cast'), options: lightOptions, value: lightValue },
+        { scheme: 'dark', label: 'Dark Appearance' | t('cast'), help: 'Used when the control panel theme is dark.' | t('cast'), options: darkOptions, value: darkValue },
     ] %}
         {# Only worth asking where there's more than Craft's own to choose from. #}
         {% if field.options | length > 2 %}
