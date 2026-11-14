@@ -37,22 +37,27 @@ Each user picks their own in **Account → Preferences**:
 
 | Theme | Modes | Notes |
 | --- | --- | --- |
-| Stone | Light, dark | Craft's neutrals warmed to its own stone hue. Every step keeps the luminance of Craft's, so every contrast ratio is exactly Craft's. |
 | Dim | Dark | Craft's dark with lifted surfaces and softer text, for long sessions. Body text 7.8:1, quiet text 5.4:1. |
+| Stone | Light, dark | Craft's neutrals warmed to its own stone hue. Every step keeps the luminance of Craft's, so every contrast ratio is exactly Craft's. |
+| Red, Amber, Green, Teal, Blue, Violet, Pink | Light, dark | The colour themes: Craft's neutrals turned to one of its palette hues, the ones **Primary Button Colour** offers, so a Teal theme pairs with Teal buttons, and Blue with Craft's own. Generated the way custom themes are (below), at the site's **Hue Tint** (Medium unless changed), so every contrast ratio is exactly Craft's. |
 
 **Craft default** is Craft's own look for that mode.
 
 ### Custom themes
 
-**Settings → Plugins → Cast → Custom Themes** makes a theme from one colour. Give it a name, a base colour and a tint, and it's offered for light and dark alongside the others.
+**Settings → Plugins → Cast → Custom Themes** makes a theme from a brand colour the colour themes don't cover. Give each a name, a base colour and a tint, and it's offered for light and dark alongside the others.
+
+How they're made, and the colour themes with them:
 
 - **Only the colour's hue is used.** Craft's neutrals are turned to it, so a bright red gives a warm, rosy grey rather than red surfaces. Black, white and greys have no hue, and give a true neutral: Craft's greys without their blue.
 - **Contrast stays Craft's.** Every step keeps the luminance of the Craft step it replaces, so every contrast ratio in the control panel matches Craft's, whatever the colour.
 - **Tint** is how strongly the hue comes through: Subtle, Medium or Strong. Dark mode gets less than light, since dark surfaces show colour far more, and warm hues get less again in dark, where a dim orange turns brown. Text and borders take less than surfaces.
 - **The focus ring** takes the colour too, at the contrast of Craft's own. Primary buttons don't: they're **Primary Button Colour**'s alone, so that picker always shows what the buttons are.
-- **Preview** shows a row's theme on the settings screen in light or dark, whichever mode you're in, before you save: even a row you've just added. Editing its colour or tint updates it as you go. Press the button again to stop. One previews at a time, and Preview isn't saved.
+- **Preview**, on a custom theme's row, shows its theme on the settings screen in light or dark, whichever mode you're in, before you save: even a row you've just added. Editing its colour or tint updates it as you go. Press the button again to stop. One previews at a time, and Preview isn't saved.
 
-Renaming a theme keeps the users who picked it. Each is generated on request and cached until its colour, tint or name changes.
+**Hue Tint**, beside Available Themes, sets how strongly the colour themes come through for everyone. For just one at another strength, add a row with its colour and the tint you want: Red `#dd473f`, Amber `#b66925`, Green `#3e8c43`, Teal `#3c8880`, Blue `#3c75f1`, Violet `#8b5ef5`, Pink `#db3c89`.
+
+Renaming a custom theme keeps the users who picked it. Each is generated on request and cached until its colour, tint or name changes.
 
 ### Increase contrast
 
@@ -67,7 +72,7 @@ Moves text, borders and links up Craft's own colour ramps, makes hairline border
 
 ### Button colour
 
-Recolours primary buttons only; selections and the rest of Craft's accent colour stay Craft's, as do focus rings outside a custom theme. The colours are Craft's own blue, **Craft Red** (Craft 5's primary button), and Amber, Green, Teal, Sky, Violet, Pink and Gray from Craft 6's palette. Each takes its fill, border and label from Craft's generated colours, which hold the label at 4.6:1 or better in both modes. Craft Red is Craft 5's `#dc2626` with a white label, 4.83:1.
+Recolours primary buttons only; selections and the rest of Craft's accent colour stay Craft's, as do focus rings outside a hue or custom theme. The colours are Craft's own blue, **Craft Red** (Craft 5's primary button), and Amber, Green, Teal, Violet, Pink and Gray from Craft 6's palette. Each takes its fill, border and label from Craft's generated colours, which hold the label at 4.6:1 or better in both modes. Craft Red is Craft 5's `#dc2626` with a white label, 4.83:1.
 
 ## Adding your own theme
 
@@ -138,11 +143,12 @@ php artisan vendor:publish --tag=cast
 return [
     'autoLightTheme' => '',          // a light theme's handle, or '' for Craft's own
     'autoDarkTheme' => 'dim',        // a dark theme's handle, or '' for Craft's own
-    'defaultButtonColor' => 'red',   // red (Craft Red), amber, green, teal, sky, violet, pink, gray, or '' for Craft's blue
+    'defaultButtonColor' => 'red',   // red (Craft Red), amber, green, teal, violet, pink, gray, or '' for Craft's blue
     'highContrast' => false,
     'allowUserOverride' => true,
     'enabledThemes' => '*',          // or a list of handles
     'themesPath' => '@root/cast-themes',
+    'hueTint' => 'medium',           // the colour themes' strength: subtle, medium or strong
     'customThemes' => [
         ['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle'],  // tint: subtle, medium or strong
     ],

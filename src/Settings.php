@@ -58,7 +58,8 @@ class Settings extends PluginSettings
     public bool $allowUserOverride = true;
 
     /**
-     * Theme handles users may pick from, or `'*'` for all, including any added later.
+     * Theme handles users may pick from, or `['*']` (or `'*'`) for all, including any
+     * added later.
      * The site defaults are always available regardless.
      *
      * @var string[]|string
@@ -82,6 +83,12 @@ class Settings extends PluginSettings
     public bool $highContrast = false;
 
     /**
+     * How strongly the colour themes ({@see Themes::HUES}) come through: a key of
+     * {@see ThemeGenerator::TINTS}. Custom themes set their own.
+     */
+    public string $hueTint = 'medium';
+
+    /**
      * Themes generated from one colour each, as rows of `name`, `color` (`#rrggbb`, only
      * its hue is used) and `tint` (a key of {@see ThemeGenerator::TINTS}). The settings
      * screen adds a `rowId`, which the theme's handle comes from, so renaming a theme
@@ -101,12 +108,13 @@ class Settings extends PluginSettings
             'enabledThemes' => [function (string $attribute, mixed $value, Closure $fail): void {
                 $known = array_keys(app(Themes::class)->all());
 
-                if ($value !== '*' && (! is_array($value) || array_diff($value, $known) !== [])) {
+                if ($value !== ['*'] && (! is_array($value) || array_diff($value, $known) !== [])) {
                     $fail(t('Pick from the themes listed.', category: 'cast'));
                 }
             }],
             'highContrast' => ['boolean'],
             'allowUserOverride' => ['boolean'],
+            'hueTint' => ['string', Rule::in(array_keys(ThemeGenerator::TINTS))],
             'customThemes' => ['array'],
             'customThemes.*.name' => ['required', 'string', 'max:40'],
             'customThemes.*.color' => ['required', 'string', 'regex:/^#[0-9a-f]{6}$/'],
@@ -125,6 +133,7 @@ class Settings extends PluginSettings
             'highContrast' => t('Increase Contrast', category: 'cast'),
             'allowUserOverride' => t('Let Users Choose', category: 'cast'),
             'enabledThemes' => t('Available Themes', category: 'cast'),
+            'hueTint' => t('Hue Tint', category: 'cast'),
             'customThemes' => t('Custom Themes', category: 'cast'),
             'customThemes.*.name' => t('Name', category: 'cast'),
             'customThemes.*.color' => t('Base Colour', category: 'cast'),
@@ -145,12 +154,22 @@ class Settings extends PluginSettings
             $data[$key] = Themes::normalizeHandle((string) ($data[$key] ?? ''));
         }
 
+        // Sky was a button colour in 2.0.0-beta.1, dropped as too close to Craft's own blue,
+        // which a saved Sky now reads as.
+        if (($data['defaultButtonColor'] ?? '') === 'sky') {
+            $data['defaultButtonColor'] = '';
+        }
+
         $data['customThemes'] = self::normalizeCustomThemes($data['customThemes'] ?? []);
 
-        // None ticked would read as offering nothing while every theme stayed on offer
-        // downstream, so it snaps back to All, as 1.x's did.
-        if (($data['enabledThemes'] ?? '*') === [] || ($data['enabledThemes'] ?? '*') === '') {
-            $data['enabledThemes'] = '*';
+        // All is `['*']`, the checkbox list's single token for it, which is also what the
+        // settings screen needs to show All ticked: these values are what it renders. A
+        // config file's `'*'` reads the same, and so does none ticked, which would
+        // otherwise read as offering nothing while every theme stayed on offer, as 1.x's did.
+        $enabled = $data['enabledThemes'] ?? '*';
+
+        if ($enabled === '*' || $enabled === [] || $enabled === '' || (is_array($enabled) && in_array('*', $enabled, true))) {
+            $data['enabledThemes'] = ['*'];
         }
 
         return $data;

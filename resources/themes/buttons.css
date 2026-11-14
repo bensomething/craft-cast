@@ -64,18 +64,6 @@ html[data-cast-button='teal'] craft-button[variant~='primary'] {
     --c-color-accent-on-loud: var(--c-color-teal-on-loud);
 }
 
-html[data-cast-button='sky'] craft-button[variant~='primary'] {
-    --c-color-accent-fill-quiet: var(--c-color-sky-fill-quiet);
-    --c-color-accent-fill-normal: var(--c-color-sky-fill-normal);
-    --c-color-accent-fill-loud: var(--c-color-sky-fill-loud);
-    --c-color-accent-border-quiet: var(--c-color-sky-border-quiet);
-    --c-color-accent-border-normal: var(--c-color-sky-border-normal);
-    --c-color-accent-border-loud: var(--c-color-sky-border-loud);
-    --c-color-accent-on-quiet: var(--c-color-sky-on-quiet);
-    --c-color-accent-on-normal: var(--c-color-sky-on-normal);
-    --c-color-accent-on-loud: var(--c-color-sky-on-loud);
-}
-
 html[data-cast-button='violet'] craft-button[variant~='primary'] {
     --c-color-accent-fill-quiet: var(--c-color-violet-fill-quiet);
     --c-color-accent-fill-normal: var(--c-color-violet-fill-normal);
@@ -126,8 +114,6 @@ craft-select-color#cast-button {
     --c-color-green-border-quiet: var(--c-color-green-border-loud);
     --c-color-teal-fill-quiet: var(--c-color-teal-fill-loud);
     --c-color-teal-border-quiet: var(--c-color-teal-border-loud);
-    --c-color-sky-fill-quiet: var(--c-color-sky-fill-loud);
-    --c-color-sky-border-quiet: var(--c-color-sky-border-loud);
     --c-color-violet-fill-quiet: var(--c-color-violet-fill-loud);
     --c-color-violet-border-quiet: var(--c-color-violet-border-loud);
     --c-color-pink-fill-quiet: var(--c-color-pink-fill-loud);

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('cast/preview.css', [ThemeStylesheetController::class, 'preview'])
     ->name('cast.themes.preview');
 
+Route::get('cast/hues.css', [ThemeStylesheetController::class, 'hues'])
+    ->name('cast.themes.hues');
+
 Route::get('cast/themes/{handle}.css', [ThemeStylesheetController::class, 'show'])
     ->where('handle', trim(Theme::HANDLE_PATTERN, '/^$'))
     ->name('cast.themes.stylesheet');

@@ -20,7 +20,7 @@ return [
     // 'autoDarkTheme' => '',
 
     // The primary button colour for users who haven't chosen their own: red (Craft
-    // Red, Craft 5's own), amber, green, teal, sky, violet, pink or gray, or '' for
+    // Red, Craft 5's own), amber, green, teal, violet, pink or gray, or '' for
     // Craft's own blue.
     // 'defaultButtonColor' => '',
 
@@ -32,7 +32,12 @@ return [
     // Theme field in their account preferences. The contrast switch is always theirs.
     // 'allowUserOverride' => true,
 
-    // Themes made from one colour each, offered for light and dark. Only the colour's
+    // How strongly the colour themes (Red, Amber, Green, Teal, Blue, Violet and Pink)
+    // come through: subtle, medium or strong. Custom themes set their own.
+    // 'hueTint' => 'medium',
+
+    // Themes made from one colour each, for brand colours the colour themes don't cover,
+    // offered for light and dark. Only the colour's
     // hue is used, and every contrast ratio stays Craft's. Tint is subtle, medium or
     // strong. A theme here takes its handle from its name ('custom-sea'), so renaming
     // it sends users who picked it back to the default.

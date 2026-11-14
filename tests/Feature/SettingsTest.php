@@ -52,6 +52,32 @@ final class SettingsTest extends TestCase
         $this->assertTrue($settings->errors()->has('defaultButtonColor'));
     }
 
+    public function test_all_as_the_settings_screen_posts_it_validates_and_saves_as_posted(): void
+    {
+        $settings = $this->make(['enabledThemes' => ['*']]);
+
+        $this->assertTrue($settings->validate(), json_encode($settings->errors()->toArray()));
+        $this->assertSame(['*'], $settings->validationData()['enabledThemes']);
+    }
+
+    public function test_hue_tint_is_one_of_the_tints(): void
+    {
+        $this->assertSame('medium', new Settings()->hueTint);
+        $this->assertTrue($this->make(['hueTint' => 'strong'])->validate());
+
+        $settings = $this->make(['hueTint' => 'loud']);
+        $this->assertFalse($settings->validate());
+        $this->assertTrue($settings->errors()->has('hueTint'));
+    }
+
+    public function test_a_saved_sky_button_colour_reads_as_crafts_blue(): void
+    {
+        $settings = $this->make(['defaultButtonColor' => 'sky']);
+
+        $this->assertTrue($settings->validate(), json_encode($settings->errors()->toArray()));
+        $this->assertSame('', $settings->validationData()['defaultButtonColor']);
+    }
+
     public function test_custom_themes_validate_and_are_saved_tidied(): void
     {
         $settings = $this->make(['customThemes' => [

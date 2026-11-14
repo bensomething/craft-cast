@@ -3,11 +3,17 @@
 ## Unreleased
 
 ### Added
-- **Custom Themes**, under **Settings → Plugins → Cast**: a theme for light and dark made from one colour and a tint, keeping every contrast ratio Craft's. Its colour also takes the focus ring. Each row's **Preview** buttons show it on the settings screen, in either mode, before saving.
+- Colour themes: **Red**, **Amber**, **Green**, **Teal**, **Blue**, **Violet** and **Pink**, for light and dark, made from Craft's palette hues, keeping every contrast ratio Craft's. Each also colours the focus ring. **Hue Tint**, under **Settings → Plugins → Cast**, sets how strongly they come through.
+- **Custom Themes**, under **Settings → Plugins → Cast**, for brand colours the colour themes don't cover: a theme for light and dark made from one colour and a tint. Each row's **Preview** buttons show it on the settings screen, in either mode, before saving.
 
 ### Changed
 - The settings screen groups **Available Themes** and **Custom Themes** under their own **Themes** heading.
+- **Dim** is listed before **Stone**.
+- **Sky** is no longer a **Primary Button Colour**: it was too close to Craft's own blue, which anyone who chose it now gets.
 - **Increase contrast** stays in each user's preferences with **Let Users Choose** off. It's an accessibility need rather than a look, so it isn't locked along with the appearances and button colour.
+
+### Fixed
+- Saving the settings with **All** ticked under **Available Themes** failed with “Pick from the themes listed.”
 
 ## 2.0.0-beta.1 - 2026-11-14
 

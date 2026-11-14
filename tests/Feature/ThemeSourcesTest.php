@@ -9,6 +9,7 @@ use bensomething\cast\Plugin;
 use bensomething\cast\Settings;
 use bensomething\cast\tests\TestCase;
 use bensomething\cast\Theme;
+use bensomething\cast\ThemeGenerator;
 use bensomething\cast\Themes;
 use Illuminate\Support\Facades\Event;
 use Override;
@@ -16,6 +17,9 @@ use Override;
 /** Where themes come from: bundled, the themes folder, and the registration event. */
 final class ThemeSourcesTest extends TestCase
 {
+    /** Cast's own themes, which come first: Dim, Stone and the hues. */
+    private const array BUNDLED = ['dim', 'stone', 'red', 'amber', 'green', 'teal', 'blue', 'violet', 'pink'];
+
     private string $folder;
 
     #[Override]
@@ -55,7 +59,7 @@ final class ThemeSourcesTest extends TestCase
 
     public function test_bundled_themes_are_always_there(): void
     {
-        $this->assertSame(['stone', 'dim'], array_keys($this->themes()->all()));
+        $this->assertSame(self::BUNDLED, array_keys($this->themes()->all()));
     }
 
     public function test_a_folder_theme_is_read_from_its_header(): void
@@ -89,7 +93,7 @@ final class ThemeSourcesTest extends TestCase
 
         $themes = $this->themes();
 
-        $this->assertSame(['stone', 'dim'], array_keys($themes->all()));
+        $this->assertSame(self::BUNDLED, array_keys($themes->all()));
 
         $skipped = implode("\n", $themes->skippedFiles());
         $this->assertStringContainsString('legacy.css', $skipped);
@@ -114,7 +118,7 @@ final class ThemeSourcesTest extends TestCase
 
         $all = $this->themes()->all();
 
-        $this->assertSame(['stone', 'midnight'], array_keys($all));
+        $this->assertSame(['stone', ...array_keys(Themes::HUES), 'midnight'], array_keys($all));
         $this->assertSame('Stone, retuned', $all['stone']->name);
         $this->assertSame(['https://example.com/midnight.css'], array_values($this->themes()->stylesheets()));
     }
@@ -129,7 +133,7 @@ final class ThemeSourcesTest extends TestCase
             $event->themes[] = new Theme('appended', 'Appended', ['light']);
         });
 
-        $this->assertSame(['stone', 'dim', 'appended'], array_keys($this->themes()->all()));
+        $this->assertSame([...self::BUNDLED, 'appended'], array_keys($this->themes()->all()));
     }
 
     public function test_folder_themes_are_served_and_stamped_on_pages(): void
@@ -160,13 +164,21 @@ final class ThemeSourcesTest extends TestCase
         $this->get('/admin/cast/themes/midnight.css')->assertRedirect();
     }
 
+    public function test_all_as_the_settings_screen_posts_it_offers_everything(): void
+    {
+        $this->file('midnight.css', ' * Modes: dark');
+        $this->setSettings(['enabledThemes' => ['*']]);
+
+        $this->assertSame(['', ...self::BUNDLED, 'midnight'], $this->themes()->offered(Themes::SCHEME_DARK));
+    }
+
     public function test_users_are_offered_only_the_enabled_themes_and_the_defaults(): void
     {
         $this->file('midnight.css', ' * Modes: dark');
         $this->setSettings(['enabledThemes' => ['midnight'], 'autoDarkTheme' => 'stone']);
 
         $this->assertSame(['', 'stone', 'midnight'], $this->themes()->offered(Themes::SCHEME_DARK));
-        $this->assertSame(['', 'stone', 'dim', 'midnight'], $this->themes()->handles(Themes::SCHEME_DARK), 'defaults may still be any');
+        $this->assertSame(['', ...self::BUNDLED, 'midnight'], $this->themes()->handles(Themes::SCHEME_DARK), 'defaults may still be any');
     }
 
     public function test_a_theme_taken_off_offer_falls_back_to_the_site_default(): void
@@ -190,11 +202,11 @@ final class ThemeSourcesTest extends TestCase
     {
         $this->setSettings(['enabledThemes' => []]);
 
-        $this->assertSame(['', 'stone', 'dim'], $this->themes()->offered(Themes::SCHEME_DARK));
+        $this->assertSame(['', ...self::BUNDLED], $this->themes()->offered(Themes::SCHEME_DARK));
 
         $settings = new Settings;
         $settings->setAttributes(['enabledThemes' => []]);
-        $this->assertSame('*', $settings->validationData()['enabledThemes']);
+        $this->assertSame(['*'], $settings->validationData()['enabledThemes']);
     }
 
     public function test_available_themes_must_be_known(): void
@@ -220,9 +232,53 @@ final class ThemeSourcesTest extends TestCase
         $this->assertStringContainsString('legacy.css', $html);
     }
 
+    public function test_the_hues_are_bundled_for_both_modes(): void
+    {
+        $theme = $this->themes()->all()['teal'];
+
+        $this->assertSame('Teal', $theme->name);
+        $this->assertSame([Themes::SCHEME_LIGHT, Themes::SCHEME_DARK], $theme->modes);
+        $this->assertArrayNotHasKey('teal', $this->themes()->stylesheets(), 'in the one hue stylesheet, not one of its own');
+    }
+
+    public function test_the_hues_are_served_at_the_hue_tint_and_their_url_moves_with_it(): void
+    {
+        $this->signIn();
+        $medium = $this->themes()->hueStylesheetUrl();
+
+        $this->assertMatchesRegularExpression('#/admin/cast/hues\.css\?v=[0-9a-f]{10}#', $medium);
+
+        $response = $this->get('/admin/cast/hues.css')->assertOk();
+        $this->assertStringStartsWith('text/css', (string) $response->headers->get('Content-Type'));
+        $this->assertSame(ThemeGenerator::hueThemes('medium'), $response->getContent(), 'Medium by default');
+
+        foreach (array_keys(Themes::HUES) as $handle) {
+            $this->assertStringContainsString("[data-cast-dark='$handle']", (string) $response->getContent());
+        }
+
+        $this->setSettings(['hueTint' => 'strong']);
+
+        $this->assertNotSame($medium, $this->themes()->hueStylesheetUrl());
+        $this->assertSame(ThemeGenerator::hueThemes('strong'), $this->get('/admin/cast/hues.css')->getContent());
+    }
+
+    public function test_every_page_loads_the_hues(): void
+    {
+        $this->signIn();
+
+        $html = (string) $this->get('/admin/dashboard')->getContent();
+
+        $this->assertMatchesRegularExpression('#/admin/cast/hues\.css\?v=[0-9a-f]{10}#', $html);
+    }
+
+    public function test_guests_cant_fetch_the_hues(): void
+    {
+        $this->get('/admin/cast/hues.css')->assertRedirect();
+    }
+
     public function test_custom_themes_are_offered_for_both_modes(): void
     {
-        $this->assertSame(['stone', 'dim'], array_keys($this->themes()->all()));
+        $this->assertSame(self::BUNDLED, array_keys($this->themes()->all()));
 
         $this->setSettings(['customThemes' => [
             ['rowId' => 'b99938a4-0a50-48ea-8d0e-c53d65126729', 'name' => 'Sea', 'color' => '#0d9488', 'tint' => 'medium'],
@@ -245,7 +301,7 @@ final class ThemeSourcesTest extends TestCase
             ['name' => 'Twice', 'color' => '#7c3aed', 'tint' => 'subtle'],
         ]]);
 
-        $this->assertSame(['stone', 'dim', 'custom-twice'], array_keys($this->themes()->all()));
+        $this->assertSame([...self::BUNDLED, 'custom-twice'], array_keys($this->themes()->all()));
         $this->assertStringContainsString('#0d9488', (string) $this->themes()->all()['custom-twice']->description, 'the first of two');
     }
 
@@ -255,7 +311,7 @@ final class ThemeSourcesTest extends TestCase
         $this->setSettings(['customThemes' => [['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle']]]);
 
         $this->assertSame('Sea', $this->themes()->all()['custom-sea']->name);
-        $this->assertNotNull($this->themes()->customCss('custom-sea'));
+        $this->assertNotNull($this->themes()->generatedCss('custom-sea'));
     }
 
     public function test_a_custom_theme_is_served_generated_and_its_url_moves_with_it(): void
@@ -282,7 +338,7 @@ final class ThemeSourcesTest extends TestCase
         });
 
         $this->assertSame('Theirs', $this->themes()->all()['custom-sea']->name);
-        $this->assertNull($this->themes()->customCss('custom-sea'));
+        $this->assertNull($this->themes()->generatedCss('custom-sea'));
         $this->assertSame('https://example.com/theirs.css', $this->themes()->stylesheets()['custom-sea']);
     }
 

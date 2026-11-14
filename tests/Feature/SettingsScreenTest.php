@@ -20,7 +20,7 @@ final class SettingsScreenTest extends TestCase
 
         $html = (string) $this->get(self::URL)->assertOk()->getContent();
 
-        foreach (['Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose', 'Themes', 'Available Themes', 'Custom Themes', 'Base Colour', 'Tint', 'Preview'] as $label) {
+        foreach (['Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose', 'Themes', 'Available Themes', 'Teal (light, dark)', 'Hue Tint', 'Custom Themes', 'Base Colour', 'Tint', 'Preview'] as $label) {
             $this->assertStringContainsString($label, $html);
         }
     }
@@ -59,6 +59,31 @@ final class SettingsScreenTest extends TestCase
             [['rowId' => 'b99938a4-0a50-48ea-8d0e-c53d65126729', 'name' => 'Sea', 'color' => '#0d9488', 'tint' => 'medium']],
             ProjectConfigHelper::unpackAssociativeArrays(app(ProjectConfig::class)->get('plugins.cast.settings.customThemes')),
         );
+    }
+
+    public function test_it_saves_all_themes(): void
+    {
+        $this->signIn();
+        $this->setSettings(['enabledThemes' => ['stone']]);
+
+        // The All checkbox posts its single token in the list.
+        $this->postJson(self::URL, ['settings' => ['enabledThemes' => ['*']]])->assertOk();
+
+        $this->assertSame(['*'], app(ProjectConfig::class)->get('plugins.cast.settings.enabledThemes'));
+    }
+
+    public function test_all_shows_ticked_however_it_was_set(): void
+    {
+        $this->signIn();
+
+        foreach (['*', ['*'], []] as $saved) {
+            $this->setSettings(['enabledThemes' => $saved]);
+
+            $html = (string) $this->get(self::URL)->assertOk()->getContent();
+            preg_match('/<script data-page="app"[^>]*>(.*?)<\/script>/s', $html, $m);
+
+            $this->assertSame(['*'], json_decode($m[1], true)['props']['ui']['values']['settings']['enabledThemes'], json_encode($saved));
+        }
     }
 
     public function test_it_rejects_a_custom_theme_without_a_colour(): void

@@ -43,6 +43,8 @@ final readonly class RegisterHeadScript
 
             // Themes besides the bundled ones, whose stylesheets the plugin lists
             // statically. Every one loads, as the bundled do, so a change repaints at once.
+            $stack->cssFile($this->themes->hueStylesheetUrl(), [], 'cast-hues');
+
             foreach ($this->themes->stylesheets() as $handle => $url) {
                 $stack->cssFile($url, [], "cast-theme-$handle");
             }

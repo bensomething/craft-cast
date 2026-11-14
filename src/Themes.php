@@ -48,10 +48,26 @@ final class Themes
      * tokens, which hold the label at 4.6:1 or better in both modes. `red` is Craft Red,
      * Craft 5's primary button, as 1.x's `red` always was.
      */
-    public const array BUTTON_COLORS = ['red', 'amber', 'green', 'teal', 'sky', 'violet', 'pink', 'gray'];
+    public const array BUTTON_COLORS = ['red', 'amber', 'green', 'teal', 'violet', 'pink', 'gray'];
 
     /** Craft 5's primary button fill, which the picker shows Craft Red as. */
     public const string CRAFT_RED = '#dc2626';
+
+    /**
+     * The hue themes Cast ships, by handle, with the colour each is generated from and its
+     * name: Craft 6's palette hues, the ones Primary Button Colour offers (Blue being
+     * Craft's own), at their 500 step in light mode. They're generated together at the
+     * site's Hue Tint, and served as one stylesheet; see {@see hueStylesheetUrl()}.
+     */
+    public const array HUES = [
+        'red' => ['#dd473f', 'Red'],
+        'amber' => ['#b66925', 'Amber'],
+        'green' => ['#3e8c43', 'Green'],
+        'teal' => ['#3c8880', 'Teal'],
+        'blue' => ['#3c75f1', 'Blue'],
+        'violet' => ['#8b5ef5', 'Violet'],
+        'pink' => ['#db3c89', 'Pink'],
+    ];
 
     /** What every custom theme's handle starts with, so none can take another theme's. */
     public const string CUSTOM_PREFIX = 'custom-';
@@ -148,9 +164,10 @@ final class Themes
     {
         $enabled = $this->settings->enabledThemes;
 
-        // Nothing ticked means All, as validation saves it.
+        // Nothing ticked means All, as validation saves it, and so does All as the
+        // settings screen posts it (`['*']`), before validation has tidied it.
         return $enabled === '*' || $enabled === '' || $enabled === []
-            || (is_array($enabled) && in_array($handle, $enabled, true));
+            || (is_array($enabled) && (in_array('*', $enabled, true) || in_array($handle, $enabled, true)));
     }
 
     /**
@@ -183,10 +200,35 @@ final class Themes
     }
 
     /**
-     * A custom theme's stylesheet, or null when the handle isn't one, or a
-     * {@see ThemesResolving} listener has put something else in its place.
+     * Where every CP page loads the hue themes from, generated at the site's Hue Tint. The
+     * hash changes with the tint, so it can be cached for good.
      */
-    public function customCss(string $handle): ?string
+    public function hueStylesheetUrl(): string
+    {
+        return Url::cpUrl('cast/hues.css', [
+            'v' => substr(md5($this->hueTint().':'.ThemeGenerator::VERSION), 0, 10),
+        ]);
+    }
+
+    /** The hue themes' stylesheet, at the site's Hue Tint. */
+    public function hueCss(): string
+    {
+        return ThemeGenerator::hueThemes($this->hueTint());
+    }
+
+    /** The site's Hue Tint, or Medium if what's saved isn't one. */
+    public function hueTint(): string
+    {
+        $tint = $this->settings->hueTint;
+
+        return isset(ThemeGenerator::TINTS[$tint]) ? $tint : 'medium';
+    }
+
+    /**
+     * A custom theme's stylesheet, generated from its row, or null when the handle isn't
+     * one, or a {@see ThemesResolving} listener has put something else in its place.
+     */
+    public function generatedCss(string $handle): ?string
     {
         $theme = $this->all()[$handle] ?? null;
         $source = $theme !== null ? $this->generatedSource($theme) : null;
@@ -231,17 +273,21 @@ final class Themes
     }
 
     /**
-     * Cast's own themes, and the custom one when its colour is set: a folder file can't
-     * take either's handle.
+     * Cast's own themes, including the hues, then the custom ones generated from the
+     * settings: a folder file can't take any of their handles.
      *
      * @return array<string, Theme>
      */
     private function bundled(): array
     {
         $themes = [
-            'stone' => new Theme('stone', t('Stone', category: 'cast'), [self::SCHEME_LIGHT, self::SCHEME_DARK]),
             'dim' => new Theme('dim', t('Dim', category: 'cast'), [self::SCHEME_DARK]),
+            'stone' => new Theme('stone', t('Stone', category: 'cast'), [self::SCHEME_LIGHT, self::SCHEME_DARK]),
         ];
+
+        foreach (self::HUES as $handle => [, $name]) {
+            $themes[$handle] = new Theme($handle, t($name, category: 'cast'), [self::SCHEME_LIGHT, self::SCHEME_DARK]);
+        }
 
         $this->generated = [];
 
@@ -269,8 +315,8 @@ final class Themes
     }
 
     /**
-     * What a custom theme is generated from, or null for any other theme, including one
-     * a listener put in a custom theme's place.
+     * What a custom theme is made from, or null for any other theme, including one a
+     * listener put in a custom theme's place.
      *
      * @return array{color: string, tint: string}|null
      */

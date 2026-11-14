@@ -158,21 +158,30 @@ final class ThemeGenerator
     /** A themes-folder stylesheet for a colour, dressing both modes. */
     public static function css(string $handle, string $name, string $color, string $tint = 'subtle'): string
     {
+        return "/**\n * Theme Name: {$name}\n * Modes: light, dark\n * Description: Generated from {$color}, {$tint} tint.\n */\n"
+            .self::rules($handle, $color, $tint);
+    }
+
+    /**
+     * A theme's rules for both modes, without a header: the ramps, the accent and the
+     * focus ring, each scoped to the handle and to Craft's mode.
+     */
+    public static function rules(string $handle, string $color, string $tint = 'subtle'): string
+    {
         if (! preg_match(Theme::HANDLE_PATTERN, $handle)) {
             throw new InvalidArgumentException("Invalid handle `{$handle}`.");
         }
 
         $selectors = [
-            Themes::SCHEME_LIGHT => ["html:not([data-theme='dark'])", "[data-cast-light='{$handle}']"],
-            Themes::SCHEME_DARK => ["html[data-theme='dark']", "[data-cast-dark='{$handle}']"],
+            Themes::SCHEME_LIGHT => "html:not([data-theme='dark'])[data-cast-light='{$handle}']",
+            Themes::SCHEME_DARK => "html[data-theme='dark'][data-cast-dark='{$handle}']",
         ];
 
-        $css = "/**\n * Theme Name: {$name}\n * Modes: light, dark\n * Description: Generated from {$color}, {$tint} tint.\n */\n";
+        $css = '';
         $accents = self::accents($color);
 
         foreach (self::ramps($color, $tint) as $mode => $steps) {
-            $root = implode('', $selectors[$mode]);
-
+            $root = $selectors[$mode];
             $css .= "\n{$root} {\n";
 
             foreach ($steps as $token => $hex) {
@@ -188,6 +197,18 @@ final class ThemeGenerator
             // Craft declares the focus colour again on every component's host, so it's
             // set on every element rather than inherited from the root.
             $css .= "\n{$root},\n{$root} * {\n    --c-color-focus-outline: var(--cast-accent-500);\n}\n";
+        }
+
+        return $css;
+    }
+
+    /** The stylesheet of the hue themes Cast ships, {@see Themes::HUES}, at a tint. */
+    public static function hueThemes(string $tint): string
+    {
+        $css = "/* Cast: hues, at the {$tint} tint. Generated; see `ThemeGenerator`. */\n";
+
+        foreach (Themes::HUES as $handle => [$color, $name]) {
+            $css .= "\n/* {$name}, from {$color} */\n".self::rules($handle, $color, $tint);
         }
 
         return $css;

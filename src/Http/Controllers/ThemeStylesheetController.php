@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Serves a themes-folder stylesheet, or a custom theme, generated from the settings.
+ * Serves a themes-folder stylesheet, or the hue and custom themes, generated from the settings.
  *
  * The folder needn't be in the web root, and
  * shouldn't be: there, a theme would be reachable at two URLs, only one of them
@@ -28,7 +28,7 @@ final readonly class ThemeStylesheetController
 
     public function show(string $handle): Response
     {
-        if (($css = $this->themes->customCss($handle)) !== null) {
+        if (($css = $this->themes->generatedCss($handle)) !== null) {
             return response($css, 200, self::HEADERS);
         }
 
@@ -52,5 +52,11 @@ final readonly class ThemeStylesheetController
         abort_unless(preg_match('/^#[0-9a-f]{6}$/', $color) && isset(ThemeGenerator::TINTS[$tint]), 404);
 
         return response(ThemeGenerator::css(Themes::PREVIEW, 'Preview', $color, $tint), 200, self::HEADERS);
+    }
+
+    /** The hue themes, generated at the site's Hue Tint. */
+    public function hues(): Response
+    {
+        return response($this->themes->hueCss(), 200, self::HEADERS);
     }
 }

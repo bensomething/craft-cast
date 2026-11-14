@@ -18,6 +18,14 @@ has a later update (13 November) on what 1.x does under the Yii adapter.
   (`Http\Controllers`, `Events`) under it. The root namespace and the plugin class name
   (`bensomething\cast\Plugin`) stay what Craft's project config and `composer.json`
   already know; a vendor-cased `BenSomething\Cast` would rename every class for no gain.
+- **Bundled hues, plus custom themes for brand colours** (after beta.1). At the chroma
+  these themes carry, hues 20 to 30° apart look the same, so the hues Cast ships are
+  Craft's palette hues (Primary Button Colour's set, Blue being Craft's own), generated
+  on request into one cached stylesheet, `cast/hues.css`, at a site-wide Hue Tint. A
+  static file was tried first, then dropped: a tint setting would have meant shipping
+  all three tints to every page. Configurable presets (hues × tints checkboxes) were also
+  tried and dropped as more setting than the result needed. The Custom Themes table
+  stays for a brand hue or a one-off strength.
 - **Custom themes are generated, not hand-written** (after beta.1). `ThemeGenerator`
   rotates Craft's base and slate ramps to one hue, solving each step back to the
   luminance of Craft's, so contrast can't drift whatever colour is picked. Chroma is

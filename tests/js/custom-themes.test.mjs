@@ -59,9 +59,16 @@ function page({rows = [row('a'), row('b', {color: '#7c3aed'})], url = 'https://e
   const html = document.documentElement;
   const cell = (id, column) => document.querySelector(`tr[data-row-id="${id}"] td[data-column="${column}"]`);
   const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
-  const press = async (id, mode) => {
+  // jsdom doesn't load stylesheets, so a preview's is marked as loaded by hand.
+  const loaded = () => {
+    for (const link of document.querySelectorAll('link[data-cast-preview-loading]')) {
+      link.dispatchEvent(new window.Event('load'));
+    }
+  };
+  const press = async (id, mode, {load = true} = {}) => {
     cell(id, 'preview').querySelector(`craft-button[value="${mode}"]`).click();
     await wait(10);
+    if (load) loaded();
   };
   const on = (id) => [...cell(id, 'preview').querySelectorAll('craft-button[active]')].map((b) => b.getAttribute('value'));
   const edit = (id, column, value) => {
@@ -69,9 +76,12 @@ function page({rows = [row('a'), row('b', {color: '#7c3aed'})], url = 'https://e
     el.value = value;
     el.dispatchEvent(new window.Event(el.tagName === 'SELECT' ? 'change' : 'input', {bubbles: true}));
   };
-  const href = () => document.getElementById('cast-preview')?.getAttribute('href') ?? null;
+  const href = () => {
+    loaded();
+    return document.getElementById('cast-preview')?.getAttribute('href') ?? null;
+  };
 
-  return {window, document, html, press, on, edit, href, wait};
+  return {window, document, html, press, on, edit, href, wait, loaded};
 }
 
 test('pressing Light or Dark shows that row in that mode, from the server', async () => {
@@ -86,6 +96,45 @@ test('pressing Light or Dark shows that row in that mode, from the server', asyn
 
   await press('a', 'dark');
   assert.equal(html.dataset.theme, 'dark');
+});
+
+test("the page isn't switched until the preview's stylesheet has loaded", async () => {
+  const {document, html, press, loaded} = page();
+
+  await press('a', 'light', {load: false});
+
+  assert.equal(html.dataset.castDark, 'dim', "still the page's own, not Craft's for a frame");
+  assert.equal(html.dataset.theme, 'dark');
+  assert.ok(document.querySelector('link[data-cast-preview-loading]'));
+
+  loaded();
+  assert.equal(html.dataset.castLight, 'cast-preview');
+  assert.equal(html.dataset.theme, undefined);
+});
+
+test('switching to another row keeps the first stylesheet until the next has loaded', async () => {
+  const {document, html, press, loaded} = page();
+
+  await press('a', 'dark');
+  await press('b', 'dark', {load: false});
+
+  assert.match(document.getElementById('cast-preview').getAttribute('href'), /color=0d9488/, 'the first still in place');
+  assert.equal(html.dataset.castDark, 'cast-preview');
+
+  loaded();
+  assert.match(document.getElementById('cast-preview').getAttribute('href'), /color=7c3aed/);
+  assert.equal(document.querySelectorAll('link[rel="stylesheet"]').length, 1, 'the first gone');
+});
+
+test('a stylesheet that loads after the preview ended is dropped', async () => {
+  const {document, html, press, loaded} = page();
+
+  await press('a', 'dark', {load: false});
+  await press('a', 'dark', {load: false});
+  loaded();
+
+  assert.equal(html.dataset.castDark, 'dim');
+  assert.equal(document.querySelectorAll('link[rel="stylesheet"]').length, 0);
 });
 
 test('switching a row from Dark to Light leaves only Light on', async () => {

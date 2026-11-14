@@ -22,8 +22,10 @@ final class ThemesTest extends TestCase
 
     public function test_each_mode_offers_its_own_themes_after_crafts(): void
     {
-        $this->assertSame(['', 'stone'], $this->themes()->handles(Themes::SCHEME_LIGHT));
-        $this->assertSame(['', 'stone', 'dim'], $this->themes()->handles(Themes::SCHEME_DARK));
+        $hues = array_keys(Themes::HUES);
+
+        $this->assertSame(['', 'stone', ...$hues], $this->themes()->handles(Themes::SCHEME_LIGHT));
+        $this->assertSame(['', 'dim', 'stone', ...$hues], $this->themes()->handles(Themes::SCHEME_DARK));
     }
 
     public function test_site_default_folds_into_craft_default_while_they_match(): void
@@ -31,9 +33,10 @@ final class ThemesTest extends TestCase
         $options = $this->themes()->options(Themes::SCHEME_DARK);
 
         $this->assertSame(
-            [['value' => 'inherit', 'label' => 'Craft default'], ['value' => 'stone', 'label' => 'Stone'], ['value' => 'dim', 'label' => 'Dim']],
-            $options,
+            [['value' => 'inherit', 'label' => 'Craft default'], ['value' => 'dim', 'label' => 'Dim'], ['value' => 'stone', 'label' => 'Stone']],
+            array_slice($options, 0, 3),
         );
+        $this->assertNotContains('', array_column($options, 'value'), 'no second Craft default row');
     }
 
     public function test_a_theme_as_site_default_gets_its_own_row(): void

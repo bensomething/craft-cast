@@ -182,7 +182,18 @@ class Plugin extends BasePlugin
                     )).')',
                 ], $themes->all())))
                 ->allOption(t('All', category: 'cast')))
-                ->instructions(t('Which themes users can pick from. **All** includes any added later, and the defaults selected above are always available.', category: 'cast'))),
+                ->instructions(t('Which themes users can pick from. **All** includes any added later, and the defaults selected above are always available.', category: 'cast'))
+                ->width(FieldWidth::Half)),
+
+            $overridable('hueTint', Field::make(t('Hue Tint', category: 'cast'), Choice::make('hueTint')
+                ->options([
+                    ['value' => 'subtle', 'label' => t('Subtle', category: 'cast')],
+                    ['value' => 'medium', 'label' => t('Medium', category: 'cast')],
+                    ['value' => 'strong', 'label' => t('Strong', category: 'cast')],
+                ])
+                ->withoutPlaceholder())
+                ->instructions(t('How strongly the colour themes come through, for everyone using them. Custom themes set their own.', category: 'cast'))
+                ->width(FieldWidth::Half)),
 
             $overridable('customThemes', Field::make(t('Custom Themes', category: 'cast'), Table::make('customThemes')
                 ->columns([
@@ -210,7 +221,7 @@ class Plugin extends BasePlugin
                 ->allowDelete()
                 ->allowReorder()
                 ->addRowLabel(t('Add a theme', category: 'cast')))
-                ->instructions(t('Each made from one colour into a light and dark appearance that keeps Craft’s contrast. Only the colour’s hue is used. Use **Preview** to see one on this page, in light or dark, before saving.', category: 'cast'))),
+                ->instructions(t('For a brand colour the colour themes don’t cover. Each is made from one colour into a light and dark appearance that keeps Craft’s contrast, and only its hue is used. Use **Preview** to see one on this page, in light or dark, before saving.', category: 'cast'))),
 
             ...$this->skippedFilesCallout($themes),
         ]);

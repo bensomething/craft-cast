@@ -83,17 +83,64 @@
     }
   }
 
-  function link() {
-    var el = document.getElementById('cast-preview');
+  // Bumped by every show and clear, so a stylesheet that finishes loading after a newer
+  // request, or after the preview's ended, is dropped rather than applied.
+  var generation = 0;
 
-    if (!el) {
-      el = document.createElement('link');
-      el.id = 'cast-preview';
-      el.rel = 'stylesheet';
-      document.head.appendChild(el);
+  function stamp(previewMode) {
+    // Craft's mode is its `data-theme`, which it sets for dark and removes for light.
+    // The generated theme dresses both.
+    if (previewMode === 'dark') {
+      dataset.theme = 'dark';
+    } else {
+      delete dataset.theme;
     }
 
-    return el;
+    dataset.castLight = 'cast-preview';
+    dataset.castDark = 'cast-preview';
+  }
+
+  // Swaps in a stylesheet without a gap: the new one loads beside the old, and only once
+  // it has does the page switch to it and the old go. Switching first would show Craft's
+  // own colours for a frame or more while it loaded.
+  function load(href, previewMode) {
+    var current = document.getElementById('cast-preview');
+
+    if (current && current.getAttribute('href') === href) {
+      stamp(previewMode);
+
+      return;
+    }
+
+    var mine = ++generation;
+    var next = document.createElement('link');
+    next.rel = 'stylesheet';
+    next.href = href;
+    next.setAttribute('data-cast-preview-loading', '');
+
+    next.onload = function () {
+      if (mine !== generation) {
+        next.remove();
+
+        return;
+      }
+
+      var old = document.getElementById('cast-preview');
+
+      if (old) {
+        old.remove();
+      }
+
+      next.id = 'cast-preview';
+      next.removeAttribute('data-cast-preview-loading');
+      stamp(previewMode);
+    };
+
+    next.onerror = function () {
+      next.remove();
+    };
+
+    document.head.appendChild(next);
   }
 
   // `pressed` is the mode just pressed, which Craft may not have marked as the only one on yet.
@@ -115,18 +162,7 @@
 
     url.searchParams.set('color', color);
     url.searchParams.set('tint', tint);
-    link().href = url.toString();
-
-    // Craft's mode is its `data-theme`, which it sets for dark and removes for light.
-    // The generated theme dresses both.
-    if (previewMode === 'dark') {
-      dataset.theme = 'dark';
-    } else {
-      delete dataset.theme;
-    }
-
-    dataset.castLight = 'cast-preview';
-    dataset.castDark = 'cast-preview';
+    load(url.toString(), previewMode);
   }
 
   function restore(key, value) {
@@ -137,14 +173,11 @@
     }
   }
 
+  // The page's own stamps go back first, then the preview's stylesheet goes, so nothing
+  // is ever stamped without its stylesheet.
   function clear() {
     previewing = null;
-
-    var el = document.getElementById('cast-preview');
-
-    if (el) {
-      el.remove();
-    }
+    generation++;
 
     if (saved) {
       restore('castLight', saved.light);
@@ -152,6 +185,10 @@
       restore('theme', saved.theme);
       saved = null;
     }
+
+    document.querySelectorAll('#cast-preview, link[data-cast-preview-loading]').forEach(function (el) {
+      el.remove();
+    });
   }
 
   // One button on at a time: every other one, in this row and the rest, goes off.
