@@ -1,4 +1,4 @@
-// Runs `src/templates/_prefs.js` against a stand-in for Craft 6's preferences page.
+// Runs `resources/js/preferences.js` against a stand-in for Craft 6's preferences page.
 //
 // The page is the parts of `resources/js/pages/users/Preferences.vue` the script reaches
 // for: the General field group holding the Theme radios, the hook's container under it,
@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 
-const script = readFileSync(new URL('../../src/templates/_prefs.js', import.meta.url), 'utf8');
+const script = readFileSync(new URL('../../resources/js/preferences.js', import.meta.url), 'utf8');
 
 function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) {
   const select = (scheme, value, options) => `

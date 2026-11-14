@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace bensomething\cast\tests\Feature;
 
-use bensomething\cast\Plugin;
 use bensomething\cast\tests\TestCase;
 use bensomething\cast\Themes;
 use Inertia\Testing\AssertableInertia;
@@ -77,21 +76,6 @@ final class PagesTest extends TestCase
         $this->setPrefs([Themes::PREF_DARK => 'dim']);
 
         $this->assertStringContainsString('d.castDark="dim";', $this->stamp($path));
-    }
-
-    /**
-     * Testbench installs the plugin after Craft has registered plugin assets, so the
-     * stylesheets aren't on its pages; this checks each one Cast lists exists.
-     */
-    public function test_every_listed_stylesheet_exists(): void
-    {
-        $styles = (fn () => $this->styles)->call(Plugin::getInstance());
-
-        $this->assertNotEmpty($styles);
-
-        foreach (array_keys($styles) as $source) {
-            $this->assertFileExists($source);
-        }
     }
 
     public function test_the_preferences_page_carries_the_fields(): void

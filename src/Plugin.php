@@ -45,6 +45,12 @@ class Plugin extends BasePlugin
     public bool $hasCpSettings = true;
 
     /**
+     * Where admin changes are disallowed, the settings screen still opens, read-only,
+     * so it's clear what the defaults are.
+     */
+    public bool $hasReadOnlyCpSettings = true;
+
+    /**
      * Every theme loads on every CP page. They're small and scoped to their own
      * attribute, and it's what lets a change repaint without a reload. Appearances stand
      * down under high contrast by selector, so order doesn't decide between them.
@@ -54,6 +60,11 @@ class Plugin extends BasePlugin
         __DIR__.'/../resources/themes/dim.css' => 'themes/dim.css',
         __DIR__.'/../resources/themes/high-contrast.css' => 'themes/high-contrast.css',
         __DIR__.'/../resources/themes/buttons.css' => 'themes/buttons.css',
+    ];
+
+    /** The preferences page's behaviour, which `_prefs.twig` calls. */
+    protected array $scripts = [
+        __DIR__.'/../resources/js/preferences.js' => 'js/preferences.js',
     ];
 
     /**
@@ -189,8 +200,7 @@ class Plugin extends BasePlugin
     /** The appearance and button colour fields beside Craft's Theme field, and the contrast switch. */
     private function preferencesHtml(): string
     {
-        /** @var Settings $settings */
-        $settings = $this->getSettings();
+        $settings = $this->app->make(Settings::class);
 
         if (! $settings->allowUserOverride) {
             return '';

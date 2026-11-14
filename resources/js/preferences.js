@@ -1,9 +1,10 @@
 /**
  * Wires up the fields `_prefs.twig` renders on Craft's preferences page.
  *
- * Kept out of the template so `tests/js/prefs.test.mjs` can run it against a stand-in
- * page. The template includes it with `source()` and calls it with what only the server
- * knows.
+ * Published through the plugin's `$scripts`, so it loads once as a cached file on
+ * every CP page, ahead of the module that starts Craft's app; the template only calls
+ * it, with what only the server knows. `tests/js/prefs.test.mjs` runs it against a
+ * stand-in page.
  *
  * @param {object} config
  * @param {string} config.url The action that saves a change.

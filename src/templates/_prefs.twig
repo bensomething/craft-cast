@@ -63,10 +63,8 @@
     </craft-checkbox-group>
 </craft-field-group>
 
-{# The behaviour lives in `_prefs.js`, so it can be tested outside Craft. #}
+{# The behaviour is `resources/js/preferences.js`, which every CP page loads. #}
 {% js %}
-    {{ source('cast/_prefs.js') | raw }}
-
     CastPreferences({{ {
         url: saveUrl,
         token: csrfToken,
