@@ -40,7 +40,7 @@ use function CraftCms\Cms\template;
  */
 class Plugin extends BasePlugin
 {
-    public string $schemaVersion = '2.0.0';
+    public string $schemaVersion = '2.0.1';
 
     public bool $hasCpSettings = true;
 
