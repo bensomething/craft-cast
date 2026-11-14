@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace bensomething\cast;
 
+use Closure;
 use CraftCms\Cms\Plugin\PluginSettings;
 use Illuminate\Validation\Rule;
 use Override;
@@ -14,9 +15,9 @@ use function CraftCms\Cms\t;
  * Site-wide defaults for what each user can choose in their own preferences, edited
  * under Settings → Plugins → Cast or in `config/cast.php`.
  *
- * Several 1.x settings are kept only so a 1.x `config/cast.php` doesn't fail: Craft 6
- * decides light or dark itself, and the colour vocabulary 1.x themed is gone. See
- * `docs/craft-6.md`.
+ * `defaultTheme` and `buttonColor` are kept only so a 1.x config doesn't fail: Craft 6
+ * decides light or dark itself, and 1.x's `buttonColor` was Craft 5's red for everyone.
+ * See `docs/craft-6.md`.
  */
 class Settings extends PluginSettings
 {
@@ -56,8 +57,8 @@ class Settings extends PluginSettings
     public bool $allowUserOverride = true;
 
     /**
-     * Theme handles offered in the picker, or `'*'` for all. The default is always
-     * available regardless of this list.
+     * Theme handles users may pick from, or `'*'` for all, including any added later.
+     * The site defaults are always available regardless.
      *
      * @var string[]|string
      */
@@ -83,9 +84,16 @@ class Settings extends PluginSettings
     public function getRules(): array
     {
         return [
-            'autoLightTheme' => ['string', Rule::in(Themes::handlesFor(Themes::SCHEME_LIGHT))],
-            'autoDarkTheme' => ['string', Rule::in(Themes::handlesFor(Themes::SCHEME_DARK))],
+            'autoLightTheme' => ['string', Rule::in(app(Themes::class)->handles(Themes::SCHEME_LIGHT))],
+            'autoDarkTheme' => ['string', Rule::in(app(Themes::class)->handles(Themes::SCHEME_DARK))],
             'defaultButtonColor' => ['string', Rule::in(['', ...Themes::BUTTON_COLORS])],
+            'enabledThemes' => [function (string $attribute, mixed $value, Closure $fail): void {
+                $known = array_keys(app(Themes::class)->all());
+
+                if ($value !== '*' && (! is_array($value) || array_diff($value, $known) !== [])) {
+                    $fail(t('Pick from the themes listed.', category: 'cast'));
+                }
+            }],
             'highContrast' => ['boolean'],
             'allowUserOverride' => ['boolean'],
         ];
@@ -101,6 +109,7 @@ class Settings extends PluginSettings
             'defaultButtonColor' => t('Button Colour', category: 'cast'),
             'highContrast' => t('Increase Contrast', category: 'cast'),
             'allowUserOverride' => t('Let Users Choose', category: 'cast'),
+            'enabledThemes' => t('Available Themes', category: 'cast'),
         ];
     }
 
@@ -115,6 +124,12 @@ class Settings extends PluginSettings
 
         foreach (['autoLightTheme', 'autoDarkTheme'] as $key) {
             $data[$key] = Themes::normalizeHandle((string) ($data[$key] ?? ''));
+        }
+
+        // None ticked would read as offering nothing while every theme stayed on offer
+        // downstream, so it snaps back to All, as 1.x's did.
+        if (($data['enabledThemes'] ?? '*') === [] || ($data['enabledThemes'] ?? '*') === '') {
+            $data['enabledThemes'] = '*';
         }
 
         return $data;

@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace bensomething\cast;
 
+use bensomething\cast\Events\ThemesResolving;
+use CraftCms\Aliases\Aliases;
+use CraftCms\Cms\Support\Url;
 use CraftCms\Cms\User\Elements\User;
+use Illuminate\Support\Str;
 
 use function CraftCms\Cms\t;
 
@@ -16,8 +20,9 @@ use function CraftCms\Cms\t;
  * is simply Craft's dark. Increased contrast is separate from both, and sits on top of
  * the appearance in whichever mode is showing.
  *
- * Bundled themes only for now. Folder discovery and the registration event come back
- * once the bundled set has settled on Craft 6's tokens.
+ * Themes come from three places, in order: the bundled ones, stylesheets in the themes
+ * folder, and {@see ThemesResolving} listeners, which see the first two and can add,
+ * replace or remove. A handle the bundled themes use can't be taken by a folder file.
  */
 final class Themes
 {
@@ -51,11 +56,8 @@ final class Themes
     /** The colour Craft's own primary buttons are, as a palette name. */
     public const string CRAFT_BUTTON_COLOR = 'blue';
 
-    /** Bundled themes, by handle, and the modes each one can dress. */
-    private const array BUNDLED = [
-        'stone' => [self::SCHEME_LIGHT, self::SCHEME_DARK],
-        'dim' => [self::SCHEME_DARK],
-    ];
+    /** How much of a folder theme is read for its header. */
+    private const int HEADER_BYTES = 8192;
 
     /**
      * Handles 1.x stored that mean something else here. Its `dark` was Cast's own dark,
@@ -69,27 +71,214 @@ final class Themes
         'high-contrast-dark' => '',
     ];
 
+    /** @var array<string, Theme>|null Resolved once per request. */
+    private ?array $themes = null;
+
+    /** @var list<string> Folder stylesheets passed over, by filename, with why. */
+    private array $skipped = [];
+
     public function __construct(private readonly Settings $settings) {}
 
     /**
-     * The handles a user may choose for a scheme, Craft's own (empty) first.
+     * Every theme, by handle.
+     *
+     * @return array<string, Theme>
+     */
+    public function all(): array
+    {
+        if ($this->themes !== null) {
+            return $this->themes;
+        }
+
+        // Bundled first, so a folder file can't take one of their handles.
+        event($event = new ThemesResolving($this->bundled() + $this->folderThemes()));
+
+        // Keyed afresh by handle, so a listener appending with `[]` still lands right.
+        $themes = [];
+
+        foreach ($event->themes as $theme) {
+            // A listener can put anything in the array, whatever its type says.
+            // @phpstan-ignore instanceof.alwaysTrue
+            if ($theme instanceof Theme && $theme->isValid()) {
+                $themes[$theme->handle] = $theme;
+            }
+        }
+
+        return $this->themes = $themes;
+    }
+
+    /**
+     * The handles a scheme can take, Craft's own (empty) first: what the site defaults
+     * may be set to. Users are offered {@see offered()}, which can be fewer.
      *
      * @return list<string>
      */
     public function handles(string $scheme): array
     {
-        return self::handlesFor($scheme);
+        return ['', ...array_keys(array_filter($this->all(), fn (Theme $theme) => $theme->dresses($scheme)))];
     }
 
     /**
-     * {@see handles()}, for callers that can't take the service, such as the settings'
-     * own validation, which the service depends on.
+     * The handles a user may pick for a scheme: those the site has enabled, plus Craft's
+     * own and the site default, which are always available.
      *
      * @return list<string>
      */
-    public static function handlesFor(string $scheme): array
+    public function offered(string $scheme): array
     {
-        return ['', ...array_keys(array_filter(self::BUNDLED, fn (array $schemes) => in_array($scheme, $schemes, true)))];
+        $default = $this->siteDefault($scheme);
+
+        return array_values(array_filter(
+            $this->handles($scheme),
+            fn (string $handle) => $handle === '' || $handle === $default || $this->isEnabled($handle),
+        ));
+    }
+
+    /** Whether the site offers a theme to users, per the Available Themes setting. */
+    public function isEnabled(string $handle): bool
+    {
+        $enabled = $this->settings->enabledThemes;
+
+        // Nothing ticked means All, as validation saves it.
+        return $enabled === '*' || $enabled === '' || $enabled === []
+            || (is_array($enabled) && in_array($handle, $enabled, true));
+    }
+
+    /**
+     * The stylesheets every CP page loads besides the bundled ones, by theme handle:
+     * those registered with a URL, and folder themes, which Cast serves itself.
+     *
+     * @return array<string, string>
+     */
+    public function stylesheets(): array
+    {
+        $urls = [];
+
+        foreach ($this->all() as $handle => $theme) {
+            if ($theme->url !== null) {
+                $urls[$handle] = $theme->url;
+            } elseif ($theme->path !== null && is_file($theme->path)) {
+                // The hash changes when the file does, so it can be cached for good.
+                $urls[$handle] = Url::cpUrl("cast/themes/$handle.css", [
+                    'v' => substr(md5(filemtime($theme->path).':'.filesize($theme->path)), 0, 10),
+                ]);
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Folder stylesheets that aren't offered, with why, for the settings screen.
+     *
+     * @return list<string>
+     */
+    public function skippedFiles(): array
+    {
+        $this->all();
+
+        return $this->skipped;
+    }
+
+    /** The themes folder as an absolute path, or null if it doesn't resolve. */
+    public function themesPath(): ?string
+    {
+        $path = Aliases::get($this->settings->themesPath, false);
+
+        return is_string($path) && $path !== '' ? rtrim($path, '/') : null;
+    }
+
+    /** @return array<string, Theme> */
+    private function bundled(): array
+    {
+        return [
+            'stone' => new Theme('stone', t('Stone', category: 'cast'), [self::SCHEME_LIGHT, self::SCHEME_DARK]),
+            'dim' => new Theme('dim', t('Dim', category: 'cast'), [self::SCHEME_DARK]),
+        ];
+    }
+
+    /**
+     * Stylesheets in the themes folder. The filename is the handle, and a header comment
+     * names the theme and the modes it dresses:
+     *
+     * ```css
+     * /**
+     *  * Theme Name: Midnight
+     *  * Modes: dark
+     *  * Description: Deep blue, for late nights.
+     *  *\/
+     * ```
+     *
+     * `Modes` is required (`light`, `dark`, or `light, dark`): it's what tells a 2.x theme
+     * from a 1.x one, whose Craft 5 variables Craft 6 no longer reads. Files starting
+     * with an underscore are partials and skipped quietly.
+     *
+     * @return array<string, Theme>
+     */
+    private function folderThemes(): array
+    {
+        $this->skipped = [];
+        $dir = $this->themesPath();
+
+        if ($dir === null || ! is_dir($dir)) {
+            return [];
+        }
+
+        $themes = [];
+
+        foreach (glob("$dir/*.css") ?: [] as $file) {
+            $handle = basename($file, '.css');
+
+            if (str_starts_with($handle, '_')) {
+                continue;
+            }
+
+            $header = $this->parseHeader($file);
+            $modes = preg_split('/[\s,]+/', strtolower($header['modes'] ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+            $theme = new Theme(
+                handle: $handle,
+                name: $header['theme name'] ?? $header['name'] ?? Str::headline($handle),
+                modes: array_values(array_unique($modes)),
+                path: $file,
+                description: $header['description'] ?? null,
+            );
+
+            if ($modes === []) {
+                $this->skipped[] = t('{file}: no `Modes` in its header. A Cast 1.x theme needs rewriting for Craft 6.', ['file' => basename($file)], 'cast');
+            } elseif (! $theme->isValid()) {
+                $this->skipped[] = t('{file}: its filename isn’t a valid handle (lower-case letters, numbers and dashes, starting with a letter), or its modes aren’t `light` and `dark`.', ['file' => basename($file)], 'cast');
+            } else {
+                $themes[$handle] = $theme;
+            }
+        }
+
+        return $themes;
+    }
+
+    /**
+     * The `Key: value` lines of a stylesheet's first comment, keys lower-cased.
+     *
+     * @return array<string, string>
+     */
+    private function parseHeader(string $file): array
+    {
+        $chunk = (string) @file_get_contents($file, length: self::HEADER_BYTES);
+
+        if (! preg_match('#/\*(.*?)\*/#s', $chunk, $comment)) {
+            return [];
+        }
+
+        $header = [];
+
+        foreach (preg_split('/\R/', $comment[1]) ?: [] as $line) {
+            // Leading asterisks are decoration in a docblock-style header.
+            if (preg_match('/^([a-z][a-z ]*):\s*(\S.*)$/i', ltrim($line, " \t*"), $field)) {
+                $header[strtolower(trim($field[1]))] = trim($field[2]);
+            }
+        }
+
+        return $header;
     }
 
     /**
@@ -112,7 +301,7 @@ final class Themes
                 : t('Site default ({theme})', ['theme' => $this->name($default)], 'cast'),
         ]];
 
-        foreach ($this->handles($scheme) as $handle) {
+        foreach ($this->offered($scheme) as $handle) {
             if ($handle !== '' || $default !== '') {
                 $options[] = ['value' => $handle, 'label' => $this->name($handle)];
             }
@@ -123,12 +312,9 @@ final class Themes
 
     public function name(string $handle): string
     {
-        return match ($handle) {
-            '' => t('Craft default', category: 'cast'),
-            'stone' => t('Stone', category: 'cast'),
-            'dim' => t('Dim', category: 'cast'),
-            default => $handle,
-        };
+        return $handle === ''
+            ? t('Craft default', category: 'cast')
+            : ($this->all()[$handle]->name ?? $handle);
     }
 
     /** The appearance a user gets for a scheme: their own choice, or the site default. */
@@ -160,9 +346,10 @@ final class Themes
         return $chosen === '' && $this->siteDefault($scheme) === '' ? Settings::THEME_INHERIT : $chosen;
     }
 
+    /** Whether a user may pick a handle for a scheme: one of {@see offered()}. */
     public function isValid(string $handle, string $scheme): bool
     {
-        return in_array($this->normalize($handle), $this->handles($scheme), true);
+        return in_array($this->normalize($handle), $this->offered($scheme), true);
     }
 
     public function siteDefault(string $scheme): string

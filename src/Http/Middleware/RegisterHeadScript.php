@@ -34,8 +34,18 @@ final readonly class RegisterHeadScript
 
     public function handle(Request $request, Closure $next): mixed
     {
-        if ($request->isMethod('GET') && ($script = $this->script()) !== '') {
-            app(HtmlStack::class)->js($script, Position::Head, 'cast-head');
+        if ($request->isMethod('GET')) {
+            $stack = app(HtmlStack::class);
+
+            if (($script = $this->script()) !== '') {
+                $stack->js($script, Position::Head, 'cast-head');
+            }
+
+            // Themes besides the bundled ones, whose stylesheets the plugin lists
+            // statically. Every one loads, as the bundled do, so a change repaints at once.
+            foreach ($this->themes->stylesheets() as $handle => $url) {
+                $stack->cssFile($url, [], "cast-theme-$handle");
+            }
         }
 
         return $next($request);

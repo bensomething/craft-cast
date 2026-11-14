@@ -22,8 +22,8 @@ final class ThemesTest extends TestCase
 
     public function test_each_mode_offers_its_own_themes_after_crafts(): void
     {
-        $this->assertSame(['', 'stone'], Themes::handlesFor(Themes::SCHEME_LIGHT));
-        $this->assertSame(['', 'stone', 'dim'], Themes::handlesFor(Themes::SCHEME_DARK));
+        $this->assertSame(['', 'stone'], $this->themes()->handles(Themes::SCHEME_LIGHT));
+        $this->assertSame(['', 'stone', 'dim'], $this->themes()->handles(Themes::SCHEME_DARK));
     }
 
     public function test_site_default_folds_into_craft_default_while_they_match(): void

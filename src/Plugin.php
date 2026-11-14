@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace bensomething\cast;
 
 use bensomething\cast\Http\Middleware\RegisterHeadScript;
+use bensomething\cast\Theme as CastTheme;
 use CraftCms\Cms\Cp\Enums\Theme;
 use CraftCms\Cms\Plugin\Plugin as BasePlugin;
 use CraftCms\Cms\Plugin\PluginSettings;
@@ -13,7 +14,9 @@ use CraftCms\Cms\Ui\Controls\Choice;
 use CraftCms\Cms\Ui\Controls\Lightswitch;
 use CraftCms\Cms\Ui\Enums\ControlMode;
 use CraftCms\Cms\Ui\Enums\FieldWidth;
+use CraftCms\Cms\Ui\Nodes\Callout;
 use CraftCms\Cms\Ui\Nodes\Field;
+use CraftCms\Cms\Ui\Nodes\Heading;
 use CraftCms\Cms\Ui\Ui;
 use CraftCms\Cms\Ui\UiContext;
 use CraftCms\Cms\View\TemplateHooks;
@@ -83,9 +86,8 @@ class Plugin extends BasePlugin
     /**
      * The site-wide defaults behind each user's own choices. Laid out like the fields
      * they're defaults for: the two appearances and the button colour on one row, as
-     * they sit beside Theme in each user's preferences. That row's instructions go
-     * under the inputs, so its selects line up however their text wraps; the switches
-     * keep theirs above, as Craft's own do.
+     * they sit beside Theme in each user's preferences, under one heading saying who
+     * they're for rather than each field repeating it.
      *
      * A setting `config/craft/cast.php` sets is read-only here, with a warning naming
      * the file: Craft applies the file over the saved value, and leaves that key alone
@@ -98,7 +100,7 @@ class Plugin extends BasePlugin
 
         $appearances = fn (string $scheme): array => array_map(
             fn (string $handle): array => ['value' => $handle, 'label' => $themes->name($handle)],
-            Themes::handlesFor($scheme),
+            $themes->handles($scheme),
         );
 
         $buttonColors = [
@@ -125,33 +127,63 @@ class Plugin extends BasePlugin
         };
 
         return Ui::make([
+            Heading::make('cast-defaults', t('Default Settings', category: 'cast'))
+                ->description(t('For anyone who hasn’t chosen their own.', category: 'cast')),
+
             $overridable('autoLightTheme', Field::make(t('Light Appearance', category: 'cast'), Choice::make('autoLightTheme')
                 ->options($appearances(Themes::SCHEME_LIGHT))
                 ->withoutPlaceholder())
-                ->width(FieldWidth::Third)
-                ->instructionsPosition('after')
-                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast'))),
+                ->width(FieldWidth::Third)),
 
             $overridable('autoDarkTheme', Field::make(t('Dark Appearance', category: 'cast'), Choice::make('autoDarkTheme')
                 ->options($appearances(Themes::SCHEME_DARK))
                 ->withoutPlaceholder())
-                ->width(FieldWidth::Third)
-                ->instructionsPosition('after')
-                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast'))),
+                ->width(FieldWidth::Third)),
 
             $overridable('defaultButtonColor', Field::make(t('Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
                 ->options($buttonColors)
                 ->withoutPlaceholder())
-                ->width(FieldWidth::Third)
-                ->instructionsPosition('after')
-                ->instructions(t('Primary buttons, for anyone who hasn’t chosen their own.', category: 'cast'))),
+                ->width(FieldWidth::Third)),
 
             $overridable('highContrast', Field::make(t('Increase Contrast', category: 'cast'), Lightswitch::make('highContrast'))
-                ->instructions(t('On by default for anyone who hasn’t set it themselves, in light and dark alike.', category: 'cast'))),
+                ->instructions(t('In light and dark alike, on top of the appearance.', category: 'cast'))),
 
             $overridable('allowUserOverride', Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
                 ->instructions(t('Offer the appearances, button colour and contrast switch in each user’s preferences. Off, everyone gets the defaults above.', category: 'cast'))),
+
+            $overridable('enabledThemes', Field::make(t('Available Themes', category: 'cast'), Choice::make('enabledThemes')
+                ->options(array_values(array_map(fn (CastTheme $theme): array => [
+                    'value' => $theme->handle,
+                    'label' => $theme->name.' ('.implode(', ', array_map(
+                        fn (string $mode) => $mode === Themes::SCHEME_DARK ? t('dark', category: 'cast') : t('light', category: 'cast'),
+                        $theme->modes,
+                    )).')',
+                ], $themes->all())))
+                ->allOption(t('All', category: 'cast')))
+                ->instructions(t('Which themes users can pick from. All includes any added later; the defaults above are always available.', category: 'cast'))),
+
+            ...$this->skippedFilesCallout($themes),
         ]);
+    }
+
+    /**
+     * A warning listing themes-folder stylesheets that aren't offered, with why.
+     *
+     * @return list<Callout>
+     */
+    private function skippedFilesCallout(Themes $themes): array
+    {
+        $skipped = $themes->skippedFiles();
+
+        if ($skipped === []) {
+            return [];
+        }
+
+        return [Callout::make('cast-skipped-themes', implode("\n", [
+            t('Some stylesheets in the themes folder aren’t offered:', category: 'cast'),
+            '',
+            ...array_map(fn (string $reason) => "- $reason", $skipped),
+        ]))->variant('warning')];
     }
 
     /** The appearance and button colour fields beside Craft's Theme field, and the contrast switch. */
