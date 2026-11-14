@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## 2.0.0-beta.1 - Unreleased
+## 2.0.0-beta.1 - 2026-11-14
 
 Cast 2 is for Craft 6, and rebuilt around its own Theme preference: Craft decides whether the control panel is light or dark, and Cast decides what each looks like. See [UPGRADE.md](UPGRADE.md) for moving from 1.x.
 
