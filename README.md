@@ -1,5 +1,8 @@
 # Cast
 
+> [!TIP]
+> **On Craft 6?** This is Cast 1, for Craft 5. Cast 2 is on the [`2.x` branch](https://github.com/bensomething/craft-cast/tree/2.x); see [UPGRADE.md](https://github.com/bensomething/craft-cast/blob/2.x/UPGRADE.md) for moving over.
+
 Colour modes for the Craft CMS control panel. **Dark**, **Dim**, **Stone** and **High Contrast**, an **Auto** mode that follows the operating system, and a per-user picker.
 
 A theme is a stylesheet redeclaring the custom properties Craft already ships in `ThemeAsset` — no forked templates, no rewritten layouts, so a Craft upgrade comes through untouched. The active theme is stamped onto `<html>` by an inline head script, so there's no flash, and picking one repaints immediately without a save.
