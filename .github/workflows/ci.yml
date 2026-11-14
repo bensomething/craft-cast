@@ -51,6 +51,31 @@ jobs:
 
       - run: composer ${{ matrix.script }}
 
+  # Craft's development branch, ahead of any tag. Allowed to fail: it's early warning
+  # of an upstream change, not a release gate.
+  craft-dev:
+    name: test (Craft 6.x-dev)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite
+          coverage: none
+
+      - run: composer require --no-update --no-interaction "craftcms/cms:6.x-dev"
+
+      - run: composer update --no-interaction --no-progress --with-all-dependencies
+
+      - name: Report the Craft version under test
+        run: composer show craftcms/cms | head -3
+
+      - run: composer test
+
   js:
     name: preferences script
     runs-on: ubuntu-latest
