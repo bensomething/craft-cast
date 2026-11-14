@@ -31,4 +31,12 @@ return [
     // Whether users may pick their own appearances and button colour, beside Craft's
     // Theme field in their account preferences. The contrast switch is always theirs.
     // 'allowUserOverride' => true,
+
+    // Themes made from one colour each, offered for light and dark. Only the colour's
+    // hue is used, and every contrast ratio stays Craft's. Tint is subtle, medium or
+    // strong. A theme here takes its handle from its name ('custom-sea'), so renaming
+    // it sends users who picked it back to the default.
+    // 'customThemes' => [
+    //     ['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle'],
+    // ],
 ];

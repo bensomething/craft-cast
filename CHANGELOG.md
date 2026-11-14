@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+### Added
+- **Custom Themes**, under **Settings → Plugins → Cast**: a theme for light and dark made from one colour and a tint, keeping every contrast ratio Craft's. Its colour also takes the focus ring. Each row's **Preview** buttons show it on the settings screen, in either mode, before saving.
+
 ### Changed
+- The settings screen groups **Available Themes** and **Custom Themes** under their own **Themes** heading.
 - **Increase contrast** stays in each user's preferences with **Let Users Choose** off. It's an accessibility need rather than a look, so it isn't locked along with the appearances and button colour.
 
 ## 2.0.0-beta.1 - 2026-11-14

@@ -12,11 +12,14 @@ use CraftCms\Cms\Plugin\PluginSettings;
 use CraftCms\Cms\Support\Url;
 use CraftCms\Cms\Ui\Controls\Choice;
 use CraftCms\Cms\Ui\Controls\Lightswitch;
+use CraftCms\Cms\Ui\Controls\Table;
+use CraftCms\Cms\Ui\Enums\ChoicePresentation;
 use CraftCms\Cms\Ui\Enums\ControlMode;
 use CraftCms\Cms\Ui\Enums\FieldWidth;
 use CraftCms\Cms\Ui\Nodes\Callout;
 use CraftCms\Cms\Ui\Nodes\Field;
 use CraftCms\Cms\Ui\Nodes\Heading;
+use CraftCms\Cms\Ui\Nodes\Separator;
 use CraftCms\Cms\Ui\Ui;
 use CraftCms\Cms\Ui\UiContext;
 use CraftCms\Cms\View\TemplateHooks;
@@ -62,9 +65,13 @@ class Plugin extends BasePlugin
         __DIR__.'/../resources/themes/buttons.css' => 'themes/buttons.css',
     ];
 
-    /** The preferences page's behaviour, which `_prefs.twig` calls. */
+    /**
+     * The preferences page's behaviour, which `_prefs.twig` calls, and the settings
+     * screen's Custom Themes preview, which waits for a Preview to be ticked.
+     */
     protected array $scripts = [
         __DIR__.'/../resources/js/preferences.js' => 'js/preferences.js',
+        __DIR__.'/../resources/js/custom-themes.js' => 'js/custom-themes.js',
     ];
 
     /**
@@ -162,6 +169,10 @@ class Plugin extends BasePlugin
             $overridable('allowUserOverride', Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
                 ->instructions(t('Offer the appearances and button colour in each user’s preferences. Off, everyone gets the defaults above. The contrast switch is always offered.', category: 'cast'))),
 
+            Separator::make('cast-themes-separator'),
+
+            Heading::make('cast-themes', t('Themes', category: 'cast')),
+
             $overridable('enabledThemes', Field::make(t('Available Themes', category: 'cast'), Choice::make('enabledThemes')
                 ->options(array_values(array_map(fn (CastTheme $theme): array => [
                     'value' => $theme->handle,
@@ -172,6 +183,34 @@ class Plugin extends BasePlugin
                 ], $themes->all())))
                 ->allOption(t('All', category: 'cast')))
                 ->instructions(t('Which themes users can pick from. **All** includes any added later, and the defaults selected above are always available.', category: 'cast'))),
+
+            $overridable('customThemes', Field::make(t('Custom Themes', category: 'cast'), Table::make('customThemes')
+                ->columns([
+                    'name' => ['heading' => t('Name', category: 'cast'), 'type' => 'singleline'],
+                    'color' => ['heading' => t('Base Colour', category: 'cast'), 'type' => 'color'],
+                    'tint' => ['heading' => t('Tint', category: 'cast'), 'type' => 'select', 'options' => [
+                        ['value' => 'subtle', 'label' => t('Subtle', category: 'cast')],
+                        ['value' => 'medium', 'label' => t('Medium', category: 'cast')],
+                        ['value' => 'strong', 'label' => t('Strong', category: 'cast')],
+                    ]],
+                    // Craft's multiple-choice button group: the kind that can be clicked
+                    // off, and whose buttons stay in a row, so the column can be as narrow
+                    // as they are (Craft's `thin`). `custom-themes.js` keeps it to one.
+                    'preview' => ['heading' => t('Preview', category: 'cast'), 'class' => 'thin', 'control' => Choice::make('preview')
+                        ->options([
+                            ['value' => 'light', 'label' => t('Light', category: 'cast'), 'icon' => 'sun'],
+                            ['value' => 'dark', 'label' => t('Dark', category: 'cast'), 'icon' => 'moon'],
+                        ])
+                        ->presentation(ChoicePresentation::Buttons)
+                        ->multiple()],
+                ])
+                ->defaultValues(['tint' => 'subtle', 'preview' => []])
+                ->includeRowId()
+                ->allowAdd()
+                ->allowDelete()
+                ->allowReorder()
+                ->addRowLabel(t('Add a theme', category: 'cast')))
+                ->instructions(t('Each made from one colour into a light and dark appearance that keeps Craft’s contrast. Only the colour’s hue is used. Use **Preview** to see one on this page, in light or dark, before saving.', category: 'cast'))),
 
             ...$this->skippedFilesCallout($themes),
         ]);

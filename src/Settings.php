@@ -6,6 +6,7 @@ namespace bensomething\cast;
 
 use Closure;
 use CraftCms\Cms\Plugin\PluginSettings;
+use CraftCms\Cms\Validation\Rules\ColorRule;
 use Illuminate\Validation\Rule;
 use Override;
 
@@ -80,6 +81,16 @@ class Settings extends PluginSettings
     /** Whether users who haven't set the switch themselves get increased contrast. */
     public bool $highContrast = false;
 
+    /**
+     * Themes generated from one colour each, as rows of `name`, `color` (`#rrggbb`, only
+     * its hue is used) and `tint` (a key of {@see ThemeGenerator::TINTS}). The settings
+     * screen adds a `rowId`, which the theme's handle comes from, so renaming a theme
+     * doesn't lose the users who picked it. See {@see Themes::customHandle()}.
+     *
+     * @var list<array<string, mixed>>
+     */
+    public array $customThemes = [];
+
     #[Override]
     public function getRules(): array
     {
@@ -96,6 +107,10 @@ class Settings extends PluginSettings
             }],
             'highContrast' => ['boolean'],
             'allowUserOverride' => ['boolean'],
+            'customThemes' => ['array'],
+            'customThemes.*.name' => ['required', 'string', 'max:40'],
+            'customThemes.*.color' => ['required', 'string', 'regex:/^#[0-9a-f]{6}$/'],
+            'customThemes.*.tint' => ['required', 'string', Rule::in(array_keys(ThemeGenerator::TINTS))],
         ];
     }
 
@@ -110,6 +125,10 @@ class Settings extends PluginSettings
             'highContrast' => t('Increase Contrast', category: 'cast'),
             'allowUserOverride' => t('Let Users Choose', category: 'cast'),
             'enabledThemes' => t('Available Themes', category: 'cast'),
+            'customThemes' => t('Custom Themes', category: 'cast'),
+            'customThemes.*.name' => t('Name', category: 'cast'),
+            'customThemes.*.color' => t('Base Colour', category: 'cast'),
+            'customThemes.*.tint' => t('Tint', category: 'cast'),
         ];
     }
 
@@ -126,6 +145,8 @@ class Settings extends PluginSettings
             $data[$key] = Themes::normalizeHandle((string) ($data[$key] ?? ''));
         }
 
+        $data['customThemes'] = self::normalizeCustomThemes($data['customThemes'] ?? []);
+
         // None ticked would read as offering nothing while every theme stayed on offer
         // downstream, so it snaps back to All, as 1.x's did.
         if (($data['enabledThemes'] ?? '*') === [] || ($data['enabledThemes'] ?? '*') === '') {
@@ -133,5 +154,39 @@ class Settings extends PluginSettings
         }
 
         return $data;
+    }
+
+    /**
+     * Custom theme rows as they're saved: colours written as Craft's colour fields write
+     * them (`#ABC` as `#aabbcc`), names trimmed, wholly empty rows dropped, and the
+     * Preview checkbox left out, as it's a look at the theme rather than part of it.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function normalizeCustomThemes(mixed $rows): array
+    {
+        $normalized = [];
+
+        foreach (is_array($rows) ? $rows : [] as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $name = trim((string) ($row['name'] ?? ''));
+            $color = trim((string) ($row['color'] ?? ''));
+
+            if ($name === '' && $color === '') {
+                continue;
+            }
+
+            $normalized[] = array_filter([
+                'rowId' => isset($row['rowId']) ? (string) $row['rowId'] : null,
+                'name' => $name,
+                'color' => $color === '' ? '' : ColorRule::normalizeColor($color),
+                'tint' => (string) ($row['tint'] ?? 'subtle'),
+            ], fn ($value) => $value !== null);
+        }
+
+        return $normalized;
     }
 }

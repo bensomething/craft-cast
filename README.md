@@ -31,7 +31,7 @@ Each user picks their own in **Account → Preferences**:
 - **Primary Button Colour** sits beside them, and applies in either mode.
 - **Increase contrast** is under **Accessibility**, with the rest of the display settings.
 
-**Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, and whether they can choose their appearances and button colour. **Increase contrast** stays each user's to switch either way: it's an accessibility need, not a look.
+**Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, whether they can choose their appearances and button colour, and any [custom themes](#custom-themes). **Increase contrast** stays each user's to switch either way: it's an accessibility need, not a look.
 
 ### Themes
 
@@ -41,6 +41,18 @@ Each user picks their own in **Account → Preferences**:
 | Dim | Dark | Craft's dark with lifted surfaces and softer text, for long sessions. Body text 7.8:1, quiet text 5.4:1. |
 
 **Craft default** is Craft's own look for that mode.
+
+### Custom themes
+
+**Settings → Plugins → Cast → Custom Themes** makes a theme from one colour. Give it a name, a base colour and a tint, and it's offered for light and dark alongside the others.
+
+- **Only the colour's hue is used.** Craft's neutrals are turned to it, so a bright red gives a warm, rosy grey rather than red surfaces. Black, white and greys have no hue, and give a true neutral: Craft's greys without their blue.
+- **Contrast stays Craft's.** Every step keeps the luminance of the Craft step it replaces, so every contrast ratio in the control panel matches Craft's, whatever the colour.
+- **Tint** is how strongly the hue comes through: Subtle, Medium or Strong. Dark mode gets less than light, since dark surfaces show colour far more, and warm hues get less again in dark, where a dim orange turns brown. Text and borders take less than surfaces.
+- **The focus ring** takes the colour too, at the contrast of Craft's own. Primary buttons don't: they're **Primary Button Colour**'s alone, so that picker always shows what the buttons are.
+- **Preview** shows a row's theme on the settings screen in light or dark, whichever mode you're in, before you save: even a row you've just added. Editing its colour or tint updates it as you go. Press the button again to stop. One previews at a time, and Preview isn't saved.
+
+Renaming a theme keeps the users who picked it. Each is generated on request and cached until its colour, tint or name changes.
 
 ### Increase contrast
 
@@ -55,7 +67,7 @@ Moves text, borders and links up Craft's own colour ramps, makes hairline border
 
 ### Button colour
 
-Recolours primary buttons only; selections, focus rings and the rest of Craft's accent colour stay Craft's. The colours are Craft's own blue, **Craft Red** (Craft 5's primary button), and Amber, Green, Teal, Sky, Violet, Pink and Gray from Craft 6's palette. Each takes its fill, border and label from Craft's generated colours, which hold the label at 4.6:1 or better in both modes. Craft Red is Craft 5's `#dc2626` with a white label, 4.83:1.
+Recolours primary buttons only; selections and the rest of Craft's accent colour stay Craft's, as do focus rings outside a custom theme. The colours are Craft's own blue, **Craft Red** (Craft 5's primary button), and Amber, Green, Teal, Sky, Violet, Pink and Gray from Craft 6's palette. Each takes its fill, border and label from Craft's generated colours, which hold the label at 4.6:1 or better in both modes. Craft Red is Craft 5's `#dc2626` with a white label, 4.83:1.
 
 ## Adding your own theme
 
@@ -131,8 +143,13 @@ return [
     'allowUserOverride' => true,
     'enabledThemes' => '*',          // or a list of handles
     'themesPath' => '@root/cast-themes',
+    'customThemes' => [
+        ['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle'],  // tint: subtle, medium or strong
+    ],
 ];
 ```
+
+A custom theme set in the file takes its handle from its name: `custom-sea` here. Renaming it there changes the handle, and users who picked it go back to the default.
 
 A setting the file sets shows as read-only on the settings screen. Use `env()` for values that differ by environment.
 

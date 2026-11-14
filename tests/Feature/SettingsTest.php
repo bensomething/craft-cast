@@ -52,6 +52,35 @@ final class SettingsTest extends TestCase
         $this->assertTrue($settings->errors()->has('defaultButtonColor'));
     }
 
+    public function test_custom_themes_validate_and_are_saved_tidied(): void
+    {
+        $settings = $this->make(['customThemes' => [
+            ['rowId' => 'abc', 'name' => '  Sea  ', 'color' => '#0D9', 'tint' => 'strong', 'preview' => true],
+            ['name' => '', 'color' => ''],
+        ]]);
+
+        $this->assertTrue($settings->validate(), json_encode($settings->errors()->toArray()));
+        $this->assertSame(
+            [['rowId' => 'abc', 'name' => 'Sea', 'color' => '#00dd99', 'tint' => 'strong']],
+            $settings->validationData()['customThemes'],
+            'colour normalised, name trimmed, Preview and the empty row dropped',
+        );
+    }
+
+    public function test_a_bad_custom_theme_is_refused(): void
+    {
+        $settings = $this->make(['customThemes' => [
+            ['name' => str_repeat('x', 41), 'color' => 'not a colour', 'tint' => 'loud'],
+            ['name' => '', 'color' => '#0d9488', 'tint' => 'subtle'],
+        ]]);
+
+        $this->assertFalse($settings->validate());
+
+        foreach (['customThemes.0.name', 'customThemes.0.color', 'customThemes.0.tint', 'customThemes.1.name'] as $key) {
+            $this->assertTrue($settings->errors()->has($key), $key);
+        }
+    }
+
     public function test_1x_handles_read_as_what_they_now_mean_and_validate(): void
     {
         $settings = $this->make(['autoDarkTheme' => 'stone-dark', 'autoLightTheme' => 'high-contrast']);

@@ -8,6 +8,7 @@ use bensomething\cast\Plugin;
 use bensomething\cast\Settings;
 use bensomething\cast\tests\TestCase;
 use CraftCms\Cms\ProjectConfig\ProjectConfig;
+use CraftCms\Cms\ProjectConfig\ProjectConfigHelper;
 
 final class SettingsScreenTest extends TestCase
 {
@@ -19,7 +20,7 @@ final class SettingsScreenTest extends TestCase
 
         $html = (string) $this->get(self::URL)->assertOk()->getContent();
 
-        foreach (['Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose'] as $label) {
+        foreach (['Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose', 'Themes', 'Available Themes', 'Custom Themes', 'Base Colour', 'Tint', 'Preview'] as $label) {
             $this->assertStringContainsString($label, $html);
         }
     }
@@ -44,6 +45,29 @@ final class SettingsScreenTest extends TestCase
         $this->assertSame('teal', $settings->defaultButtonColor);
         $this->assertTrue($settings->highContrast);
         $this->assertFalse($settings->allowUserOverride);
+    }
+
+    public function test_it_saves_custom_themes_without_the_preview(): void
+    {
+        $this->signIn();
+
+        $this->postJson(self::URL, ['settings' => ['customThemes' => [
+            ['rowId' => 'b99938a4-0a50-48ea-8d0e-c53d65126729', 'name' => 'Sea', 'color' => '#0D9488', 'tint' => 'medium', 'preview' => ['dark']],
+        ]]])->assertOk();
+
+        $this->assertSame(
+            [['rowId' => 'b99938a4-0a50-48ea-8d0e-c53d65126729', 'name' => 'Sea', 'color' => '#0d9488', 'tint' => 'medium']],
+            ProjectConfigHelper::unpackAssociativeArrays(app(ProjectConfig::class)->get('plugins.cast.settings.customThemes')),
+        );
+    }
+
+    public function test_it_rejects_a_custom_theme_without_a_colour(): void
+    {
+        $this->signIn();
+
+        $this->postJson(self::URL, ['settings' => ['customThemes' => [['name' => 'Sea', 'color' => '', 'tint' => 'subtle']]]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['settings.customThemes.0.color']);
     }
 
     public function test_it_rejects_what_isnt_offered(): void

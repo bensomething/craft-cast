@@ -18,6 +18,20 @@ has a later update (13 November) on what 1.x does under the Yii adapter.
   (`Http\Controllers`, `Events`) under it. The root namespace and the plugin class name
   (`bensomething\cast\Plugin`) stay what Craft's project config and `composer.json`
   already know; a vendor-cased `BenSomething\Cast` would rename every class for no gain.
+- **Custom themes are generated, not hand-written** (after beta.1). `ThemeGenerator`
+  rotates Craft's base and slate ramps to one hue, solving each step back to the
+  luminance of Craft's, so contrast can't drift whatever colour is picked. Chroma is
+  Craft's own per step times a tint factor, cut for dark, for text and borders, and for
+  warm hues in dark, all tuned by eye on craft6-dev. The colour's accent ramp (Craft's
+  blue at the same luminances) takes the focus ring but not primary buttons, so the
+  Primary Button Colour picker never shows a colour the buttons aren't. Preview is a
+  Light/Dark button pair per row, Craft's multiple-choice button group (the one kind
+  that can be clicked off and doesn't wrap), kept to one on at a time by script. A
+  single dropdown of every theme was tried and dropped: it can't preview an unsaved
+  row, and Stone and Dim can be tried from Preferences anyway.
+  Handles come from
+  the table's row UUIDs, so renaming keeps users' picks. Bump `ThemeGenerator::VERSION`
+  whenever the output changes, as it's in each stylesheet's cache-busting hash.
 
 ## Research notes
 

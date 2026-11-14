@@ -53,6 +53,12 @@ final class Themes
     /** Craft 5's primary button fill, which the picker shows Craft Red as. */
     public const string CRAFT_RED = '#dc2626';
 
+    /** What every custom theme's handle starts with, so none can take another theme's. */
+    public const string CUSTOM_PREFIX = 'custom-';
+
+    /** The handle a previewed custom theme is stamped with on the settings screen. */
+    public const string PREVIEW = 'cast-preview';
+
     /** The colour Craft's own primary buttons are, as a palette name. */
     public const string CRAFT_BUTTON_COLOR = 'blue';
 
@@ -76,6 +82,9 @@ final class Themes
 
     /** @var list<string> Folder stylesheets passed over, by filename, with why. */
     private array $skipped = [];
+
+    /** @var array<string, array{color: string, tint: string}> Custom themes' sources, by handle. */
+    private array $generated = [];
 
     public function __construct(private readonly Settings $settings) {}
 
@@ -157,6 +166,11 @@ final class Themes
         foreach ($this->all() as $handle => $theme) {
             if ($theme->url !== null) {
                 $urls[$handle] = $theme->url;
+            } elseif (($source = $this->generatedSource($theme)) !== null) {
+                // The hash changes with what it's generated from.
+                $urls[$handle] = Url::cpUrl("cast/themes/$handle.css", [
+                    'v' => substr(md5(implode(':', [$source['color'], $source['tint'], $theme->name, ThemeGenerator::VERSION])), 0, 10),
+                ]);
             } elseif ($theme->path !== null && is_file($theme->path)) {
                 // The hash changes when the file does, so it can be cached for good.
                 $urls[$handle] = Url::cpUrl("cast/themes/$handle.css", [
@@ -166,6 +180,34 @@ final class Themes
         }
 
         return $urls;
+    }
+
+    /**
+     * A custom theme's stylesheet, or null when the handle isn't one, or a
+     * {@see ThemesResolving} listener has put something else in its place.
+     */
+    public function customCss(string $handle): ?string
+    {
+        $theme = $this->all()[$handle] ?? null;
+        $source = $theme !== null ? $this->generatedSource($theme) : null;
+
+        return $theme !== null && $source !== null
+            ? ThemeGenerator::css($handle, $theme->name, $source['color'], $source['tint'])
+            : null;
+    }
+
+    /**
+     * A custom theme row's handle: from its row ID where the settings screen gave it
+     * one, so renaming keeps it, and otherwise from its name, as a config file's rows
+     * have no ID.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    public static function customHandle(array $row): string
+    {
+        $id = strtolower((string) preg_replace('/[^a-z0-9]/i', '', (string) ($row['rowId'] ?? '')));
+
+        return self::CUSTOM_PREFIX.($id !== '' ? substr($id, 0, 8) : Str::slug((string) ($row['name'] ?? '')));
     }
 
     /**
@@ -188,13 +230,53 @@ final class Themes
         return is_string($path) && $path !== '' ? rtrim($path, '/') : null;
     }
 
-    /** @return array<string, Theme> */
+    /**
+     * Cast's own themes, and the custom one when its colour is set: a folder file can't
+     * take either's handle.
+     *
+     * @return array<string, Theme>
+     */
     private function bundled(): array
     {
-        return [
+        $themes = [
             'stone' => new Theme('stone', t('Stone', category: 'cast'), [self::SCHEME_LIGHT, self::SCHEME_DARK]),
             'dim' => new Theme('dim', t('Dim', category: 'cast'), [self::SCHEME_DARK]),
         ];
+
+        $this->generated = [];
+
+        foreach (Settings::normalizeCustomThemes($this->settings->customThemes) as $row) {
+            $handle = self::customHandle($row);
+            $color = strtolower((string) $row['color']);
+            $tint = (string) $row['tint'];
+
+            // A row that wouldn't validate, or a second with the same handle, is passed over.
+            if ($handle === self::CUSTOM_PREFIX || isset($themes[$handle])
+                || ! preg_match('/^#[0-9a-f]{6}$/', $color) || ! isset(ThemeGenerator::TINTS[$tint])) {
+                continue;
+            }
+
+            $themes[$handle] = new Theme(
+                handle: $handle,
+                name: (string) $row['name'],
+                modes: [self::SCHEME_LIGHT, self::SCHEME_DARK],
+                description: t('Generated from {color}.', ['color' => $color], 'cast'),
+            );
+            $this->generated[$handle] = ['color' => $color, 'tint' => $tint];
+        }
+
+        return $themes;
+    }
+
+    /**
+     * What a custom theme is generated from, or null for any other theme, including one
+     * a listener put in a custom theme's place.
+     *
+     * @return array{color: string, tint: string}|null
+     */
+    private function generatedSource(Theme $theme): ?array
+    {
+        return $theme->url === null && $theme->path === null ? $this->generated[$theme->handle] ?? null : null;
     }
 
     /**

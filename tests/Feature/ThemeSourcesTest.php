@@ -219,4 +219,87 @@ final class ThemeSourcesTest extends TestCase
         $this->assertStringContainsString('Stone (light, dark)', $html);
         $this->assertStringContainsString('legacy.css', $html);
     }
+
+    public function test_custom_themes_are_offered_for_both_modes(): void
+    {
+        $this->assertSame(['stone', 'dim'], array_keys($this->themes()->all()));
+
+        $this->setSettings(['customThemes' => [
+            ['rowId' => 'b99938a4-0a50-48ea-8d0e-c53d65126729', 'name' => 'Sea', 'color' => '#0d9488', 'tint' => 'medium'],
+            ['name' => 'Ink Wash', 'color' => '#1e3a8a', 'tint' => 'subtle'],
+        ]]);
+        $themes = $this->themes()->all();
+
+        $this->assertSame('Sea', $themes['custom-b99938a4']->name, 'named for its row, so renaming keeps it');
+        $this->assertSame('Ink Wash', $themes['custom-ink-wash']->name, 'a config file row has no ID, so its name');
+        $this->assertSame([Themes::SCHEME_LIGHT, Themes::SCHEME_DARK], $themes['custom-b99938a4']->modes);
+        $this->assertContains('custom-ink-wash', $this->themes()->handles(Themes::SCHEME_DARK));
+    }
+
+    public function test_rows_that_wouldnt_validate_are_passed_over(): void
+    {
+        $this->setSettings(['customThemes' => [
+            ['name' => 'No Colour', 'color' => '', 'tint' => 'subtle'],
+            ['name' => 'Bad Tint', 'color' => '#0d9488', 'tint' => 'loud'],
+            ['name' => 'Twice', 'color' => '#0d9488', 'tint' => 'subtle'],
+            ['name' => 'Twice', 'color' => '#7c3aed', 'tint' => 'subtle'],
+        ]]);
+
+        $this->assertSame(['stone', 'dim', 'custom-twice'], array_keys($this->themes()->all()));
+        $this->assertStringContainsString('#0d9488', (string) $this->themes()->all()['custom-twice']->description, 'the first of two');
+    }
+
+    public function test_a_folder_file_cant_take_a_custom_handle(): void
+    {
+        $this->file('custom-sea.css', " * Theme Name: Impostor\n * Modes: dark");
+        $this->setSettings(['customThemes' => [['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle']]]);
+
+        $this->assertSame('Sea', $this->themes()->all()['custom-sea']->name);
+        $this->assertNotNull($this->themes()->customCss('custom-sea'));
+    }
+
+    public function test_a_custom_theme_is_served_generated_and_its_url_moves_with_it(): void
+    {
+        $this->signIn();
+        $this->setSettings(['customThemes' => [['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle']]]);
+        $before = $this->themes()->stylesheets()['custom-sea'];
+
+        $this->assertMatchesRegularExpression('#/admin/cast/themes/custom-sea\.css\?v=[0-9a-f]{10}#', $before);
+
+        $response = $this->get('/admin/cast/themes/custom-sea.css')->assertOk();
+        $this->assertStringStartsWith('text/css', (string) $response->headers->get('Content-Type'));
+        $this->assertStringContainsString("[data-cast-dark='custom-sea']", (string) $response->getContent());
+
+        $this->setSettings(['customThemes' => [['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'strong']]]);
+        $this->assertNotSame($before, $this->themes()->stylesheets()['custom-sea']);
+    }
+
+    public function test_a_listener_can_replace_a_custom_theme(): void
+    {
+        $this->setSettings(['customThemes' => [['name' => 'Sea', 'color' => '#0d9488', 'tint' => 'subtle']]]);
+        Event::listen(ThemesResolving::class, function (ThemesResolving $event): void {
+            $event->add(new Theme('custom-sea', 'Theirs', [Themes::SCHEME_DARK], url: 'https://example.com/theirs.css'));
+        });
+
+        $this->assertSame('Theirs', $this->themes()->all()['custom-sea']->name);
+        $this->assertNull($this->themes()->customCss('custom-sea'));
+        $this->assertSame('https://example.com/theirs.css', $this->themes()->stylesheets()['custom-sea']);
+    }
+
+    public function test_the_preview_is_generated_from_the_query(): void
+    {
+        $this->signIn();
+
+        $css = (string) $this->get('/admin/cast/preview.css?color=0d9488&tint=medium')->assertOk()->getContent();
+
+        $this->assertStringContainsString("[data-cast-light='cast-preview']", $css);
+        $this->assertStringContainsString("[data-cast-dark='cast-preview']", $css);
+        $this->get('/admin/cast/preview.css?color=teal')->assertNotFound();
+        $this->get('/admin/cast/preview.css?color=0d9488&tint=loud')->assertNotFound();
+    }
+
+    public function test_guests_cant_fetch_a_preview(): void
+    {
+        $this->get('/admin/cast/preview.css?color=0d9488')->assertRedirect();
+    }
 }
