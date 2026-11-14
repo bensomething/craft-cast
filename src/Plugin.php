@@ -160,7 +160,7 @@ class Plugin extends BasePlugin
                     )).')',
                 ], $themes->all())))
                 ->allOption(t('All', category: 'cast')))
-                ->instructions(t('Which themes users can pick from. All includes any added later; the defaults above are always available.', category: 'cast'))),
+                ->instructions(t('Which themes users can pick from. **All** includes any added later, and the defaults selected above are always available.', category: 'cast'))),
 
             ...$this->skippedFilesCallout($themes),
         ]);
