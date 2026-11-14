@@ -1,5 +1,26 @@
 # Cast on Craft 6
 
+## What 2.x decided
+
+Cast 2 shipped as 2.0.0-beta.1 on 14 November 2026. The research notes below led to it;
+where they disagree with this section, this section wins. `develop`'s copy of this file
+has a later update (13 November) on what 1.x does under the Yii adapter.
+
+- **Native, no Yii adapter.** 1.x loaded under `craftcms/yii2-adapter` but painted nothing,
+  saved no preferences and missed Inertia pages, and a release needing the adapter can't
+  also install on Craft 5. 2.x is its own major, requiring Craft 6 and PHP 8.5.
+- **Craft owns the mode.** Craft 6's Theme preference decides light or dark; Cast offers
+  a light and a dark appearance on top, stamped as `data-cast-light` / `data-cast-dark`
+  and paired with Craft's `data-theme` in each theme's selectors. Craft's picker isn't
+  hidden: it's a Vue radio group, the command palette can set it too, and `useTheme.ts`
+  rewrites `data-theme` live.
+- **Namespace kept as `bensomething\cast`,** with Laravel-style PascalCase subfolders
+  (`Http\Controllers`, `Events`) under it. The root namespace and the plugin class name
+  (`bensomething\cast\Plugin`) stay what Craft's project config and `composer.json`
+  already know; a vendor-cased `BenSomething\Cast` would rename every class for no gain.
+
+## Research notes
+
 Notes towards a 6.x version. Nothing here is committed to — Craft 6 is unreleased and
 its token names are still moving.
 
