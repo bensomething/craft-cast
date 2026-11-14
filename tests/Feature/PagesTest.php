@@ -103,7 +103,7 @@ final class PagesTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('users/Preferences', false)
                 ->where('prefsHook.html', function (string $html): bool {
-                    foreach (['id="cast-light"', 'id="cast-dark"', 'id="cast-button"', 'id="cast-contrast"', 'Light Appearance', 'Dark Appearance', 'Button Colour', 'Craft Red'] as $needle) {
+                    foreach (['id="cast-light"', 'id="cast-dark"', 'id="cast-button"', 'id="cast-contrast"', 'Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red'] as $needle) {
                         $this->assertStringContainsString($needle, $html);
                     }
 

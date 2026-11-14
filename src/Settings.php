@@ -106,7 +106,7 @@ class Settings extends PluginSettings
         return [
             'autoLightTheme' => t('Light Appearance', category: 'cast'),
             'autoDarkTheme' => t('Dark Appearance', category: 'cast'),
-            'defaultButtonColor' => t('Button Colour', category: 'cast'),
+            'defaultButtonColor' => t('Primary Button Colour', category: 'cast'),
             'highContrast' => t('Increase Contrast', category: 'cast'),
             'allowUserOverride' => t('Let Users Choose', category: 'cast'),
             'enabledThemes' => t('Available Themes', category: 'cast'),

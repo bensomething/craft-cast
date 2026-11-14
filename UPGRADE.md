@@ -16,7 +16,7 @@ So the 1.x picker of one theme, with Auto as a pair, is now:
 | **Dark** | Craft's own dark |
 | **Stone Dark** | **Stone** as the dark appearance |
 | **High Contrast**, **High Contrast Dark** | The **Increase contrast** switch under **Preferences → Accessibility**, in either mode |
-| **Button colour** (site-wide) | **Button Colour** per user, with a site default |
+| **Button colour** (site-wide) | **Primary Button Colour** per user, with a site default |
 
 ## Requirements
 
@@ -49,7 +49,7 @@ Settings saved in the control panel carry over, with these changes:
 | `enabledThemes` | Unchanged: **Available Themes**. |
 | `themesPath` | Unchanged. Still `@root/cast-themes` by default. |
 | `allowUserOverride` | Unchanged: **Let Users Choose**. |
-| `defaultButtonColor` | New: the default **Button Colour**. Starts as Craft's own blue. |
+| `defaultButtonColor` | New: the default **Primary Button Colour**. Starts as Craft's own blue. |
 | `highContrast` | New: whether **Increase contrast** is on for users who haven't set it. |
 | `buttonColor` | Retired. 1.x saved `red`, Craft 5's own, for everyone, so it's not read: every upgraded site would otherwise turn its buttons red. Set `defaultButtonColor` to `red` (Craft Red) to keep them. |
 | `defaultTheme` | Retired. Craft's own Theme preference decides light or dark. |

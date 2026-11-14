@@ -140,7 +140,7 @@ class Plugin extends BasePlugin
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)),
 
-            $overridable('defaultButtonColor', Field::make(t('Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
+            $overridable('defaultButtonColor', Field::make(t('Primary Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
                 ->options($buttonColors)
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)),

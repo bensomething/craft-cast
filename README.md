@@ -1,6 +1,6 @@
 # Cast
 
-Colour modes for the Craft CMS control panel. Craft 6 decides whether the control panel is light or dark, Cast decides what each looks like. It includes **Stone** and **Dim** themes, an **Increase contrast** switch, and a **Button Colour**, chosen per user with site-wide defaults.
+Colour modes for the Craft CMS control panel. Craft 6 decides whether the control panel is light or dark, Cast decides what each looks like. It includes **Stone** and **Dim** themes, an **Increase contrast** switch, and a **Primary Button Colour**, chosen per user with site-wide defaults.
 
 A theme is a stylesheet overriding the colour tokens Craft 6 already draws everything from, so there are no forked templates and a Craft upgrade comes through untouched. Choices are stamped onto `<html>` ahead of Craft's styles, so there's no flash, and changing one repaints at once without a save.
 
@@ -28,7 +28,7 @@ If Composer refuses, your project's `minimum-stability` is `stable`. Set it to `
 Each user picks their own in **Account → Preferences**:
 
 - **Light Appearance** and **Dark Appearance** sit beside Craft's own **Theme** field. Only the ones Craft's Theme can use are shown: one for Light or Dark, both for System.
-- **Button Colour** sits beside them, and applies in either mode.
+- **Primary Button Colour** sits beside them, and applies in either mode.
 - **Increase contrast** is under **Accessibility**, with the rest of the display settings.
 
 **Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, and whether they can choose at all.

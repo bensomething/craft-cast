@@ -19,7 +19,7 @@ final class SettingsScreenTest extends TestCase
 
         $html = (string) $this->get(self::URL)->assertOk()->getContent();
 
-        foreach (['Light Appearance', 'Dark Appearance', 'Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose'] as $label) {
+        foreach (['Light Appearance', 'Dark Appearance', 'Primary Button Colour', 'Craft Red', 'Increase Contrast', 'Let Users Choose'] as $label) {
             $this->assertStringContainsString($label, $html);
         }
     }

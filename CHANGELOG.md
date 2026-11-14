@@ -7,7 +7,7 @@ Cast 2 is for Craft 6, and rebuilt around its own Theme preference: Craft decide
 ### Added
 - **Light Appearance** and **Dark Appearance**, beside Craft's **Theme** field in **Account → Preferences**. Only the ones Craft's Theme can use are shown.
 - **Increase contrast**, under **Preferences → Accessibility**, on top of whichever appearance is showing, in light and dark alike.
-- **Button Colour** per user, with a site default. **Craft Red** is Craft 5's primary button.
+- **Primary Button Colour** per user, with a site default. **Craft Red** is Craft 5's primary button.
 - `ThemesResolving`, a Laravel event for registering, replacing or removing themes.
 - Settings set in `config/craft/cast.php` show as read-only on the settings screen, saying so.
 
