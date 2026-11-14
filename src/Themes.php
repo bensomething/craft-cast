@@ -364,12 +364,16 @@ final class Themes
         return $scheme === self::SCHEME_DARK ? self::PREF_DARK : self::PREF_LIGHT;
     }
 
-    /** Whether a user gets increased contrast: their own switch, or the site default. */
+    /**
+     * Whether a user gets increased contrast: their own switch, or the site default.
+     *
+     * Their own switch counts whether or not users may choose the rest.
+     */
     public function highContrastForUser(?User $user): bool
     {
         $chosen = $user?->getPreference(self::PREF_CONTRAST);
 
-        if ($this->settings->allowUserOverride && is_bool($chosen)) {
+        if (is_bool($chosen)) {
             return $chosen;
         }
 

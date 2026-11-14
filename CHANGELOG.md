@@ -1,5 +1,10 @@
 # Release Notes for Cast
 
+## Unreleased
+
+### Changed
+- **Increase contrast** stays in each user's preferences with **Let Users Choose** off. It's an accessibility need rather than a look, so it isn't locked along with the appearances and button colour.
+
 ## 2.0.0-beta.1 - 2026-11-14
 
 Cast 2 is for Craft 6, and rebuilt around its own Theme preference: Craft decides whether the control panel is light or dark, and Cast decides what each looks like. See [UPGRADE.md](UPGRADE.md) for moving from 1.x.

@@ -160,7 +160,7 @@ class Plugin extends BasePlugin
                 ->instructions(t('In light and dark alike, on top of the appearance.', category: 'cast'))),
 
             $overridable('allowUserOverride', Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
-                ->instructions(t('Offer the appearances, button colour and contrast switch in each user’s preferences. Off, everyone gets the defaults above.', category: 'cast'))),
+                ->instructions(t('Offer the appearances and button colour in each user’s preferences. Off, everyone gets the defaults above. The contrast switch is always offered.', category: 'cast'))),
 
             $overridable('enabledThemes', Field::make(t('Available Themes', category: 'cast'), Choice::make('enabledThemes')
                 ->options(array_values(array_map(fn (CastTheme $theme): array => [
@@ -197,19 +197,20 @@ class Plugin extends BasePlugin
         ]))->variant('warning')];
     }
 
-    /** The appearance and button colour fields beside Craft's Theme field, and the contrast switch. */
+    /**
+     * The appearance and button colour fields beside Craft's Theme field, and the contrast switch.
+     *
+     * With Let Users Choose off, only the switch: contrast is an accessibility need
+     * rather than a look, so it isn't the admin's to lock.
+     */
     private function preferencesHtml(): string
     {
         $settings = $this->app->make(Settings::class);
-
-        if (! $settings->allowUserOverride) {
-            return '';
-        }
-
         $themes = $this->app->make(Themes::class);
         $user = currentUserElement();
 
         return template('cast/_prefs.twig', [
+            'canChoose' => $settings->allowUserOverride,
             'lightOptions' => $themes->options(Themes::SCHEME_LIGHT),
             'darkOptions' => $themes->options(Themes::SCHEME_DARK),
             'lightValue' => $themes->storedChoice($user, Themes::SCHEME_LIGHT),

@@ -12,7 +12,7 @@ import {JSDOM} from 'jsdom';
 
 const script = readFileSync(new URL('../../resources/js/preferences.js', import.meta.url), 'utf8');
 
-function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) {
+function fragment({light = 'inherit', dark = 'inherit', contrast = false, canChoose = true} = {}) {
   const select = (scheme, value, options) => `
     <craft-select data-cast-field="${scheme}">
       <label slot="label" for="cast-${scheme}">${scheme}</label>
@@ -23,9 +23,9 @@ function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) 
 
   return `
     <craft-field-group id="cast-prefs">
-      ${select('light', light, ['inherit', '', 'stone'])}
-      ${select('dark', dark, ['inherit', '', 'stone', 'dim'])}
-      <craft-select-color data-cast-field="button" id="cast-button"></craft-select-color>
+      ${canChoose ? select('light', light, ['inherit', '', 'stone']) : ''}
+      ${canChoose ? select('dark', dark, ['inherit', '', 'stone', 'dim']) : ''}
+      ${canChoose ? '<craft-select-color data-cast-field="button" id="cast-button"></craft-select-color>' : ''}
       <craft-checkbox-group id="cast-contrast-field">
         <craft-checkbox>
           <input slot="input" type="checkbox" id="cast-contrast" ${contrast ? 'checked' : ''}>
@@ -34,7 +34,7 @@ function fragment({light = 'inherit', dark = 'inherit', contrast = false} = {}) 
     </craft-field-group>`;
 }
 
-function page({theme = 'system', withTheme = true, withDisplay = true, buttonDefault = ''} = {}) {
+function page({theme = 'system', withTheme = true, withDisplay = true, buttonDefault = '', canChoose = true} = {}) {
   const radios = ['light', 'dark', 'system']
     .map((v) => `<input type="radio" name="theme" value="${v}" ${v === theme ? 'checked' : ''}>`)
     .join('');
@@ -46,7 +46,7 @@ function page({theme = 'system', withTheme = true, withDisplay = true, buttonDef
           <craft-select id="time-zone"></craft-select>
           ${withTheme ? `<craft-radio-group name="theme">${radios}</craft-radio-group>` : ''}
         </craft-field-group>
-        <div id="hook">${fragment()}</div>
+        <div id="hook">${fragment({canChoose})}</div>
       </section>
       <section id="preferences-accessibility">
         <craft-field-group id="accessibility">
@@ -290,4 +290,17 @@ test('Craft Red as the site default is followed, not pinned', () => {
   change(window, document.getElementById('cast-button'), '#dc2626');
 
   assert.deepEqual(saves.at(-1).body, {buttonColor: 'inherit'});
+});
+
+test("with only the contrast switch, Theme keeps its width and the switch still saves", () => {
+  const {window, document, html, saves} = page({canChoose: false});
+  const theme = document.querySelector('craft-radio-group');
+
+  assert.deepEqual(ids(document.getElementById('general').children), ['time-zone', 'craft-radio-group']);
+  assert.equal(theme.className, '');
+  assert.deepEqual(ids(document.getElementById('accessibility').children), ['display', 'cast-contrast-field', 'general-settings']);
+
+  change(window, document.getElementById('cast-contrast'), true);
+  assert.equal(html.dataset.castContrast, 'more');
+  assert.deepEqual(saves.at(-1).body, {highContrast: true});
 });

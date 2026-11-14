@@ -28,7 +28,7 @@ return [
     // dark alike, on top of the appearance.
     // 'highContrast' => false,
 
-    // Whether users may pick their own appearances, button colour and contrast, beside
-    // Craft's Theme field in their account preferences.
+    // Whether users may pick their own appearances and button colour, beside Craft's
+    // Theme field in their account preferences. The contrast switch is always theirs.
     // 'allowUserOverride' => true,
 ];

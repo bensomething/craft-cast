@@ -30,7 +30,12 @@ final readonly class PreferencesController
     {
         $user = $request->craftUser();
 
-        if (! $user || ! $this->settings->allowUserOverride) {
+        if (! $user) {
+            return response()->json(['message' => t('Theme can’t be changed.', category: 'cast')], 403);
+        }
+
+        // With Let Users Choose off, only the contrast switch is the user's.
+        if (! $this->settings->allowUserOverride && $request->hasAny([Themes::SCHEME_LIGHT, Themes::SCHEME_DARK, 'buttonColor'])) {
             return response()->json(['message' => t('Theme can’t be changed.', category: 'cast')], 403);
         }
 

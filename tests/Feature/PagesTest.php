@@ -112,12 +112,21 @@ final class PagesTest extends TestCase
                 }));
     }
 
-    public function test_no_fields_when_users_may_not_choose(): void
+    public function test_only_the_contrast_switch_when_users_may_not_choose(): void
     {
         $this->signIn();
         $this->setSettings(['allowUserOverride' => false]);
 
         $this->get('/admin/myaccount/preferences')
-            ->assertInertia(fn (AssertableInertia $page) => $page->where('prefsHook', null));
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('prefsHook.html', function (string $html): bool {
+                    $this->assertStringContainsString('id="cast-contrast"', $html);
+
+                    foreach (['id="cast-light"', 'id="cast-dark"', 'id="cast-button"'] as $needle) {
+                        $this->assertStringNotContainsString($needle, $html);
+                    }
+
+                    return true;
+                }));
     }
 }

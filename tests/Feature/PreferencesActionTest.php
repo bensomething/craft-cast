@@ -95,12 +95,25 @@ final class PreferencesActionTest extends TestCase
         $this->assertNull($this->pref(Themes::PREF_LIGHT), 'nothing is half-saved');
     }
 
-    public function test_it_refuses_when_users_may_not_choose(): void
+    public function test_it_refuses_looks_when_users_may_not_choose(): void
     {
         $this->signIn();
         $this->setSettings(['allowUserOverride' => false]);
 
         $this->postJson($this->castAction('preferences'), ['dark' => 'dim'])->assertForbidden();
+        $this->postJson($this->castAction('preferences'), ['buttonColor' => 'teal'])->assertForbidden();
+        $this->postJson($this->castAction('preferences'), ['highContrast' => true, 'light' => 'stone'])->assertForbidden();
         $this->assertNull($this->pref(Themes::PREF_DARK));
+        $this->assertNull($this->pref(Themes::PREF_BUTTON));
+        $this->assertNull($this->pref(Themes::PREF_CONTRAST), 'nothing is half-saved');
+    }
+
+    public function test_contrast_saves_when_users_may_not_choose(): void
+    {
+        $this->signIn();
+        $this->setSettings(['allowUserOverride' => false]);
+
+        $this->postJson($this->castAction('preferences'), ['highContrast' => true])->assertOk();
+        $this->assertTrue($this->pref(Themes::PREF_CONTRAST));
     }
 }

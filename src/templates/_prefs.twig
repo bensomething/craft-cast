@@ -2,7 +2,11 @@
    its own Theme field. Craft's field picks light or dark; these pick what each looks like.
    The contrast switch is moved to Accessibility by the script below.
 
-   The page's own form never posts these, so each control saves itself on change. #}
+   The page's own form never posts these, so each control saves itself on change.
+
+   With Let Users Choose off, only the contrast switch renders: it's an accessibility
+   need, not the admin's to lock. #}
+{# @var canChoose bool Whether the user may pick appearances and a button colour. #}
 {# @var lightOptions array #}
 {# @var darkOptions array #}
 {# @var lightValue string #}
@@ -21,6 +25,7 @@
 {# A group of its own, after Craft's. The section spaces groups 12px apart and a group's
    fields 24px, so the difference goes on top to sit these at the field spacing. #}
 <craft-field-group id="cast-prefs" style="margin-block-start: calc(var(--c-spacing) * 3)">
+    {% if canChoose %}
     {% for field in [
         { scheme: 'light', label: 'Light Appearance' | t('cast'), options: lightOptions, value: lightValue },
         { scheme: 'dark', label: 'Dark Appearance' | t('cast'), options: darkOptions, value: darkValue },
@@ -53,6 +58,7 @@
         labels="{{ buttonOptions.labels | json_encode }}"
         value="{{ buttonValue }}"
     ></craft-select-color>
+    {% endif %}
 
     <craft-checkbox-group id="cast-contrast-field">
         <label slot="label">{{ 'Contrast' | t('cast') }}</label>

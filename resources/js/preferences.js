@@ -104,8 +104,9 @@ function CastPreferences(config) {
       return visible;
     });
 
-    // Without Craft's field to share a row with, each keeps a full one.
-    if (!themeField) {
+    // Without Craft's field to share a row with, each keeps a full one. With nothing
+    // beside it (only the contrast switch rendered), Theme keeps its own width.
+    if (!themeField || !fields.length) {
       return;
     }
 

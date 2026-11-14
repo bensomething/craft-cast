@@ -31,7 +31,7 @@ Each user picks their own in **Account → Preferences**:
 - **Primary Button Colour** sits beside them, and applies in either mode.
 - **Increase contrast** is under **Accessibility**, with the rest of the display settings.
 
-**Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, and whether they can choose at all.
+**Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, and whether they can choose their appearances and button colour. **Increase contrast** stays each user's to switch either way: it's an accessibility need, not a look.
 
 ### Themes
 

@@ -80,7 +80,7 @@ final class ThemesTest extends TestCase
         $this->assertSame('stone', $this->themes()->forUser($this->admin(), Themes::SCHEME_LIGHT));
     }
 
-    public function test_users_choices_are_ignored_when_they_may_not_choose(): void
+    public function test_users_looks_are_ignored_when_they_may_not_choose(): void
     {
         $this->setPrefs([Themes::PREF_DARK => 'dim', Themes::PREF_BUTTON => 'teal', Themes::PREF_CONTRAST => true]);
         $this->setSettings(['allowUserOverride' => false, 'autoDarkTheme' => 'stone', 'defaultButtonColor' => 'pink']);
@@ -88,7 +88,7 @@ final class ThemesTest extends TestCase
 
         $this->assertSame('stone', $this->themes()->forUser($user, Themes::SCHEME_DARK));
         $this->assertSame('pink', $this->themes()->buttonColorForUser($user));
-        $this->assertFalse($this->themes()->highContrastForUser($user));
+        $this->assertTrue($this->themes()->highContrastForUser($user), 'contrast is always the user\'s');
     }
 
     public function test_a_stored_craft_default_shows_as_the_folded_row(): void
