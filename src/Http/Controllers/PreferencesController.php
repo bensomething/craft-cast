@@ -37,11 +37,11 @@ final readonly class PreferencesController
         $prefs = [];
 
         foreach ([Themes::SCHEME_LIGHT, Themes::SCHEME_DARK] as $scheme) {
-            $value = $request->input($scheme);
-
-            if ($value === null) {
+            if (! $request->exists($scheme)) {
                 continue;
             }
+
+            $value = $this->choice($request, $scheme);
 
             if (! is_string($value) || ($value !== Settings::THEME_INHERIT && ! $this->themes->isValid($value, $scheme))) {
                 return response()->json(['message' => t('That theme isn’t available.', category: 'cast')], 422);
@@ -50,10 +50,9 @@ final readonly class PreferencesController
             $prefs[$this->themes->prefKey($scheme)] = $value;
         }
 
-        if ($request->has('buttonColor')) {
-            $value = $request->input('buttonColor');
+        if ($request->exists('buttonColor')) {
+            $value = $this->choice($request, 'buttonColor');
 
-            // An empty string is Craft's own colour.
             if (! is_string($value) || ($value !== Settings::THEME_INHERIT && ! $this->themes->isValidButtonColor($value))) {
                 return response()->json(['message' => t('That colour isn’t available.', category: 'cast')], 422);
             }
@@ -61,7 +60,7 @@ final readonly class PreferencesController
             $prefs[Themes::PREF_BUTTON] = $value;
         }
 
-        if ($request->has('highContrast')) {
+        if ($request->exists('highContrast')) {
             $value = $request->input('highContrast');
 
             if (! is_bool($value)) {
@@ -77,5 +76,17 @@ final readonly class PreferencesController
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * A posted choice, where an empty string means Craft's own.
+     *
+     * Laravel's default `ConvertEmptyStringsToNull` middleware, which a Craft 6 project
+     * may well run, turns that empty string into null before it gets here. A key that
+     * was posted but came through null is read back as the empty string it was.
+     */
+    private function choice(Request $request, string $key): mixed
+    {
+        return $request->input($key) ?? '';
     }
 }
