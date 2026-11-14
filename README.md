@@ -1,140 +1,152 @@
 # Cast
 
-Colour modes for the Craft CMS control panel. **Dark**, **Dim**, **Stone** and **High Contrast**, an **Auto** mode that follows the operating system, and a per-user picker.
+More looks for the Craft CMS control panel. Craft 6 decides whether the control panel is light or dark; Cast decides what each looks like, with **Stone** and **Dim** themes, an **Increase contrast** switch, and a **Button Colour**, chosen per user with site-wide defaults.
 
-A theme is a stylesheet redeclaring the custom properties Craft already ships in `ThemeAsset` — no forked templates, no rewritten layouts, so a Craft upgrade comes through untouched. The active theme is stamped onto `<html>` by an inline head script, so there's no flash, and picking one repaints immediately without a save.
+A theme is a stylesheet overriding the colour tokens Craft 6 already draws everything from, so there are no forked templates and a Craft upgrade comes through untouched. Choices are stamped onto `<html>` ahead of Craft's styles, so there's no flash, and changing one repaints at once without a save.
 
 > [!NOTE]
-> Cast is in beta. The theme APIs are settled — `Themes::EVENT_REGISTER_THEMES` and the `cast-themes/` file format won't change before 1.0.0 — but the plugin's own settings may still move.
+> Cast 2 is in beta, as is Craft 6. Cast's themes are built on Craft 6's colour tokens, which may still change before Craft 6.0.
+
+Cast 2 is for Craft 6. For Craft 5, use [Cast 1.x](https://github.com/bensomething/craft-cast/tree/develop). Upgrading? See [UPGRADE.md](UPGRADE.md).
 
 ## Requirements
 
-- Craft CMS 5.10+
-- PHP 8.2+
+- Craft CMS 6.0.0-beta.1 or later
+- PHP 8.5 or later
 
 ## Installation
 
 ```bash
-composer require bensomething/craft-cast:^1.0.0-beta
+composer require bensomething/craft-cast:^2.0.0-beta
+php artisan craft:plugin:install cast
 ```
 
 If Composer refuses, your project's `minimum-stability` is `stable`. Set it to `beta` with `"prefer-stable": true`, or pin the exact version.
 
 ## Usage
 
-**Settings → Plugins → Cast** sets the site-wide default and which themes users can pick from. Users choose their own under **Account → Preferences → Colour mode**.
+Each user picks their own in **Account → Preferences**:
 
-**Auto is a pair, not a theme.** Anyone set to Auto gets the two themes configured on the **Auto** tab, so the **Default theme** has no effect on them. That pair is the starting point rather than the last word: a user who can pick their own theme can also name their own light or dark half, and either half falls back to the admin's if the theme it names goes away.
+- **Light Appearance** and **Dark Appearance** sit beside Craft's own **Theme** field. Only the ones Craft's Theme can use are shown: one for Light or Dark, both for System.
+- **Button Colour** sits beside them, and applies in either mode.
+- **Increase contrast** is under **Accessibility**, with the rest of the display settings.
 
-> **If the picker doesn't appear on the preferences screen**, run `php craft clear-caches/compiled-templates`. Cast renders it through Craft's `cp.users.edit.prefs` hook, and a stale compiled template silently skips it.
+**Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, and whether they can choose at all.
 
-### Bundled themes
+### Themes
 
-| Theme | Scheme | Notes |
+| Theme | Modes | Notes |
 | --- | --- | --- |
-| Dark | Dark | Neutral dark CP. The reference implementation. |
-| Dim | Dark | Softer and lower contrast, for long sessions. |
-| Stone | Light | A warm neutral, based on Tailwind's stone ramp. |
-| Stone Dark | Dark | The same warm neutral, but.. dark. |
-| High Contrast | Light | Near-black text, solid borders, widened focus ring. |
-| High Contrast Dark | Dark | The same treatment on a near-black canvas. |
+| Stone | Light, dark | Craft's neutrals warmed to its own stone hue. Every step keeps the luminance of Craft's, so every contrast ratio is exactly Craft's. |
+| Dim | Dark | Craft's dark with lifted surfaces and softer text, for long sessions. Body text 7.8:1, quiet text 5.4:1. |
 
-## Button colour
+**Craft default** is Craft's own look for that mode.
 
-Repoints the fill of Craft's primary buttons at one of nine colours. Beyond primary buttons, `--bg-primary` reaches only the Plugin Store's cart badge and the installer's step dots.
+### Increase contrast
 
-Each is shaded per mode so the white label clears WCAG AA against the fill (≥4.5:1 light, ≥4:1 dark). **Black/White** carries its own label colour so it can swap ends with the mode. **Amber** is a knowing compromise at 3.19:1 — the only warm colour distinct enough from the default that keeps a white label. Status colours stay red.
+Moves text, borders and links up Craft's own colour ramps, makes hairline borders solid, widens the focus ring, and deepens dark surfaces. It applies in light and dark alike, on top of the appearance:
+
+| | Light | Craft light | Dark | Craft dark |
+| --- | --- | --- | --- | --- |
+| Body text | 15.1:1 | 12.3:1 | 16.8:1 | 11.2:1 |
+| Quiet text | 9.5:1 | 5.5:1 | 12.1:1 | 6.5:1 |
+| Form-control borders | 5.5:1 | 3.3:1 | 8.4:1 | 4.0:1 |
+| Links | 7.2:1 | 5.5:1 | 12.1:1 | 6.5:1 |
+
+### Button colour
+
+Recolours primary buttons only; selections, focus rings and the rest of Craft's accent colour stay Craft's. The colours are Craft's own blue, **Craft Red** (Craft 5's primary button), and Amber, Green, Teal, Sky, Violet, Pink and Gray from Craft 6's palette. Each takes its fill, border and label from Craft's generated colours, which hold the label at 4.6:1 or better in both modes. Craft Red is Craft 5's `#dc2626` with a white label, 4.83:1.
 
 ## Adding your own theme
 
-Drop a `.css` file in `cast-themes/`, alongside `config/` and `templates/`. The filename is the handle, a header comment supplies the rest.
+Drop a `.css` file in `cast-themes/`, alongside `config/` in your project. The filename is the handle; a header comment names the theme and says which of Craft's modes it dresses:
 
 ```css
 /**
  * Theme Name: Midnight
- * Color Scheme: dark
+ * Modes: dark
  * Description: Near-black, for late sessions.
  */
 
-html[data-cast-theme="midnight"] {
-    --body-bg: #05070d;
-    --text-color: #e6ecff;
+html[data-theme='dark'][data-cast-dark='midnight'] {
+    --c-surface-default: #0b1020;
+    --c-surface-sunken: #060914;
+    --c-text-default: #e6ecff;
 }
 ```
 
-Only **Color Scheme** really matters: it decides whether `_dark-base.css` loads ahead of your theme, and which side of **Auto** it sits on. The name falls back to the filename and the scheme to light, so a file with no header is still a theme. Files starting with an underscore are partials and skipped.
+- **`Modes`** is required: `light`, `dark`, or `light, dark`. A file without it is taken to be a Cast 1.x theme and skipped.
+- **The selector** pairs Craft's `data-theme` with Cast's `data-cast-dark` (or `data-cast-light`), so the theme applies only while Craft is in that mode and the user has picked it. For a light theme: `html:not([data-theme='dark'])[data-cast-light='midnight']`.
+- **What to override** is Craft 6's colour tokens: `--c-surface-*`, `--c-text-*`, `--c-border-*`, and the `--color-base-*` and `--color-slate-*` ramps they're drawn from. Craft's own `tokens.css` and `color-palette.css` list them. [`stone.css`](resources/themes/stone.css) and [`dim.css`](resources/themes/dim.css) are worked examples.
+- **Handles** are lower-case letters, numbers and dashes, starting with a letter. Files starting with an underscore are skipped as partials. A bundled theme's handle can't be taken by a file.
 
-The file *is* the registration, so a theme can't exist in one environment and not another. **Settings → Plugins → Cast → Themes** lists what was found and any file that couldn't be read, with the reason. The folder is published to `cpresources` — it needn't sit in the web root, and editing a theme busts its own cache. Point elsewhere with `themesPath` in `config/cast.php`.
+The name falls back to the filename. The file is the registration, so a theme can't exist in one environment and not another. **Settings → Plugins → Cast** lists any file that was skipped, with why.
 
-Bundled handles win, so a `dark.css` won't quietly redefine **Dark** for everyone already using it. To genuinely replace one, register it in code.
-
-### What it costs
-
-Craft's palette derives almost entirely from a `--gray-*-hsl` ramp plus semantic properties (`--pane-bg`, `--text-color`, …), and most themes are a page of variables. Dark themes get `_dark-base.css` ahead of them — the inverted ramp plus patches — so they only declare deltas. Cast also sets `data-cast-scheme` to `light` or `dark`, so several of your own themes can share a base the same way.
-
-> Never `@import` a base from a theme. The preview screens load every theme at once, and a second import would re-declare the base *after* the first theme's overrides, flattening it.
-
-The expense isn't light versus dark, and it isn't how much of the ramp you redeclare. It's **how far you move the hue**. Dim rewrites all fourteen ramp steps but keeps Craft's blue-grey, and needs two extra rules. Stone shifts to a warm neutral and needs nine — as does Stone Dark, base or no base. Craft and the dark base both write blues straight into rules in a few dozen places, and those don't follow a retinted ramp. The most visible is `--fg-input`, which every control background derives from at 25%, 30% and 50% alpha.
-
-Move the hue and `stone.css` is the worked example; each patch carries a note on what was pinned and why.
+Cast serves the folder itself, with a hash of each file in its URL, so the folder needn't be in the web root and an edited theme busts its own cache. Point elsewhere with `themesPath`.
 
 ## Registering a theme in code
 
-For a plugin or module shipping its own:
+For a plugin or module shipping its own, listen for `ThemesResolving`:
 
 ```php
-use bensomething\cast\events\RegisterThemesEvent;
-use bensomething\cast\models\Theme;
-use bensomething\cast\services\Themes;
-use yii\base\Event;
+use bensomething\cast\Events\ThemesResolving;
+use bensomething\cast\Theme;
+use Illuminate\Support\Facades\Event;
 
-Event::on(Themes::class, Themes::EVENT_REGISTER_THEMES, function(RegisterThemesEvent $event) {
-    $event->themes['midnight'] = new Theme([
-        'handle' => 'midnight',
-        'name' => 'Midnight',
-        'colorScheme' => Theme::SCHEME_DARK,
-        'url' => Craft::$app->getAssetManager()->getPublishedUrl(
-            '@mymodule/resources', true, 'midnight.css',
-        ),
-    ]);
+Event::listen(function (ThemesResolving $event) {
+    $event->add(new Theme(
+        handle: 'midnight',
+        name: 'Midnight',
+        modes: ['dark'],
+        url: asset('vendor/acme/midnight/midnight.css'),
+    ));
 });
 ```
 
-Use a bundled handle as the key to replace that theme.
+| | |
+| --- | --- |
+| **Class** | `bensomething\cast\Events\ThemesResolving` |
+| **Fires** | Once per request, the first time Cast needs its themes |
+| **`$themes`** | The themes so far, by handle: the bundled ones, then the themes folder's |
+| **`add(Theme $theme)`** | Adds a theme, replacing any with the same handle |
 
-## Opting a screen out
+Listeners can also replace a theme by adding one with its handle, or remove one with `unset($event->themes['dim'])`. A theme with an invalid handle, no modes, or a mode other than `light` and `dark` is dropped.
 
-Most plugin UIs get Cast for free, building on Craft's components. One shipping its own compiled stylesheet with colours baked in doesn't, and lands as dark text on a dark canvas.
-
-```twig
-<div data-cast-ignore>
-    {# your app #}
-</div>
-```
-
-Everything inside gets Craft's palette back, plus `color-scheme: light` so native controls follow. It's the whole subtree, so mark the outermost element the region owns. Menus opened from inside come with it — Garnish moves them to `<body>`, which would otherwise hand them back to the theme. Craft's Plugin Store is exempted this way out of the box.
-
-Reach for it only when a region genuinely can't follow the palette; fixing the stylesheet to read Craft's properties earns dark mode rather than opting out of it.
-
-> **Caveat:** the region is restored through Cast's variables, so anything reading them corrects itself. A few patches carry literal colours — Prism syntax highlighting mainly — and those still need overriding by hand inside an ignored region.
+`Theme` takes either a `url`, for a stylesheet you serve, or a `path`, for a file Cast serves the way it serves the themes folder. Every theme's stylesheet loads on every control panel page, so a choice repaints at once.
 
 ## Config
 
-Override per environment in `config/cast.php`:
+Override any setting in `config/craft/cast.php`. Publish a commented one with:
+
+```bash
+php artisan vendor:publish --tag=cast
+```
 
 ```php
 return [
-    'buttonColor' => 'red',
-    'defaultTheme' => 'auto',
+    'autoLightTheme' => '',          // a light theme's handle, or '' for Craft's own
+    'autoDarkTheme' => 'dim',        // a dark theme's handle, or '' for Craft's own
+    'defaultButtonColor' => 'red',   // red (Craft Red), amber, green, teal, sky, violet, pink, gray, or '' for Craft's blue
+    'highContrast' => false,
     'allowUserOverride' => true,
-    'enabledThemes' => ['dark', 'high-contrast'],
-    'autoLightTheme' => '',
-    'autoDarkTheme' => 'dark',
+    'enabledThemes' => '*',          // or a list of handles
     'themesPath' => '@root/cast-themes',
 ];
 ```
 
-An empty handle means Craft's stock appearance. Copy [`src/config.php`](src/config.php) for a commented starting point.
+A setting the file sets shows as read-only on the settings screen. Use `env()` for values that differ by environment.
+
+> [!WARNING]
+> The `cast` publish tag also covers Cast's stylesheets. `vendor:publish --tag=cast --force`, to refresh those, overwrites your `config/craft/cast.php` too.
+
+## Development
+
+```bash
+composer test        # PHPUnit, against a fresh Craft install per test
+composer phpstan     # level 8
+composer check-cs    # Pint
+npm test             # the preferences script, in jsdom
+```
 
 ## Licence
 

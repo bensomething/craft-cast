@@ -1,5 +1,32 @@
 # Release Notes for Cast
 
+## 2.0.0-beta.1 - Unreleased
+
+Cast 2 is for Craft 6, and rebuilt around its own Theme preference: Craft decides whether the control panel is light or dark, and Cast decides what each looks like. See [UPGRADE.md](UPGRADE.md) for moving from 1.x.
+
+### Added
+- **Light Appearance** and **Dark Appearance**, beside Craft's **Theme** field in **Account → Preferences**. Only the ones Craft's Theme can use are shown.
+- **Increase contrast**, under **Preferences → Accessibility**, on top of whichever appearance is showing, in light and dark alike.
+- **Button Colour** per user, with a site default. **Craft Red** is Craft 5's primary button.
+- `ThemesResolving`, a Laravel event for registering, replacing or removing themes.
+- Settings set in `config/craft/cast.php` show as read-only on the settings screen, saying so.
+
+### Changed
+- Requires Craft 6 and PHP 8.5.
+- Themes override Craft 6's colour tokens, scoped to the mode they dress. **Stone** is offered for both modes and **Dim** for dark.
+- A themes-folder file's header must declare `Modes`. Files without it, such as 1.x themes, are skipped and listed on the settings screen.
+- `autoLightTheme` and `autoDarkTheme` are now the default appearances for everyone, not just users on Auto.
+- The config file moves to `config/craft/cast.php`, and Craft 5's per-environment keys aren't read.
+- Each user's 1.x choice is carried over by a migration: Craft's Theme, plus the matching appearance, and the contrast switch for either high contrast theme.
+
+### Removed
+- **Dark**, which is now Craft's own dark, and **Stone Dark**, which is Stone offered for dark.
+- **High Contrast** and **High Contrast Dark**, which are now the **Increase contrast** switch.
+- **Auto**, which is now Craft's own System theme.
+- The site-wide `buttonColor` setting, in favour of `defaultButtonColor` and per-user colours.
+- `data-cast-ignore`.
+- `Themes::EVENT_REGISTER_THEMES` and `RegisterThemesEvent`, in favour of `ThemesResolving`.
+
 ## 1.0.0-beta.7 - 2026-07-31
 
 ### Added
