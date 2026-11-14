@@ -67,6 +67,10 @@ jobs:
           extensions: pdo_sqlite
           coverage: none
 
+      # 6.x-dev pulls in its siblings' dev branches too (craftcms/cms-assets), which
+      # the package's beta minimum-stability would refuse.
+      - run: composer config minimum-stability dev
+
       - run: composer require --no-update --no-interaction "craftcms/cms:6.x-dev"
 
       - run: composer update --no-interaction --no-progress --with-all-dependencies
