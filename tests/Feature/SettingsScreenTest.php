@@ -58,4 +58,53 @@ final class SettingsScreenTest extends TestCase
         // none of them were saved.
         $this->assertNull(app(ProjectConfig::class)->get('plugins.cast.settings.autoDarkTheme'));
     }
+
+    public function test_settings_from_the_config_file_are_read_only_and_say_why(): void
+    {
+        $this->signIn();
+        config(['craft.cast' => ['autoDarkTheme' => 'dim', 'highContrast' => true]]);
+
+        $fields = $this->fields();
+
+        $this->assertSame('readOnly', $fields['autoDarkTheme']['mode']);
+        $this->assertStringContainsString('config/craft/cast.php', $fields['autoDarkTheme']['warning']);
+        $this->assertSame('readOnly', $fields['highContrast']['mode']);
+
+        $this->assertNotSame('readOnly', $fields['autoLightTheme']['mode']);
+        $this->assertNull($fields['autoLightTheme']['warning']);
+    }
+
+    public function test_the_config_sample_is_where_craft_publishes_from(): void
+    {
+        $sample = dirname(__DIR__, 2).'/config/cast.php';
+
+        $this->assertFileExists($sample);
+        $this->assertIsArray(require $sample);
+    }
+
+    /**
+     * Each field on the settings screen, by setting, with its control's mode and the
+     * field's warning.
+     *
+     * @return array<string, array{mode: ?string, warning: ?string}>
+     */
+    private function fields(): array
+    {
+        $html = (string) $this->get(self::URL)->assertOk()->getContent();
+        preg_match('/<script data-page="app"[^>]*>(.*?)<\/script>/s', $html, $m);
+        $nodes = json_decode($m[1], true)['props']['ui']['nodes'];
+
+        $fields = [];
+
+        foreach ($nodes as $node) {
+            if (isset($node['control']['path'])) {
+                $fields[end($node['control']['path'])] = [
+                    'mode' => $node['control']['mode'] ?? null,
+                    'warning' => $node['props']['warning'] ?? null,
+                ];
+            }
+        }
+
+        return $fields;
+    }
 }

@@ -11,6 +11,7 @@ use CraftCms\Cms\Plugin\PluginSettings;
 use CraftCms\Cms\Support\Url;
 use CraftCms\Cms\Ui\Controls\Choice;
 use CraftCms\Cms\Ui\Controls\Lightswitch;
+use CraftCms\Cms\Ui\Enums\ControlMode;
 use CraftCms\Cms\Ui\Enums\FieldWidth;
 use CraftCms\Cms\Ui\Nodes\Field;
 use CraftCms\Cms\Ui\Ui;
@@ -18,6 +19,7 @@ use CraftCms\Cms\Ui\UiContext;
 use CraftCms\Cms\View\TemplateHooks;
 use CraftCms\Cms\View\TemplateMode;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Config;
 use Override;
 
 use function CraftCms\Cms\currentUserElement;
@@ -30,6 +32,8 @@ use function CraftCms\Cms\template;
  * Craft 6 owns light, dark and following the OS. Cast picks what light and dark each
  * look like: Craft's own, or one of Cast's themes, which override Craft's colour tokens
  * while Craft's mode matches. See `docs/craft-6.md` for how 2.x got here.
+ *
+ * @method Settings getSettings()
  */
 class Plugin extends BasePlugin
 {
@@ -49,10 +53,21 @@ class Plugin extends BasePlugin
         __DIR__.'/../resources/themes/buttons.css' => 'themes/buttons.css',
     ];
 
+    /**
+     * Bound here rather than in `boot()`: Craft loads a plugin's route files before
+     * `boot()` runs, so anything they resolve has to be bound already.
+     */
+    #[Override]
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->singleton(Settings::class, fn () => $this->getSettings());
+        $this->app->scoped(Themes::class);
+    }
+
     public function boot(Router $router, TemplateHooks $hooks): void
     {
-        $this->app->bind(Settings::class, fn () => $this->getSettings());
-        $this->app->scoped(Themes::class);
 
         $router->pushMiddlewareToGroup('craft.cp', RegisterHeadScript::class);
 
@@ -71,6 +86,10 @@ class Plugin extends BasePlugin
      * they sit beside Theme in each user's preferences. That row's instructions go
      * under the inputs, so its selects line up however their text wraps; the switches
      * keep theirs above, as Craft's own do.
+     *
+     * A setting `config/craft/cast.php` sets is read-only here, with a warning naming
+     * the file: Craft applies the file over the saved value, and leaves that key alone
+     * when this screen saves, so editing it here would appear to save and do nothing.
      */
     #[Override]
     public function settingsUi(UiContext $context = new UiContext): ?Ui
@@ -90,33 +109,48 @@ class Plugin extends BasePlugin
             ),
         ];
 
+        $overrides = Config::get("craft.$this->handle", []);
+        $overrides = is_array($overrides) ? $overrides : [];
+
+        $overridable = function (string $setting, Field $field) use ($overrides): Field {
+            if (array_key_exists($setting, $overrides)) {
+                $field->getControl()?->mode(ControlMode::ReadOnly);
+                $field->warning(t('Set by `{setting}` in `config/craft/{handle}.php`, so it can’t be changed here.', [
+                    'setting' => $setting,
+                    'handle' => $this->handle,
+                ], 'cast'));
+            }
+
+            return $field;
+        };
+
         return Ui::make([
-            Field::make(t('Light Appearance', category: 'cast'), Choice::make('autoLightTheme')
+            $overridable('autoLightTheme', Field::make(t('Light Appearance', category: 'cast'), Choice::make('autoLightTheme')
                 ->options($appearances(Themes::SCHEME_LIGHT))
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
                 ->instructionsPosition('after')
-                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast')),
+                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast'))),
 
-            Field::make(t('Dark Appearance', category: 'cast'), Choice::make('autoDarkTheme')
+            $overridable('autoDarkTheme', Field::make(t('Dark Appearance', category: 'cast'), Choice::make('autoDarkTheme')
                 ->options($appearances(Themes::SCHEME_DARK))
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
                 ->instructionsPosition('after')
-                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast')),
+                ->instructions(t('For anyone who hasn’t chosen their own.', category: 'cast'))),
 
-            Field::make(t('Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
+            $overridable('defaultButtonColor', Field::make(t('Button Colour', category: 'cast'), Choice::make('defaultButtonColor')
                 ->options($buttonColors)
                 ->withoutPlaceholder())
                 ->width(FieldWidth::Third)
                 ->instructionsPosition('after')
-                ->instructions(t('Primary buttons, for anyone who hasn’t chosen their own.', category: 'cast')),
+                ->instructions(t('Primary buttons, for anyone who hasn’t chosen their own.', category: 'cast'))),
 
-            Field::make(t('Increase Contrast', category: 'cast'), Lightswitch::make('highContrast'))
-                ->instructions(t('On by default for anyone who hasn’t set it themselves, in light and dark alike.', category: 'cast')),
+            $overridable('highContrast', Field::make(t('Increase Contrast', category: 'cast'), Lightswitch::make('highContrast'))
+                ->instructions(t('On by default for anyone who hasn’t set it themselves, in light and dark alike.', category: 'cast'))),
 
-            Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
-                ->instructions(t('Offer the appearances, button colour and contrast switch in each user’s preferences. Off, everyone gets the defaults above.', category: 'cast')),
+            $overridable('allowUserOverride', Field::make(t('Let Users Choose', category: 'cast'), Lightswitch::make('allowUserOverride'))
+                ->instructions(t('Offer the appearances, button colour and contrast switch in each user’s preferences. Off, everyone gets the defaults above.', category: 'cast'))),
         ]);
     }
 
