@@ -2,13 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [2.x]
   pull_request:
-  # The themes are pinned to Craft's internal markup, so a Craft release can break them
-  # without anything here changing. The selector check runs weekly against the newest
-  # Craft the constraint allows, so drift surfaces on a schedule rather than in an issue.
-  schedule:
-    - cron: '0 6 * * 1'
+    branches: [2.x]
   workflow_dispatch:
 
 permissions:
@@ -21,17 +17,18 @@ concurrency:
 
 jobs:
   checks:
-    name: ${{ matrix.script }} (PHP ${{ matrix.php }}, ${{ matrix.dependencies }})
+    name: ${{ matrix.script }} (Craft ${{ matrix.dependencies }})
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.4']
         script: [check-cs, phpstan, test]
+        # Both ends of the craftcms/cms constraint. Craft 6 is pre-release, so the
+        # highest moves often, and that's where a token rename shows up first.
         dependencies: [highest, lowest]
         exclude:
-          # Code style is ours alone — the Craft version can't affect it.
+          # Code style is ours alone; the Craft version can't affect it.
           - script: check-cs
             dependencies: lowest
 
@@ -40,44 +37,35 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: '8.5'
+          extensions: pdo_sqlite
           coverage: none
 
       - uses: ramsey/composer-install@v3
         with:
           dependency-versions: ${{ matrix.dependencies }}
 
+      # Which Craft got installed is the first thing to know from a failure.
+      - name: Report the Craft version under test
+        run: composer show craftcms/cms | head -3
+
       - run: composer ${{ matrix.script }}
 
-  selectors:
-    name: check-selectors (Craft ${{ matrix.dependencies }})
+  js:
+    name: preferences script
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # Both ends of the `^5.10` constraint. A selector present in only one of them is
-        # a selector some supported install doesn't get.
-        dependencies: [highest, lowest]
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/setup-node@v4
         with:
-          php-version: '8.2'
-          coverage: none
+          node-version: '24'
+          cache: npm
 
-      - uses: ramsey/composer-install@v3
-        with:
-          dependency-versions: ${{ matrix.dependencies }}
+      - run: npm ci
 
-      # Which Craft actually got installed is the first thing you want to know from a
-      # failure here, and `highest` moves without the repo changing.
-      - name: Report the Craft version under test
-        run: composer show craftcms/cms | head -3
-
-      - run: composer check-selectors
+      - run: npm test
 
   package:
     name: package
@@ -88,7 +76,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.5'
           coverage: none
 
       # No `composer install` above: validation reads the manifest, not the tree.

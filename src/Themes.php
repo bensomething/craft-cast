@@ -74,7 +74,7 @@ final class Themes
     /**
      * The handles a user may choose for a scheme, Craft's own (empty) first.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function handles(string $scheme): array
     {
@@ -85,7 +85,7 @@ final class Themes
      * {@see handles()}, for callers that can't take the service, such as the settings'
      * own validation, which the service depends on.
      *
-     * @return string[]
+     * @return list<string>
      */
     public static function handlesFor(string $scheme): array
     {

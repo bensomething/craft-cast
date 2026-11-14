@@ -34,6 +34,11 @@
             "bensomething\\cast\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "bensomething\\cast\\tests\\": "tests/"
+        }
+    },
     "extra": {
         "handle": "cast",
         "name": "Cast",
