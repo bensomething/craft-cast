@@ -590,9 +590,38 @@ html[data-cast-scheme="dark"] .btn.caution:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Prism, which Craft bundles with its stock light theme for syntax highlighting
-   (email previews, the project config viewer).
+   Syntax highlighting (asset previews, the project config viewer). Craft 5.12
+   moved from Prism to TanStack Highlight, which takes its colours from `--th-*`
+   custom properties. Both get the same palette, so code reads the same on either.
    -------------------------------------------------------------------------- */
+
+html[data-cast-scheme="dark"] {
+    --th-background: var(--cast-code-bg);
+    --th-token: var(--gray-800);
+    --th-comment: var(--gray-500);
+    --th-meta: var(--gray-500);
+    --th-deleted: #f0a1c8;
+    --th-literal: #f0a1c8;
+    --th-number: #f0a1c8;
+    --th-property: #f0a1c8;
+    --th-tag: #f0a1c8;
+    --th-attr: #b5d97a;
+    --th-inserted: #b5d97a;
+    --th-selector: #b5d97a;
+    --th-string: #b5d97a;
+    --th-code-inline: #e0b57a;
+    --th-link: #e0b57a;
+    --th-operator: #e0b57a;
+    --th-type: #e0b57a;
+    --th-variable: #e0b57a;
+    --th-command: #7fc4e8;
+    --th-function: #7fc4e8;
+    --th-heading: #7fc4e8;
+    --th-keyword: #7fc4e8;
+}
+
+/* Prism, for Craft 5.10 and 5.11. Drop this when Cast's minimum reaches 5.12, along
+   with PRISM_TOKENS in bin/check-selectors.php. */
 
 html[data-cast-scheme="dark"] code[class*="language-"],
 html[data-cast-scheme="dark"] pre[class*="language-"] {

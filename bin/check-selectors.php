@@ -44,6 +44,21 @@ const OWN_PREFIX = 'cast-';
 const IGNORE = [];
 
 /**
+ * Prism's token classes, which Craft 5.10 and 5.11 colour code with. Craft 5.12 moved to
+ * TanStack Highlight, which the themes colour through `--th-*` custom properties instead,
+ * so these are only checked while the installed Craft still has them. Drop the list, and
+ * the Prism rules, when Cast's minimum Craft reaches 5.12.
+ *
+ * @var list<string>
+ */
+const PRISM_TOKENS = [
+    'atrule', 'attr-name', 'attr-value', 'boolean', 'builtin', 'cdata', 'char', 'comment',
+    'constant', 'deleted', 'doctype', 'entity', 'inserted', 'keyword', 'language-css',
+    'number', 'operator', 'prolog', 'property', 'punctuation', 'selector', 'string', 'style',
+    'symbol', 'tag', 'url',
+];
+
+/**
  * Pulls every class and ID name out of a stylesheet's selectors.
  *
  * Only selector text is scanned — never declarations — so hex colours can't be mistaken
@@ -195,13 +210,19 @@ if ($craftFiles === []) {
 }
 
 $craft = namesIn($craftFiles);
+
+// Without Prism's stylesheet (Craft 5.12 and later), its token names have nothing to be
+// checked against, and the rules using them are for older Craft versions
+$skip = file_exists("$root/vendor/craftcms/cms/src/web/assets/prismjs/dist/prism.css")
+    ? IGNORE
+    : IGNORE + array_fill_keys(PRISM_TOKENS, 'Prism, for Craft 5.10 and 5.11');
 $status = 0;
 
 printf("Checking %d theme file(s) against %d Craft stylesheet(s).\n\n", count($themeFiles), count($craftFiles));
 
 foreach ($themeFiles as $file) {
     $missing = array_filter(
-        array_diff_key(namesIn([$file]), $craft, IGNORE),
+        array_diff_key(namesIn([$file]), $craft, $skip),
         static fn(string $name) => !str_starts_with($name, OWN_PREFIX),
         ARRAY_FILTER_USE_KEY,
     );
