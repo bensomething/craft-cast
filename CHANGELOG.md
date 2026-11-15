@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## Unreleased
+## 2.0.0-beta.2 - 2026-11-15
 
 ### Added
 - Colour themes: **Red**, **Amber**, **Green**, **Teal**, **Blue**, **Violet** and **Pink**, for light and dark, made from Craft's palette hues, keeping every contrast ratio Craft's. Each also colours the focus ring. **Hue Tint**, under **Settings → Plugins → Cast**, sets how strongly they come through.
