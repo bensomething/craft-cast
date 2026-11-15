@@ -271,6 +271,17 @@ final class ThemeSourcesTest extends TestCase
         $this->assertMatchesRegularExpression('#/admin/cast/hues\.css\?v=[0-9a-f]{10}#', $html);
     }
 
+    public function test_the_login_screen_links_no_theme_stylesheets(): void
+    {
+        // They're behind CP auth: a guest's browser fetching one would be sent to
+        // log in, and logging in would then land on the stylesheet.
+        $this->file('midnight.css', ' * Modes: dark');
+
+        $html = (string) $this->get('/admin/login')->getContent();
+
+        $this->assertStringNotContainsString('/admin/cast/', $html);
+    }
+
     public function test_guests_cant_fetch_the_hues(): void
     {
         $this->get('/admin/cast/hues.css')->assertRedirect();

@@ -43,10 +43,14 @@ final readonly class RegisterHeadScript
 
             // Themes besides the bundled ones, whose stylesheets the plugin lists
             // statically. Every one loads, as the bundled do, so a change repaints at once.
-            $stack->cssFile($this->themes->hueStylesheetUrl(), [], 'cast-hues');
+            // Not for guests: their routes are behind CP auth, so on the login screen
+            // each link would bounce to login and become the URL logging in returns to.
+            if (currentUserElement() !== null) {
+                $stack->cssFile($this->themes->hueStylesheetUrl(), [], 'cast-hues');
 
-            foreach ($this->themes->stylesheets() as $handle => $url) {
-                $stack->cssFile($url, [], "cast-theme-$handle");
+                foreach ($this->themes->stylesheets() as $handle => $url) {
+                    $stack->cssFile($url, [], "cast-theme-$handle");
+                }
             }
         }
 
