@@ -1,5 +1,10 @@
 # Release Notes for Cast
 
+## 1.0.0-beta.8 - 2026-11-15
+
+### Fixed
+- On Craft 5.12, code in asset previews and the Project Config utility kept Craft's light-theme colours on a dark background. Craft 5.12 replaced Prism with its own highlighter, and the dark themes now colour that too.
+
 ## 1.0.0-beta.7 - 2026-07-31
 
 ### Added
