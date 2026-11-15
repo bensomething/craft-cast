@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## Unreleased
+## 2.0.0-beta.3 - 2026-11-15
 
 ### Fixed
 - Logging in could land on a Cast stylesheet rather than the control panel. The login screen linked the theme stylesheets, which only signed-in users can fetch, so the browser's request for one was remembered as the page to return to.
