@@ -5,6 +5,11 @@
 ### Fixed
 - Logging in could land on a Cast stylesheet rather than the control panel. The login screen linked the theme stylesheets, which only signed-in users can fetch, so the browser's request for one was remembered as the page to return to.
 
+## Unreleased
+
+### Added
+- Cast's preferences are in Craft's command palette: **Set light appearance to Teal**, **Set dark appearance to Dim** and so on, for the modes Craft's Theme shows, plus **Increase contrast**. Search for “cast” to list them. Choosing one repaints at once, without a reload.
+
 ## 2.0.0-beta.2 - 2026-11-15
 
 ### Added

@@ -31,6 +31,8 @@ Each user picks their own in **Account → Preferences**:
 - **Primary Button Colour** sits beside them, and applies in either mode.
 - **Increase contrast** is under **Accessibility**, with the rest of the display settings.
 
+They're in Craft's command palette too: search for **cast** to list them, or for the theme, such as **cast teal**. Choosing one repaints at once and saves, without a reload. The palette offers the appearances Craft's Theme can show, and the contrast switch.
+
 **Settings → Plugins → Cast** sets the defaults for anyone who hasn't chosen their own, which themes they can pick from, whether they can choose their appearances and button colour, and any [custom themes](#custom-themes). **Increase contrast** stays each user's to switch either way: it's an accessibility need, not a look.
 
 ### Themes

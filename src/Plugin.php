@@ -6,6 +6,7 @@ namespace bensomething\cast;
 
 use bensomething\cast\Http\Middleware\RegisterHeadScript;
 use bensomething\cast\Theme as CastTheme;
+use CraftCms\Cms\Cp\CommandPalette\ActionRegistry;
 use CraftCms\Cms\Cp\Enums\Theme;
 use CraftCms\Cms\Plugin\Plugin as BasePlugin;
 use CraftCms\Cms\Plugin\PluginSettings;
@@ -22,6 +23,7 @@ use CraftCms\Cms\Ui\Nodes\Heading;
 use CraftCms\Cms\Ui\Nodes\Separator;
 use CraftCms\Cms\Ui\Ui;
 use CraftCms\Cms\Ui\UiContext;
+use CraftCms\Cms\User\Contracts\CraftUser;
 use CraftCms\Cms\View\TemplateHooks;
 use CraftCms\Cms\View\TemplateMode;
 use Illuminate\Routing\Router;
@@ -66,12 +68,14 @@ class Plugin extends BasePlugin
     ];
 
     /**
-     * The preferences page's behaviour, which `_prefs.twig` calls, and the settings
-     * screen's Custom Themes preview, which waits for a Preview to be ticked.
+     * The preferences page's behaviour, which `_prefs.twig` calls, the settings screen's
+     * Custom Themes preview, which waits for a Preview to be ticked, and the command
+     * palette's actions, which wait for one to be chosen.
      */
     protected array $scripts = [
         __DIR__.'/../resources/js/preferences.js' => 'js/preferences.js',
         __DIR__.'/../resources/js/custom-themes.js' => 'js/custom-themes.js',
+        __DIR__.'/../resources/js/command-palette.js' => 'js/command-palette.js',
     ];
 
     /**
@@ -87,12 +91,13 @@ class Plugin extends BasePlugin
         $this->app->scoped(Themes::class);
     }
 
-    public function boot(Router $router, TemplateHooks $hooks): void
+    public function boot(Router $router, TemplateHooks $hooks, ActionRegistry $actions): void
     {
-
         $router->pushMiddlewareToGroup('craft.cp', RegisterHeadScript::class);
 
         $hooks->register('cp.users.edit.prefs', fn (array &$context) => $this->preferencesHtml());
+
+        $actions->register($this->handle, fn (CraftUser $user) => $this->app->make(CommandPaletteActions::class)->items($user));
     }
 
     #[Override]
