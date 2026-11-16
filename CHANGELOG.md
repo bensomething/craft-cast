@@ -1,6 +1,6 @@
 # Release Notes for Cast
 
-## Unreleased
+## 2.0.0-beta.4 - 2026-11-16
 
 ### Added
 - Cast's preferences are in Craft's command palette: **Set light appearance to Teal**, **Set dark appearance to Dim** and so on, for the modes Craft's Theme shows, plus **Increase contrast**. Search for “appearance” or “theme” to list them. Choosing one repaints at once, without a reload.
